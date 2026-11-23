@@ -3,12 +3,13 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from httpx import ASGITransport, AsyncClient
+
 from agentos.api.app import create_app
 from agentos.config import AgentOSSettings
 from agentos.errors import PathSecurityError
 from agentos.security.paths import resolve_authorized_path, validate_workspace_root
 from agentos.security.redactor import global_redactor, redact_text, redact_value
-from httpx import ASGITransport, AsyncClient
 
 
 @pytest.fixture

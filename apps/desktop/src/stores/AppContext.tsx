@@ -98,10 +98,10 @@ export function AppProvider({ children }: { children: React.ReactNode }): React.
 
   const notify = useCallback((message: string, tone: ToastNotice["tone"] = "info") => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    setToasts((prev) => [...prev.slice(-3), { id, tone, message }]);
+    setToasts((prev) => [...prev.slice(-1), { id, tone, message }]);
     window.setTimeout(() => {
       setToasts((prev) => prev.filter((item) => item.id !== id));
-    }, 4500);
+    }, 3500);
   }, []);
 
   const loadWithClient = useCallback(

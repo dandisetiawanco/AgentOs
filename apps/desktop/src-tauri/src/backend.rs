@@ -112,6 +112,12 @@ impl BackendManager {
     }
 }
 
+impl Drop for BackendManager {
+    fn drop(&mut self) {
+        self.shutdown();
+    }
+}
+
 pub fn allocate_loopback_port() -> Result<u16, String> {
     let listener = TcpListener::bind("127.0.0.1:0")
         .map_err(|err| format!("Failed to reserve localhost port: {err}"))?;
@@ -167,12 +173,15 @@ fn build_backend_command(
     session_token: &str,
     resource_dir: Option<&Path>,
 ) -> Result<Command, String> {
+    let parent_pid = std::process::id().to_string();
+
     if let Ok(custom_bin) = std::env::var("AGENTOS_BACKEND_BIN") {
         let path = PathBuf::from(custom_bin);
         if path.exists() {
             let mut cmd = Command::new(path);
             cmd.args(["--host", "127.0.0.1", "--port", &port.to_string()]);
             cmd.env("AGENTOS_SESSION_TOKEN", session_token);
+            cmd.env("AGENTOS_PARENT_PID", &parent_pid);
             return Ok(cmd);
         }
     }
@@ -183,6 +192,7 @@ fn build_backend_command(
             let mut cmd = Command::new(sidecar);
             cmd.args(["--host", "127.0.0.1", "--port", &port.to_string()]);
             cmd.env("AGENTOS_SESSION_TOKEN", session_token);
+            cmd.env("AGENTOS_PARENT_PID", &parent_pid);
             return Ok(cmd);
         }
     }
@@ -209,6 +219,7 @@ fn build_backend_command(
             &port.to_string(),
         ]);
         cmd.env("AGENTOS_SESSION_TOKEN", session_token);
+        cmd.env("AGENTOS_PARENT_PID", &parent_pid);
         cmd.env("PYTHONUNBUFFERED", "1");
         return Ok(cmd);
     }

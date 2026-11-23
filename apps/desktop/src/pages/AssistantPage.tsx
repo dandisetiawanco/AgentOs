@@ -299,7 +299,8 @@ export function AssistantPage(): React.JSX.Element {
         <div>
           <h1 className="text-[22px] font-semibold tracking-tight">Assistant</h1>
           <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
-            Turn natural-language instructions into structured plans, explicit permission gates, and verified results.
+            Turn natural-language instructions into structured plans, explicit permission gates, and
+            verified results.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -321,7 +322,10 @@ export function AssistantPage(): React.JSX.Element {
       {/* Context bar: Provider, Model, Workspace */}
       <div className="rounded-[8px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)] p-3.5 grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
-          <label htmlFor="asst-provider" className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1">
+          <label
+            htmlFor="asst-provider"
+            className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
+          >
             AI Provider
           </label>
           <select
@@ -339,7 +343,10 @@ export function AssistantPage(): React.JSX.Element {
         </div>
 
         <div>
-          <label htmlFor="asst-model" className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1">
+          <label
+            htmlFor="asst-model"
+            className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
+          >
             Model
           </label>
           <input
@@ -352,7 +359,10 @@ export function AssistantPage(): React.JSX.Element {
         </div>
 
         <div>
-          <label htmlFor="asst-workspace" className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1">
+          <label
+            htmlFor="asst-workspace"
+            className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
+          >
             Authorized Workspace
           </label>
           <div className="flex gap-1.5">
@@ -380,7 +390,8 @@ export function AssistantPage(): React.JSX.Element {
 
       {activeProviderObj?.capabilities.is_mock && (
         <div className="rounded-[6px] border border-[var(--warning-border)] bg-[var(--warning-tint)] text-[var(--warning-ink)] px-3.5 py-2 text-[12px]">
-          Offline Deterministic Test Mode is active. Plans use deterministic local rules without calling external AI APIs. Configure a live provider in Settings whenever ready.
+          Offline Deterministic Test Mode is active. Plans use deterministic local rules without
+          calling external AI APIs. Configure a live provider in Settings whenever ready.
         </div>
       )}
 
@@ -416,7 +427,9 @@ export function AssistantPage(): React.JSX.Element {
               <div className="text-[13px] text-[var(--ink-secondary)]">
                 <p className="font-medium text-[var(--ink-primary)]">Ready for an instruction</p>
                 <p className="mt-1">
-                  Describe a concrete task. Read-only steps execute and verify automatically; file mutations, form submissions, and terminal commands pause for your explicit approval.
+                  Describe a concrete task. Read-only steps execute and verify automatically; file
+                  mutations, form submissions, and terminal commands pause for your explicit
+                  approval.
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {[
@@ -453,8 +466,7 @@ export function AssistantPage(): React.JSX.Element {
                       <button
                         type="button"
                         onClick={() =>
-                          client &&
-                          void client.getTask(msg.task_id!).then((t) => setActiveTask(t))
+                          client && void client.getTask(msg.task_id!).then((t) => setActiveTask(t))
                         }
                         className="font-mono underline text-[var(--accent-ink)]"
                       >
@@ -485,7 +497,10 @@ export function AssistantPage(): React.JSX.Element {
             onSubmit={(e) => void handleSubmitInstruction(e)}
             className="rounded-[8px] border border-[var(--border-control)] bg-[var(--surface-elevated)] p-3.5 flex flex-col gap-3"
           >
-            <label htmlFor="asst-instruction" className="text-[12px] font-medium text-[var(--ink-secondary)]">
+            <label
+              htmlFor="asst-instruction"
+              className="text-[12px] font-medium text-[var(--ink-secondary)]"
+            >
               Instruction
             </label>
             <textarea
@@ -528,11 +543,7 @@ export function AssistantPage(): React.JSX.Element {
                   aria-label="Attach files"
                   onChange={handleFileAttach}
                 />
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                >
+                <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
                   <Paperclip className="w-3.5 h-3.5" aria-hidden={true} />
                   Attach file
                 </Button>
@@ -589,14 +600,11 @@ export function AssistantPage(): React.JSX.Element {
                     <span>Approval required before sensitive execution</span>
                   </div>
                   <p className="text-[13px] m-0">
-                    Review the planned steps and affected targets below. Nothing has been modified yet.
+                    Review the planned steps and affected targets below. Nothing has been modified
+                    yet.
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => setApprovalDialogOpen(true)}
-                    >
+                    <Button variant="primary" size="sm" onClick={() => setApprovalDialogOpen(true)}>
                       Review & approve
                     </Button>
                     <Button

@@ -45,13 +45,17 @@ export function ToolsPage(): React.JSX.Element {
       <div className="border-b border-[var(--border-hairline)] pb-4">
         <h1 className="text-[22px] font-semibold tracking-tight">Tool Registry</h1>
         <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
-          Deterministic, strongly typed tools with declared schemas, risk tiers, timeouts, rollback support, and verification procedures.
+          Deterministic, strongly typed tools with declared schemas, risk tiers, timeouts, rollback
+          support, and verification procedures.
         </p>
       </div>
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex-1 min-w-[220px]">
-          <label htmlFor="tool-search" className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1">
+          <label
+            htmlFor="tool-search"
+            className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
+          >
             Search tools
           </label>
           <input

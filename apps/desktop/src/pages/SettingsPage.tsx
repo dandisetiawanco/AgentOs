@@ -9,11 +9,7 @@ import {
   ShieldAlert,
   Trash2,
 } from "lucide-react";
-import type {
-  ComputerUseCapabilities,
-  McpServerRecord,
-  ThemePreference,
-} from "@agentos/shared";
+import type { ComputerUseCapabilities, McpServerRecord, ThemePreference } from "@agentos/shared";
 import { Button, ErrorState, LoadingState } from "@agentos/ui";
 import { useApp } from "../stores/AppContext.js";
 import { pickWorkspaceDirectory } from "../services/bridge.js";
@@ -92,7 +88,9 @@ export function SettingsPage(): React.JSX.Element {
     return <ErrorState message={error} onRetry={() => void refreshAll()} />;
   }
   if (!settings || !client) {
-    return <ErrorState message="Backend connection is not ready." onRetry={() => void refreshAll()} />;
+    return (
+      <ErrorState message="Backend connection is not ready." onRetry={() => void refreshAll()} />
+    );
   }
 
   const handleSaveKey = async (providerId: string) => {
@@ -253,7 +251,8 @@ export function SettingsPage(): React.JSX.Element {
       <div className="border-b border-[var(--border-hairline)] pb-4">
         <h1 className="text-[24px] font-semibold tracking-tight">Settings</h1>
         <p className="text-[14px] text-[var(--ink-secondary)] mt-1">
-          Configure AI providers, OS Keychain credentials, workspaces, execution budgets, security policies, MCP servers, computer use, and appearance.
+          Configure AI providers, OS Keychain credentials, workspaces, execution budgets, security
+          policies, MCP servers, computer use, and appearance.
         </p>
       </div>
 
@@ -303,7 +302,8 @@ export function SettingsPage(): React.JSX.Element {
           AI Providers & Keychain Credentials
         </h2>
         <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
-          Supply your own API keys. Keys are stored via {bootstrap?.keychain.backend ?? "OS Keychain"}, never in SQLite, logs, or localStorage.
+          Supply your own API keys. Keys are stored via{" "}
+          {bootstrap?.keychain.backend ?? "OS Keychain"}, never in SQLite, logs, or localStorage.
         </p>
 
         <div className="mt-4 flex flex-col gap-3">
@@ -421,7 +421,8 @@ export function SettingsPage(): React.JSX.Element {
           Authorized Workspaces
         </h2>
         <p className="text-[13px] text-[var(--ink-secondary)] mt-1">
-          Default-deny filesystem boundary. System paths, credential folders, and symlink escapes are permanently blocked.
+          Default-deny filesystem boundary. System paths, credential folders, and symlink escapes
+          are permanently blocked.
         </p>
 
         <form
@@ -429,7 +430,10 @@ export function SettingsPage(): React.JSX.Element {
           className="mt-4 grid grid-cols-1 md:grid-cols-12 gap-3 items-end"
         >
           <div className="md:col-span-3">
-            <label htmlFor="ws-name" className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1">
+            <label
+              htmlFor="ws-name"
+              className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
+            >
               Label
             </label>
             <input
@@ -443,7 +447,10 @@ export function SettingsPage(): React.JSX.Element {
             />
           </div>
           <div className="md:col-span-6">
-            <label htmlFor="ws-path" className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1">
+            <label
+              htmlFor="ws-path"
+              className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
+            >
               Directory path
             </label>
             <div className="flex gap-2">
@@ -495,7 +502,11 @@ export function SettingsPage(): React.JSX.Element {
                     {ws.path} {ws.read_only ? "(Read-only)" : "(Read/Write with approval)"}
                   </p>
                 </div>
-                <Button variant="danger" size="sm" onClick={() => void handleRevokeWorkspace(ws.id)}>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => void handleRevokeWorkspace(ws.id)}
+                >
                   <Trash2 className="w-3.5 h-3.5" aria-hidden={true} />
                   Revoke
                 </Button>
@@ -521,7 +532,9 @@ export function SettingsPage(): React.JSX.Element {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div>
-            <label htmlFor="sec-dur" className="block text-[12px] font-medium mb-1">Max duration (sec)</label>
+            <label htmlFor="sec-dur" className="block text-[12px] font-medium mb-1">
+              Max duration (sec)
+            </label>
             <input
               id="sec-dur"
               type="number"
@@ -529,13 +542,18 @@ export function SettingsPage(): React.JSX.Element {
               max={3600}
               value={settings.max_duration_sec}
               onChange={(e) =>
-                void updateSettings({ ...settings, max_duration_sec: Number(e.target.value) || 300 })
+                void updateSettings({
+                  ...settings,
+                  max_duration_sec: Number(e.target.value) || 300,
+                })
               }
               className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-2.5 py-1.5 text-[13px]"
             />
           </div>
           <div>
-            <label htmlFor="sec-calls" className="block text-[12px] font-medium mb-1">Max tool calls</label>
+            <label htmlFor="sec-calls" className="block text-[12px] font-medium mb-1">
+              Max tool calls
+            </label>
             <input
               id="sec-calls"
               type="number"
@@ -549,7 +567,9 @@ export function SettingsPage(): React.JSX.Element {
             />
           </div>
           <div>
-            <label htmlFor="sec-tokens" className="block text-[12px] font-medium mb-1">Max tokens / task</label>
+            <label htmlFor="sec-tokens" className="block text-[12px] font-medium mb-1">
+              Max tokens / task
+            </label>
             <input
               id="sec-tokens"
               type="number"
@@ -563,7 +583,9 @@ export function SettingsPage(): React.JSX.Element {
             />
           </div>
           <div>
-            <label htmlFor="sec-ret" className="block text-[12px] font-medium mb-1">Memory retention (days)</label>
+            <label htmlFor="sec-ret" className="block text-[12px] font-medium mb-1">
+              Memory retention (days)
+            </label>
             <input
               id="sec-ret"
               type="number"
@@ -587,7 +609,9 @@ export function SettingsPage(): React.JSX.Element {
               id="sec-mem-en"
               type="checkbox"
               checked={settings.memory_enabled}
-              onChange={(e) => void updateSettings({ ...settings, memory_enabled: e.target.checked })}
+              onChange={(e) =>
+                void updateSettings({ ...settings, memory_enabled: e.target.checked })
+              }
             />
             Enable optional local SQLite memory
           </label>
@@ -597,14 +621,20 @@ export function SettingsPage(): React.JSX.Element {
               id="sec-term-en"
               type="checkbox"
               checked={settings.terminal_enabled}
-              onChange={(e) => void updateSettings({ ...settings, terminal_enabled: e.target.checked })}
+              onChange={(e) =>
+                void updateSettings({ ...settings, terminal_enabled: e.target.checked })
+              }
             />
-            Enable restricted allowlisted terminal execution (disabled by default; still requires HIGH approval per command)
+            Enable restricted allowlisted terminal execution (disabled by default; still requires
+            HIGH approval per command)
           </label>
 
           <div className="flex flex-wrap items-end gap-2">
             <div className="flex-1 min-w-[240px]">
-              <label htmlFor="sec-allow" className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1">
+              <label
+                htmlFor="sec-allow"
+                className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
+              >
                 Terminal command allowlist (comma separated)
               </label>
               <input
@@ -645,7 +675,8 @@ export function SettingsPage(): React.JSX.Element {
               Computer Use & Desktop Capabilities
             </h2>
             <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
-              Separate opt-in authorization for desktop window inspection and single-frame screenshots. Continuous recording is permanently disabled.
+              Separate opt-in authorization for desktop window inspection and single-frame
+              screenshots. Continuous recording is permanently disabled.
             </p>
           </div>
           {cuCaps && (
@@ -656,7 +687,9 @@ export function SettingsPage(): React.JSX.Element {
                 await client.triggerEmergencyStop(!cuCaps.emergency_stop_active);
                 await loadAdvanced();
                 notify(
-                  cuCaps.emergency_stop_active ? "Emergency stop cleared." : "Emergency stop activated.",
+                  cuCaps.emergency_stop_active
+                    ? "Emergency stop cleared."
+                    : "Emergency stop activated.",
                   cuCaps.emergency_stop_active ? "success" : "error",
                 );
               }}
@@ -724,12 +757,16 @@ export function SettingsPage(): React.JSX.Element {
               }).then(() => void loadAdvanced())
             }
           />
-          Separately authorize single-frame desktop screenshots (excludes password and keychain apps)
+          Separately authorize single-frame desktop screenshots (excludes password and keychain
+          apps)
         </label>
 
         <div className="flex flex-wrap items-end gap-2">
           <div className="flex-1 min-w-[240px]">
-            <label htmlFor="cu-apps" className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1">
+            <label
+              htmlFor="cu-apps"
+              className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
+            >
               Approved applications (comma separated)
             </label>
             <input
@@ -768,13 +805,19 @@ export function SettingsPage(): React.JSX.Element {
             External MCP Servers (Optional)
           </h2>
           <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
-            External MCP servers are treated as untrusted by default. Discovered tools are never executed automatically until explicitly allowlisted.
+            External MCP servers are treated as untrusted by default. Discovered tools are never
+            executed automatically until explicitly allowlisted.
           </p>
         </div>
 
-        <form onSubmit={(e) => void handleAddMcp(e)} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+        <form
+          onSubmit={(e) => void handleAddMcp(e)}
+          className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end"
+        >
           <div className="md:col-span-3">
-            <label htmlFor="mcp-name" className="block text-[12px] font-medium mb-1">Server name</label>
+            <label htmlFor="mcp-name" className="block text-[12px] font-medium mb-1">
+              Server name
+            </label>
             <input
               id="mcp-name"
               type="text"
@@ -786,11 +829,15 @@ export function SettingsPage(): React.JSX.Element {
             />
           </div>
           <div className="md:col-span-2">
-            <label htmlFor="mcp-trans" className="block text-[12px] font-medium mb-1">Transport</label>
+            <label htmlFor="mcp-trans" className="block text-[12px] font-medium mb-1">
+              Transport
+            </label>
             <select
               id="mcp-trans"
               value={mcpTransport}
-              onChange={(e) => setMcpTransport(e.target.value as "stdio" | "sse" | "streamable_http")}
+              onChange={(e) =>
+                setMcpTransport(e.target.value as "stdio" | "sse" | "streamable_http")
+              }
               className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-2.5 py-1.5 text-[13px]"
             >
               <option value="stdio">stdio</option>
@@ -860,7 +907,11 @@ export function SettingsPage(): React.JSX.Element {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="secondary" size="sm" onClick={() => void handleTestMcp(srv.id)}>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => void handleTestMcp(srv.id)}
+                      >
                         Test & inspect tools
                       </Button>
                       <Button
@@ -880,7 +931,9 @@ export function SettingsPage(): React.JSX.Element {
                   )}
                   {tools.length > 0 && (
                     <div className="pt-2 border-t border-[var(--border-hairline)] flex flex-col gap-1.5">
-                      <p className="text-[12px] font-medium m-0">Discovered tools (check to authorize):</p>
+                      <p className="text-[12px] font-medium m-0">
+                        Discovered tools (check to authorize):
+                      </p>
                       {tools.map((t) => (
                         <label key={t.name} className="inline-flex items-center gap-2 text-[12px]">
                           <input
@@ -910,7 +963,9 @@ export function SettingsPage(): React.JSX.Element {
           Diagnostics & About
         </h2>
         <p className="text-[13px] text-[var(--ink-secondary)] m-0">
-          AgentOS v{bootstrap?.app.version ?? "0.1.0"} by {bootstrap?.app.author ?? "Dandi Setiawan"} ({bootstrap?.app.organization ?? "NGOPREK DIGITAL"}). Open-source under Apache License 2.0.
+          AgentOS v{bootstrap?.app.version ?? "0.1.0"} by{" "}
+          {bootstrap?.app.author ?? "Dandi Setiawan"} (
+          {bootstrap?.app.organization ?? "NGOPREK DIGITAL"}). Open-source under Apache License 2.0.
         </p>
         <div className="flex flex-wrap gap-2">
           <Button variant="secondary" size="sm" onClick={() => void handleExportDiagnostics()}>

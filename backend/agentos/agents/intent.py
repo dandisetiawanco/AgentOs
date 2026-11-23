@@ -51,7 +51,7 @@ class IntentAnalyzer:
                 "copy",
                 "organize",
             )
-        ):
+        ) or bool(re.search(r"(/etc/|~/\.|\.\./)", text)):
             category = "file_intelligence"
         elif any(k in lower for k in ("open app", "window", "screen capture")):
             category = "computer_use"

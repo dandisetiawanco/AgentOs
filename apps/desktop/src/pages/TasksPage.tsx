@@ -101,7 +101,8 @@ export function TasksPage(): React.JSX.Element {
         <div>
           <h1 className="text-[22px] font-semibold tracking-tight">Tasks</h1>
           <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
-            Persistent execution ledger stored in local SQLite. Inspect tool invocations, permissions, and verification evidence.
+            Persistent execution ledger stored in local SQLite. Inspect tool invocations,
+            permissions, and verification evidence.
           </p>
         </div>
         <Button variant="secondary" size="sm" onClick={() => void loadTasks()}>

@@ -127,7 +127,9 @@ export class AgentOSClient {
 
   async updateProvider(
     providerId: string,
-    payload: Partial<Pick<ProviderStatus, "enabled" | "base_url" | "default_model" | "timeout_sec" | "max_retries">>,
+    payload: Partial<
+      Pick<ProviderStatus, "enabled" | "base_url" | "default_model" | "timeout_sec" | "max_retries">
+    >,
   ): Promise<ProviderStatus> {
     const res = await this.request<{ provider: ProviderStatus }>(
       `/api/v1/providers/${encodeURIComponent(providerId)}`,
@@ -209,7 +211,9 @@ export class AgentOSClient {
   }
 
   async listConversations(): Promise<ConversationRecord[]> {
-    const res = await this.request<{ conversations: ConversationRecord[] }>("/api/v1/conversations");
+    const res = await this.request<{ conversations: ConversationRecord[] }>(
+      "/api/v1/conversations",
+    );
     return res.conversations;
   }
 
@@ -464,7 +468,10 @@ export class AgentOSClient {
     });
   }
 
-  authorizeMcpTools(serverId: string, allowedTools: string[]): Promise<{ server: McpServerRecord }> {
+  authorizeMcpTools(
+    serverId: string,
+    allowedTools: string[],
+  ): Promise<{ server: McpServerRecord }> {
     return this.request(`/api/v1/mcp/servers/${encodeURIComponent(serverId)}/authorize`, {
       method: "PUT",
       body: JSON.stringify({ allowed_tools: allowedTools }),
@@ -475,7 +482,9 @@ export class AgentOSClient {
     return this.request<ComputerUseCapabilities>("/api/v1/computer-use/capabilities");
   }
 
-  triggerEmergencyStop(active: boolean): Promise<{ emergency_stop_active: boolean; cancelled_tasks: number }> {
+  triggerEmergencyStop(
+    active: boolean,
+  ): Promise<{ emergency_stop_active: boolean; cancelled_tasks: number }> {
     return this.request("/api/v1/computer-use/emergency-stop", {
       method: "POST",
       body: JSON.stringify({ active }),

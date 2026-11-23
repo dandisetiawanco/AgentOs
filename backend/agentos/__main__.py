@@ -1,13 +1,46 @@
 from __future__ import annotations
 
 import argparse
+import os
 import signal
 import sys
+import threading
+import time
 
 import uvicorn
 
 from agentos.api.app import create_app
 from agentos.config import AgentOSSettings
+
+
+def _start_parent_watchdog(server: uvicorn.Server) -> None:
+    """Exit cleanly if the desktop parent process exits or crashes unexpectedly."""
+    raw_ppid = os.environ.get("AGENTOS_PARENT_PID", "").strip()
+    if not raw_ppid:
+        return
+    try:
+        parent_pid = int(raw_ppid)
+    except ValueError:
+        return
+    if parent_pid <= 1:
+        return
+
+    def _watch() -> None:
+        while not server.should_exit:
+            time.sleep(0.5)
+            if os.name != "nt" and os.getppid() != parent_pid:
+                server.should_exit = True
+                return
+            try:
+                os.kill(parent_pid, 0)
+            except ProcessLookupError:
+                server.should_exit = True
+                return
+            except PermissionError:
+                continue
+
+    thread = threading.Thread(target=_watch, name="agentos-parent-watchdog", daemon=True)
+    thread.start()
 
 
 def main() -> int:
@@ -40,6 +73,7 @@ def main() -> int:
 
     signal.signal(signal.SIGTERM, _handle_signal)
     signal.signal(signal.SIGINT, _handle_signal)
+    _start_parent_watchdog(server)
 
     server.run()
     return 0

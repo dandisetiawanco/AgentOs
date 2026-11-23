@@ -3,9 +3,10 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from httpx import ASGITransport, AsyncClient
+
 from agentos.api.app import create_app
 from agentos.config import AgentOSSettings
-from httpx import ASGITransport, AsyncClient
 
 
 async def test_workflows_mcp_and_computer_use_endpoints(tmp_path: Path) -> None:

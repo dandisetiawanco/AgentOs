@@ -126,7 +126,8 @@ export function WorkflowsPage(): React.JSX.Element {
         <div>
           <h1 className="text-[22px] font-semibold tracking-tight">Workflows</h1>
           <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
-            Reusable task templates with manual execution and in-app interval scheduling (active only while AgentOS is running).
+            Reusable task templates with manual execution and in-app interval scheduling (active
+            only while AgentOS is running).
           </p>
         </div>
         <Button variant="primary" size="sm" onClick={() => setCreateOpen(true)}>
@@ -246,11 +247,21 @@ export function WorkflowsPage(): React.JSX.Element {
               <caption className="visually-hidden">Workflow execution history</caption>
               <thead>
                 <tr className="border-b border-[var(--border-hairline)] bg-[var(--surface-recessed)]">
-                  <th scope="col" className="px-3.5 py-2.5 font-medium">Run ID</th>
-                  <th scope="col" className="px-3.5 py-2.5 font-medium">Trigger</th>
-                  <th scope="col" className="px-3.5 py-2.5 font-medium">Status</th>
-                  <th scope="col" className="px-3.5 py-2.5 font-medium">Summary</th>
-                  <th scope="col" className="px-3.5 py-2.5 font-medium">Task</th>
+                  <th scope="col" className="px-3.5 py-2.5 font-medium">
+                    Run ID
+                  </th>
+                  <th scope="col" className="px-3.5 py-2.5 font-medium">
+                    Trigger
+                  </th>
+                  <th scope="col" className="px-3.5 py-2.5 font-medium">
+                    Status
+                  </th>
+                  <th scope="col" className="px-3.5 py-2.5 font-medium">
+                    Summary
+                  </th>
+                  <th scope="col" className="px-3.5 py-2.5 font-medium">
+                    Task
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -259,7 +270,9 @@ export function WorkflowsPage(): React.JSX.Element {
                     <td className="px-3.5 py-2.5 font-mono text-[12px]">{r.id}</td>
                     <td className="px-3.5 py-2.5">{r.trigger}</td>
                     <td className="px-3.5 py-2.5 font-mono text-[12px]">{r.status}</td>
-                    <td className="px-3.5 py-2.5 max-w-[360px] truncate">{r.summary ?? r.error_message ?? ""}</td>
+                    <td className="px-3.5 py-2.5 max-w-[360px] truncate">
+                      {r.summary ?? r.error_message ?? ""}
+                    </td>
                     <td className="px-3.5 py-2.5">
                       {r.task_id && (
                         <Button variant="ghost" size="sm" onClick={() => setRoute("tasks")}>
@@ -283,7 +296,9 @@ export function WorkflowsPage(): React.JSX.Element {
       >
         <form onSubmit={(e) => void handleCreate(e)} className="flex flex-col gap-3.5">
           <div>
-            <label htmlFor="wf-name" className="block text-[12px] font-medium mb-1">Name</label>
+            <label htmlFor="wf-name" className="block text-[12px] font-medium mb-1">
+              Name
+            </label>
             <input
               id="wf-name"
               type="text"
@@ -295,7 +310,9 @@ export function WorkflowsPage(): React.JSX.Element {
             />
           </div>
           <div>
-            <label htmlFor="wf-desc" className="block text-[12px] font-medium mb-1">Description</label>
+            <label htmlFor="wf-desc" className="block text-[12px] font-medium mb-1">
+              Description
+            </label>
             <input
               id="wf-desc"
               type="text"
@@ -331,7 +348,9 @@ export function WorkflowsPage(): React.JSX.Element {
             >
               <option value="">None</option>
               {workspaces.map((ws) => (
-                <option key={ws.id} value={ws.id}>{ws.name}</option>
+                <option key={ws.id} value={ws.id}>
+                  {ws.name}
+                </option>
               ))}
             </select>
           </div>
@@ -347,7 +366,9 @@ export function WorkflowsPage(): React.JSX.Element {
             </label>
             {draftSchedule && (
               <div className="flex items-center gap-1.5">
-                <label htmlFor="wf-int" className="text-[12px]">Every (minutes):</label>
+                <label htmlFor="wf-int" className="text-[12px]">
+                  Every (minutes):
+                </label>
                 <input
                   id="wf-int"
                   type="number"
@@ -361,8 +382,12 @@ export function WorkflowsPage(): React.JSX.Element {
             )}
           </div>
           <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border-hairline)]">
-            <Button variant="secondary" onClick={() => setCreateOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="primary">Save workflow</Button>
+            <Button variant="secondary" onClick={() => setCreateOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary">
+              Save workflow
+            </Button>
           </div>
         </form>
       </ModalDialog>

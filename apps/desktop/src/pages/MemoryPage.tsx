@@ -140,7 +140,8 @@ export function MemoryPage(): React.JSX.Element {
         <div>
           <h1 className="text-[22px] font-semibold tracking-tight">Local Memory</h1>
           <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
-            Optional SQLite memory store. Retention: {settings?.memory_retention_days ?? 90} days. Credentials are automatically rejected.
+            Optional SQLite memory store. Retention: {settings?.memory_retention_days ?? 90} days.
+            Credentials are automatically rejected.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -167,7 +168,9 @@ export function MemoryPage(): React.JSX.Element {
 
       {settings?.memory_enabled === false && (
         <div className="rounded-[6px] border border-[var(--warning-border)] bg-[var(--warning-tint)] text-[var(--warning-ink)] px-4 py-3 text-[13px] flex flex-wrap items-center justify-between gap-2">
-          <span>Local memory is currently disabled in Settings. No new memories are saved or retrieved.</span>
+          <span>
+            Local memory is currently disabled in Settings. No new memories are saved or retrieved.
+          </span>
           <Button variant="secondary" size="sm" onClick={() => setRoute("settings")}>
             Change in Settings
           </Button>
@@ -176,7 +179,10 @@ export function MemoryPage(): React.JSX.Element {
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex-1 min-w-[220px]">
-          <label htmlFor="mem-search" className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1">
+          <label
+            htmlFor="mem-search"
+            className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
+          >
             Search memory
           </label>
           <input
@@ -189,7 +195,10 @@ export function MemoryPage(): React.JSX.Element {
           />
         </div>
         <div>
-          <label htmlFor="mem-cat" className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1">
+          <label
+            htmlFor="mem-cat"
+            className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
+          >
             Category
           </label>
           <select
@@ -200,7 +209,9 @@ export function MemoryPage(): React.JSX.Element {
           >
             <option value="">All categories</option>
             {CATEGORIES.map((c) => (
-              <option key={c} value={c}>{c.replace("_", " ")}</option>
+              <option key={c} value={c}>
+                {c.replace("_", " ")}
+              </option>
             ))}
           </select>
         </div>
@@ -280,7 +291,9 @@ export function MemoryPage(): React.JSX.Element {
         <form onSubmit={(e) => void handleSave(e)} className="flex flex-col gap-3.5">
           {!editing && (
             <div>
-              <label htmlFor="m-cat" className="block text-[12px] font-medium mb-1">Category</label>
+              <label htmlFor="m-cat" className="block text-[12px] font-medium mb-1">
+                Category
+              </label>
               <select
                 id="m-cat"
                 value={catDraft}
@@ -288,13 +301,17 @@ export function MemoryPage(): React.JSX.Element {
                 className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-3 py-1.5 text-[13px]"
               >
                 {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{c.replace("_", " ")}</option>
+                  <option key={c} value={c}>
+                    {c.replace("_", " ")}
+                  </option>
                 ))}
               </select>
             </div>
           )}
           <div>
-            <label htmlFor="m-title" className="block text-[12px] font-medium mb-1">Title</label>
+            <label htmlFor="m-title" className="block text-[12px] font-medium mb-1">
+              Title
+            </label>
             <input
               id="m-title"
               type="text"
@@ -306,7 +323,9 @@ export function MemoryPage(): React.JSX.Element {
             />
           </div>
           <div>
-            <label htmlFor="m-content" className="block text-[12px] font-medium mb-1">Content</label>
+            <label htmlFor="m-content" className="block text-[12px] font-medium mb-1">
+              Content
+            </label>
             <textarea
               id="m-content"
               rows={4}
@@ -340,8 +359,12 @@ export function MemoryPage(): React.JSX.Element {
             Pin record (exempt from retention expiry)
           </label>
           <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border-hairline)]">
-            <Button variant="secondary" onClick={() => setEditorOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="primary">Save memory</Button>
+            <Button variant="secondary" onClick={() => setEditorOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary">
+              Save memory
+            </Button>
           </div>
         </form>
       </ModalDialog>

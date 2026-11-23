@@ -21,18 +21,21 @@ const RISK_STYLES: Record<RiskLevel, { label: string; className: string }> = {
   },
   BLOCKED: {
     label: "Blocked",
-    className: "bg-[var(--danger-tint)] text-[var(--danger-ink)] border-[var(--danger-border)] font-semibold",
+    className:
+      "bg-[var(--danger-tint)] text-[var(--danger-ink)] border-[var(--danger-border)] font-semibold",
   },
 };
 
 const STATUS_STYLES: Record<TaskStatus, { label: string; className: string }> = {
   created: {
     label: "Created",
-    className: "bg-[var(--surface-recessed)] text-[var(--ink-secondary)] border-[var(--border-hairline)]",
+    className:
+      "bg-[var(--surface-recessed)] text-[var(--ink-secondary)] border-[var(--border-hairline)]",
   },
   planning: {
     label: "Planning",
-    className: "bg-[var(--surface-recessed)] text-[var(--ink-primary)] border-[var(--border-control)]",
+    className:
+      "bg-[var(--surface-recessed)] text-[var(--ink-primary)] border-[var(--border-control)]",
   },
   awaiting_approval: {
     label: "Awaiting approval",
@@ -64,7 +67,8 @@ const STATUS_STYLES: Record<TaskStatus, { label: string; className: string }> = 
   },
   cancelled: {
     label: "Cancelled",
-    className: "bg-[var(--surface-recessed)] text-[var(--ink-secondary)] border-[var(--border-hairline)]",
+    className:
+      "bg-[var(--surface-recessed)] text-[var(--ink-secondary)] border-[var(--border-hairline)]",
   },
 };
 

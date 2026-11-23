@@ -1,0 +1,24 @@
+{
+  "measured_at": "2026-11-23T02:03:07.005057+00:00",
+  "hardware": {
+    "os": "Darwin",
+    "os_version": "15.8.3",
+    "arch": "x86_64",
+    "logical_cpus": 8,
+    "total_ram_gb": 8.0,
+    "python": "3.12.16"
+  },
+  "metrics": {
+    "backend_startup_ms": 4039.6,
+    "backend_idle_rss_mb": 145.86,
+    "task_execution_overhead_ms": 315.0,
+    "tool_file_list_40_files_ms": 11.66,
+    "tool_file_duplicates_40_files_ms": 149.18,
+    "tool_system_health_ms": 151.77,
+    "doc_pdf_generate_and_parse_ms": 19.69,
+    "doc_docx_generate_and_parse_ms": 108.61,
+    "doc_xlsx_generate_and_parse_ms": 42.09,
+    "sqlite_100_queries_total_ms": 209.53,
+    "sqlite_avg_query_ms": 2.095
+  }
+}

@@ -110,7 +110,10 @@ export function OverviewPage(): React.JSX.Element {
       )}
 
       {/* Operational readiness ledger */}
-      <section aria-labelledby="readiness-heading" className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <section
+        aria-labelledby="readiness-heading"
+        className="grid grid-cols-1 lg:grid-cols-3 gap-4"
+      >
         <div className="rounded-[8px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)] p-5 flex flex-col justify-between gap-3">
           <div>
             <div className="flex items-center justify-between">
@@ -164,7 +167,10 @@ export function OverviewPage(): React.JSX.Element {
             </p>
             <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
               Terminal execution is{" "}
-              {bootstrap?.settings.terminal_enabled ? "enabled (allowlisted)" : "disabled by default"}.
+              {bootstrap?.settings.terminal_enabled
+                ? "enabled (allowlisted)"
+                : "disabled by default"}
+              .
             </p>
           </div>
           <Button variant="secondary" size="sm" onClick={() => setRoute("activity")}>

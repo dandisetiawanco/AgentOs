@@ -57,7 +57,8 @@ export function ActivityPage(): React.JSX.Element {
         <div>
           <h1 className="text-[22px] font-semibold tracking-tight">Activity & Audit Log</h1>
           <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
-            Secret-redacted chronological record of permissions, tool calls, security blocks, and configuration changes.
+            Secret-redacted chronological record of permissions, tool calls, security blocks, and
+            configuration changes.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -74,7 +75,10 @@ export function ActivityPage(): React.JSX.Element {
 
       <div className="flex flex-wrap gap-3">
         <div>
-          <label htmlFor="aud-cat" className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1">
+          <label
+            htmlFor="aud-cat"
+            className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
+          >
             Category
           </label>
           <select
@@ -84,15 +88,28 @@ export function ActivityPage(): React.JSX.Element {
             className="rounded-[6px] border border-[var(--border-control)] bg-[var(--surface-elevated)] px-3 py-1.5 text-[13px]"
           >
             <option value="">All categories</option>
-            {["task", "tool", "permission", "security", "workspace", "provider", "settings", "memory", "mcp"].map(
-              (c) => (
-                <option key={c} value={c}>{c}</option>
-              ),
-            )}
+            {[
+              "task",
+              "tool",
+              "permission",
+              "security",
+              "workspace",
+              "provider",
+              "settings",
+              "memory",
+              "mcp",
+            ].map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
           </select>
         </div>
         <div>
-          <label htmlFor="aud-risk" className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1">
+          <label
+            htmlFor="aud-risk"
+            className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
+          >
             Risk level
           </label>
           <select
@@ -103,7 +120,9 @@ export function ActivityPage(): React.JSX.Element {
           >
             <option value="">All levels</option>
             {["READ_ONLY", "LOW", "MEDIUM", "HIGH", "BLOCKED"].map((r) => (
-              <option key={r} value={r}>{r}</option>
+              <option key={r} value={r}>
+                {r}
+              </option>
             ))}
           </select>
         </div>

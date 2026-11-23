@@ -56,7 +56,9 @@ def test_real_backend_process_start_auth_and_graceful_stop(tmp_path: Path) -> No
         if not ready:
             proc.terminate()
             out, err = proc.communicate(timeout=5)
-            raise AssertionError(f"Backend failed to become ready within 15s.\nSTDOUT:\n{out}\nSTDERR:\n{err}")
+            raise AssertionError(
+                f"Backend failed to become ready within 15s.\nSTDOUT:\n{out}\nSTDERR:\n{err}"
+            )
 
         unauth = httpx.get(f"{base_url}/api/v1/system/bootstrap", timeout=2.0)
         assert unauth.status_code == 401

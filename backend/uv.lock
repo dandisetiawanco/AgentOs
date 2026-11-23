@@ -43,14 +43,14 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.115.8,<1.0.0" },
     { name = "httpx", specifier = ">=0.28.1,<1.0.0" },
     { name = "keyring", specifier = ">=25.6.0,<26.0.0" },
-    { name = "langgraph", specifier = ">=0.2.70,<1.0.0" },
+    { name = "langgraph", specifier = ">=1.0.10,<2.0.0" },
     { name = "mcp", specifier = ">=1.3.0,<2.0.0" },
     { name = "openpyxl", specifier = ">=3.1.5,<4.0.0" },
     { name = "playwright", specifier = "==1.49.1" },
     { name = "psutil", specifier = ">=6.1.1,<8.0.0" },
     { name = "pydantic", specifier = ">=2.10.6,<3.0.0" },
     { name = "pydantic-settings", specifier = ">=2.7.1,<3.0.0" },
-    { name = "pypdf", specifier = ">=5.3.0,<6.0.0" },
+    { name = "pypdf", specifier = ">=6.21.4,<7.0.0" },
     { name = "python-docx", specifier = ">=1.1.2,<2.0.0" },
     { name = "python-multipart", specifier = ">=0.0.20,<1.0.0" },
     { name = "reportlab", specifier = ">=4.3.1,<5.0.0" },
@@ -62,8 +62,8 @@ requires-dist = [
 dev = [
     { name = "mypy", specifier = ">=1.15.0,<2.0.0" },
     { name = "pip-audit", specifier = ">=2.8.0,<3.0.0" },
-    { name = "pytest", specifier = ">=8.3.4,<9.0.0" },
-    { name = "pytest-asyncio", specifier = ">=0.25.3,<1.0.0" },
+    { name = "pytest", specifier = ">=9.0.3,<10.0.0" },
+    { name = "pytest-asyncio", specifier = ">=0.25.3,<2.0.0" },
     { name = "ruff", specifier = ">=0.9.6,<1.0.0" },
 ]
 
@@ -682,7 +682,7 @@ wheels = [
 
 [[package]]
 name = "langgraph"
-version = "0.6.11"
+version = "1.2.24"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "langchain-core" },
@@ -692,48 +692,51 @@ dependencies = [
     { name = "pydantic" },
     { name = "xxhash" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/87/4d/8dfe5e0f9c69655dfb1f450922699ab683b3abbc038cfe38f769eaf871c2/langgraph-0.6.11.tar.gz", hash = "sha256:cd5373d0a59701ab39c9f8af33a33c5704553de815318387fa7f240511e0efd7", size = 492075, upload-time = "2025-10-21T00:04:14.608Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/dd/78/cfe1c6601ae7f6c95c29faae1f884b7eaa5eb1ae624d2d89f4b57ac91dfb/langgraph-1.2.24.tar.gz", hash = "sha256:86b0dd611b7201cb393da2de0e064029c1bef520f11a5e6ee04be53c2a815bc7", size = 801064, upload-time = "2026-11-20T01:10:14.129Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/df/94/430f0341c5c2fe3e3b9f5ab2622f35e2bda12c4a7d655c519468e853d1b0/langgraph-0.6.11-py3-none-any.whl", hash = "sha256:49268de69d85b7db3da9e2ca582a474516421c1c44be5cff390416cfa6967faa", size = 155424, upload-time = "2025-10-21T00:04:12.89Z" },
+    { url = "https://files.pythonhosted.org/packages/2d/67/087148694ea5daeb4ebdbf6c02ad642fff0c48ed7c0a189a9fe5e980f221/langgraph-1.2.24-py3-none-any.whl", hash = "sha256:312f9a75c1aa0dde5571da32c5c24b891e726fa9781b835b956ec6d9746fa943", size = 264578, upload-time = "2026-11-20T01:10:12.83Z" },
 ]
 
 [[package]]
 name = "langgraph-checkpoint"
-version = "3.0.1"
+version = "4.3.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "langchain-core" },
     { name = "ormsgpack" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0f/07/2b1c042fa87d40cf2db5ca27dc4e8dd86f9a0436a10aa4361a8982718ae7/langgraph_checkpoint-3.0.1.tar.gz", hash = "sha256:59222f875f85186a22c494aedc65c4e985a3df27e696e5016ba0b98a5ed2cee0", size = 137785, upload-time = "2025-11-04T21:55:47.774Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/27/1e/8c885180ba6a57bff177b9ecb2e273aa32d9d29a093ba0a5214ef8f5136f/langgraph_checkpoint-4.3.2.tar.gz", hash = "sha256:fcab8468c7e965d7055e2a35c253d73a145624ef4728b150ca7c361f4afca286", size = 185401, upload-time = "2026-11-14T01:31:05.25Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/48/e3/616e3a7ff737d98c1bbb5700dd62278914e2a9ded09a79a1fa93cf24ce12/langgraph_checkpoint-3.0.1-py3-none-any.whl", hash = "sha256:9b04a8d0edc0474ce4eaf30c5d731cee38f11ddff50a6177eead95b5c4e4220b", size = 46249, upload-time = "2025-11-04T21:55:46.472Z" },
+    { url = "https://files.pythonhosted.org/packages/d5/f1/c84ac1431857640bfb9ea811a58ab5b9c040da3842fd1bcf080655184db0/langgraph_checkpoint-4.3.2-py3-none-any.whl", hash = "sha256:60e02eb2c2eefc4c22fb1549f1c90b85ce9617377604596c5f34fbd6af0bd6e9", size = 58321, upload-time = "2026-11-14T01:31:03.733Z" },
 ]
 
 [[package]]
 name = "langgraph-prebuilt"
-version = "0.6.5"
+version = "1.1.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "langchain-core" },
     { name = "langgraph-checkpoint" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/98/6a/76ed0f0d740b187ac2014beae929658881b8d18291bd107571aae5515b12/langgraph_prebuilt-0.6.5.tar.gz", hash = "sha256:9c63e9e867e62b345805fd1e8ea5c2df5cc112e939d714f277af84f2afe5950d", size = 125791, upload-time = "2025-10-21T00:14:50.431Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b5/51/e44110cba9383391e5fd41ff3a5832712f988bb9152a95f6ccb8e7b89bba/langgraph_prebuilt-1.1.3.tar.gz", hash = "sha256:7ee72332e925000e3d24d2d491dd0ebb9d3a44dbffe650185943b730a832cf6d", size = 183612, upload-time = "2026-11-19T05:26:06.632Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8e/d1/e4727f4822943befc3b7046f79049b1086c9493a34b4d44a1adf78577693/langgraph_prebuilt-0.6.5-py3-none-any.whl", hash = "sha256:b6ceb5db31c16a30a3ee3c0b923667f02e7c9e27852621abf9d5bd5603534141", size = 28158, upload-time = "2025-10-21T00:14:49.192Z" },
+    { url = "https://files.pythonhosted.org/packages/bc/f3/f1d3426c239dc7eca37e1e49586f7559cc224d3a12933e22e0070a4e8e13/langgraph_prebuilt-1.1.3-py3-none-any.whl", hash = "sha256:7b55eb1c2004348b73b9af9e2f81e5f3eda47dcf13d885ccb4195538426c55ce", size = 42512, upload-time = "2026-11-19T05:26:05.396Z" },
 ]
 
 [[package]]
 name = "langgraph-sdk"
-version = "0.2.15"
+version = "0.4.14"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
+    { name = "langchain-core" },
+    { name = "langchain-protocol" },
     { name = "orjson" },
+    { name = "websockets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/71/46/a0bc5914e4a418ad5e8558b19bccd6f0baf56d0c674d6d65a0acf4f22590/langgraph_sdk-0.2.15.tar.gz", hash = "sha256:8faaafe2c1193b89f782dd66c591060cd67862aa6aaf283749b7846f331d5334", size = 130343, upload-time = "2025-12-09T19:26:40.097Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/28/4d/d26d0393fa9a305199ebc4fbc2550b9b5b4fd33603bd8bd149ad6b84616f/langgraph_sdk-0.4.14.tar.gz", hash = "sha256:13eb1fee92504d87c1f0f43c8e213e7ba0a46bd23a07e3198e413d48efac5833", size = 371481, upload-time = "2026-11-06T03:03:23.191Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6b/c9/bf2bff18f85bb7973fa5280838580049574bd7649c36e3dd346c49304997/langgraph_sdk-0.2.15-py3-none-any.whl", hash = "sha256:746566a5d89aa47160eccc17d71682a78771c754126f6c235a68353d61ed7462", size = 66483, upload-time = "2025-12-09T19:26:39.198Z" },
+    { url = "https://files.pythonhosted.org/packages/14/f1/3db4776fb3673dbae57b0ad2e9f14d9a2c44bde8932df7df0f7671572ed3/langgraph_sdk-0.4.14-py3-none-any.whl", hash = "sha256:d47a6755890ae537aa80613a3138680ac77f5d256a2d3953af95a96328e6964d", size = 171310, upload-time = "2026-11-06T03:03:21.723Z" },
 ]
 
 [[package]]
@@ -1433,16 +1436,16 @@ wheels = [
 
 [[package]]
 name = "pypdf"
-version = "5.9.0"
+version = "6.21.4"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/89/3a/584b97a228950ed85aec97c811c68473d9b8d149e6a8c155668287cf1a28/pypdf-5.9.0.tar.gz", hash = "sha256:30f67a614d558e495e1fbb157ba58c1de91ffc1718f5e0dfeb82a029233890a1", size = 5035118, upload-time = "2025-07-27T14:04:52.364Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1e/e1/ec8f4d155c997c45917153a5521e60d6ee6389d68abdcbc8e44e564caffc/pypdf-6.21.4.tar.gz", hash = "sha256:c8817e3f888d47a087872ded69812c1ef30cacb871d6e053e0c00bbaf0bc2163", size = 7109255, upload-time = "2026-10-28T17:00:54.81Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/48/d9/6cff57c80a6963e7dd183bf09e9f21604a77716644b1e580e97b259f7612/pypdf-5.9.0-py3-none-any.whl", hash = "sha256:be10a4c54202f46d9daceaa8788be07aa8cd5ea8c25c529c50dd509206382c35", size = 313193, upload-time = "2025-07-27T14:04:50.53Z" },
+    { url = "https://files.pythonhosted.org/packages/3f/4b/77e8ad4ac42c9d93600f40541a50e9feb3a61d2bbee2d76f659346072051/pypdf-6.21.4-py3-none-any.whl", hash = "sha256:33e4fb41ca352810eb4e9838aa0d82d6888a5f8bf682f43e99cce5faa666255c", size = 410430, upload-time = "2026-10-28T17:00:53.146Z" },
 ]
 
 [[package]]
 name = "pytest"
-version = "8.4.2"
+version = "9.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
@@ -1451,21 +1454,22 @@ dependencies = [
     { name = "pluggy" },
     { name = "pygments" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a3/5c/00a0e072241553e1a7496d638deababa67c5058571567b92a7eaa258397c/pytest-8.4.2.tar.gz", hash = "sha256:86c0d0b93306b961d58d62a4db4879f27fe25513d4b969df351abdddb3c30e01", size = 1519618, upload-time = "2025-09-04T14:34:22.711Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/79/42/bb4641652e58dedeac2ec51abc1f8cae4fee4ec63899a0999016229a0f2a/pytest-9.2.0.tar.gz", hash = "sha256:97c4f3b1f3c7414aa36465e09b8220f1d03627993bd51b1282e193753c80557b", size = 1797555, upload-time = "2026-10-27T21:30:20.728Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/a4/20da314d277121d6534b3a980b29035dcd51e6744bd79075a6ce8fa4eb8d/pytest-8.4.2-py3-none-any.whl", hash = "sha256:872f880de3fc3a5bdc88a11b39c9710c3497a547cfa9320bc3c5e62fbf272e79", size = 365750, upload-time = "2025-09-04T14:34:20.226Z" },
+    { url = "https://files.pythonhosted.org/packages/51/39/1f5d8c8877a0fa327db959c19341d4be61660de1ab6b7391f9eb805bcd67/pytest-9.2.0-py3-none-any.whl", hash = "sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588", size = 411776, upload-time = "2026-10-27T21:30:19.131Z" },
 ]
 
 [[package]]
 name = "pytest-asyncio"
-version = "0.26.0"
+version = "1.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pytest" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8e/c4/453c52c659521066969523e87d85d54139bbd17b78f09532fb8eb8cdb58e/pytest_asyncio-0.26.0.tar.gz", hash = "sha256:c4df2a697648241ff39e7f0e4a73050b03f123f760673956cf0d72a4990e312f", size = 54156, upload-time = "2025-03-25T06:22:28.883Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2c/de/80724f9b5b9eca1a654179cae6edc51aaa0a355a9834a736e2a188b91780/pytest_asyncio-1.5.0.tar.gz", hash = "sha256:92c8fa83ca419fd0d4bd6a34df6520dae435841d3733c319343249492adf37f7", size = 146227, upload-time = "2026-11-12T16:35:49.845Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/20/7f/338843f449ace853647ace35870874f69a764d251872ed1b4de9f234822c/pytest_asyncio-0.26.0-py3-none-any.whl", hash = "sha256:7b51ed894f4fbea1340262bdae5135797ebbe21d8638978e35d31c6d19f72fb0", size = 19694, upload-time = "2025-03-25T06:22:27.807Z" },
+    { url = "https://files.pythonhosted.org/packages/27/2d/e600d8f47597a803641704aba367c7266cd621f86561ec36da9888f160ec/pytest_asyncio-1.5.0-py3-none-any.whl", hash = "sha256:557f255ee03cc84f84a8d5f438bc9c6e0f714bf86970ae743c7ecb5a38d7e07d", size = 17215, upload-time = "2026-11-12T16:35:48.446Z" },
 ]
 
 [[package]]

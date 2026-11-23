@@ -174,9 +174,7 @@ export function ShellLayout({ children }: { children: React.ReactNode }): React.
                 />
                 <span>{error ? "Backend offline" : "Local backend ready"}</span>
               </span>
-              <span className="font-mono text-[11px]">
-                v{bootstrap?.app.version ?? "0.1.0"}
-              </span>
+              <span className="font-mono text-[11px]">v{bootstrap?.app.version ?? "0.1.0"}</span>
             </div>
           )}
         </footer>
@@ -234,14 +232,14 @@ export function ShellLayout({ children }: { children: React.ReactNode }): React.
       <div
         aria-live="polite"
         aria-atomic="false"
-        className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-[360px]"
+        className="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-[340px]"
       >
         {toasts.map((toast) => (
           <div
             key={toast.id}
             role={toast.tone === "error" ? "alert" : "status"}
             className={[
-              "rounded-[8px] border px-3.5 py-2.5 text-[13px] shadow-md flex items-center justify-between gap-3",
+              "pointer-events-auto rounded-[8px] border px-3.5 py-2.5 text-[13px] shadow-md flex items-center justify-between gap-3",
               toast.tone === "error"
                 ? "bg-[var(--danger-tint)] text-[var(--danger-ink)] border-[var(--danger-border)]"
                 : toast.tone === "success"

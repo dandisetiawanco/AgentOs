@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from pydantic import BaseModel
+
 from agentos.agents.orchestrator import AgentOrchestrator
 from agentos.agents.recovery import RecoveryManager
 from agentos.api.schemas import AppSettingsPayload
@@ -30,7 +32,6 @@ from agentos.tools.base import (
 )
 from agentos.tools.registry import ToolRegistry
 from agentos.verification.engine import VerificationEngine
-from pydantic import BaseModel
 
 
 class EchoInput(BaseModel):
