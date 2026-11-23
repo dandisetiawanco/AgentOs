@@ -1,0 +1,253 @@
+@import "tailwindcss";
+
+/*
+ * AgentOS Design System Tokens (docs/DESIGN.md)
+ * Contrast-verified WCAG AA in both light and dark modes (4.69:1 to 17.72:1).
+ */
+:root {
+  color-scheme: light dark;
+
+  --canvas-light: #f6f5f2;
+  --surface-elevated-light: #ffffff;
+  --surface-recessed-light: #eceae4;
+  --ink-primary-light: #18181b;
+  --ink-secondary-light: #52525b;
+  --ink-recessed-light: #4b4b52;
+  --border-hairline-light: #d6d3cb;
+  --border-control-light: #76746b;
+  --accent-light: #1d4ed8;
+  --accent-fill-light: #1d4ed8;
+  --accent-fill-hover-light: #1e40af;
+  --accent-ink-light: #1d4ed8;
+  --accent-tint-light: #dbeafe;
+  --accent-border-light: #93c5fd;
+  --success-tint-light: #dcfce7;
+  --success-ink-light: #166534;
+  --success-border-light: #86efac;
+  --warning-tint-light: #fef3c7;
+  --warning-ink-light: #92400e;
+  --warning-border-light: #fcd34d;
+  --danger-tint-light: #fee2e2;
+  --danger-ink-light: #991b1b;
+  --danger-border-light: #fca5a5;
+
+  --canvas-dark: #121316;
+  --surface-elevated-dark: #1a1c21;
+  --surface-recessed-dark: #16181d;
+  --ink-primary-dark: #f3f2ee;
+  --ink-secondary-dark: #a8abb3;
+  --ink-recessed-dark: #a8abb3;
+  --border-hairline-dark: #2a2d35;
+  --border-control-dark: #828894;
+  --accent-dark: #60a5fa;
+  --accent-fill-dark: #2563eb;
+  --accent-fill-hover-dark: #1d4ed8;
+  --accent-ink-dark: #60a5fa;
+  --accent-tint-dark: #172554;
+  --accent-border-dark: #3b82f6;
+  --success-tint-dark: #14291d;
+  --success-ink-dark: #86efac;
+  --success-border-dark: #22c55e;
+  --warning-tint-dark: #2b210e;
+  --warning-ink-dark: #fcd34d;
+  --warning-border-dark: #d97706;
+  --danger-tint-dark: #2d1517;
+  --danger-ink-dark: #fca5a5;
+  --danger-border-dark: #ef4444;
+
+  /* Default light tokens with fallback media query below */
+  --canvas: var(--canvas-light);
+  --surface-elevated: var(--surface-elevated-light);
+  --surface-recessed: var(--surface-recessed-light);
+  --ink-primary: var(--ink-primary-light);
+  --ink-secondary: var(--ink-secondary-light);
+  --ink-recessed: var(--ink-recessed-light);
+  --border-hairline: var(--border-hairline-light);
+  --border-control: var(--border-control-light);
+  --accent: var(--accent-light);
+  --accent-fill: var(--accent-fill-light);
+  --accent-fill-hover: var(--accent-fill-hover-light);
+  --accent-ink: var(--accent-ink-light);
+  --accent-tint: var(--accent-tint-light);
+  --accent-border: var(--accent-border-light);
+  --success-tint: var(--success-tint-light);
+  --success-ink: var(--success-ink-light);
+  --success-border: var(--success-border-light);
+  --warning-tint: var(--warning-tint-light);
+  --warning-ink: var(--warning-ink-light);
+  --warning-border: var(--warning-border-light);
+  --danger-tint: var(--danger-tint-light);
+  --danger-ink: var(--danger-ink-light);
+  --danger-border: var(--danger-border-light);
+
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  accent-color: var(--accent-fill);
+}
+
+:root:has(> head > meta[name="color-scheme"][content="dark"]) {
+  color-scheme: dark;
+}
+
+:root:has(> head > meta[name="color-scheme"][content="light"]) {
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(:has(> head > meta[name="color-scheme"][content="light"])) {
+    --canvas: var(--canvas-dark);
+    --surface-elevated: var(--surface-elevated-dark);
+    --surface-recessed: var(--surface-recessed-dark);
+    --ink-primary: var(--ink-primary-dark);
+    --ink-secondary: var(--ink-secondary-dark);
+    --ink-recessed: var(--ink-recessed-dark);
+    --border-hairline: var(--border-hairline-dark);
+    --border-control: var(--border-control-dark);
+    --accent: var(--accent-dark);
+    --accent-fill: var(--accent-fill-dark);
+    --accent-fill-hover: var(--accent-fill-hover-dark);
+    --accent-ink: var(--accent-ink-dark);
+    --accent-tint: var(--accent-tint-dark);
+    --accent-border: var(--accent-border-dark);
+    --success-tint: var(--success-tint-dark);
+    --success-ink: var(--success-ink-dark);
+    --success-border: var(--success-border-dark);
+    --warning-tint: var(--warning-tint-dark);
+    --warning-ink: var(--warning-ink-dark);
+    --warning-border: var(--warning-border-dark);
+    --danger-tint: var(--danger-tint-dark);
+    --danger-ink: var(--danger-ink-dark);
+    --danger-border: var(--danger-border-dark);
+  }
+}
+
+@supports (color: light-dark(white, black)) {
+  :root {
+    --canvas: light-dark(var(--canvas-light), var(--canvas-dark));
+    --surface-elevated: light-dark(var(--surface-elevated-light), var(--surface-elevated-dark));
+    --surface-recessed: light-dark(var(--surface-recessed-light), var(--surface-recessed-dark));
+    --ink-primary: light-dark(var(--ink-primary-light), var(--ink-primary-dark));
+    --ink-secondary: light-dark(var(--ink-secondary-light), var(--ink-secondary-dark));
+    --ink-recessed: light-dark(var(--ink-recessed-light), var(--ink-recessed-dark));
+    --border-hairline: light-dark(var(--border-hairline-light), var(--border-hairline-dark));
+    --border-control: light-dark(var(--border-control-light), var(--border-control-dark));
+    --accent: light-dark(var(--accent-light), var(--accent-dark));
+    --accent-fill: light-dark(var(--accent-fill-light), var(--accent-fill-dark));
+    --accent-fill-hover: light-dark(var(--accent-fill-hover-light), var(--accent-fill-hover-dark));
+    --accent-ink: light-dark(var(--accent-ink-light), var(--accent-ink-dark));
+    --accent-tint: light-dark(var(--accent-tint-light), var(--accent-tint-dark));
+    --accent-border: light-dark(var(--accent-border-light), var(--accent-border-dark));
+    --success-tint: light-dark(var(--success-tint-light), var(--success-tint-dark));
+    --success-ink: light-dark(var(--success-ink-light), var(--success-ink-dark));
+    --success-border: light-dark(var(--success-border-light), var(--success-border-dark));
+    --warning-tint: light-dark(var(--warning-tint-light), var(--warning-tint-dark));
+    --warning-ink: light-dark(var(--warning-ink-light), var(--warning-ink-dark));
+    --warning-border: light-dark(var(--warning-border-light), var(--warning-border-dark));
+    --danger-tint: light-dark(var(--danger-tint-light), var(--danger-tint-dark));
+    --danger-ink: light-dark(var(--danger-ink-light), var(--danger-ink-dark));
+    --danger-border: light-dark(var(--danger-border-light), var(--danger-border-dark));
+  }
+}
+
+@layer base {
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--canvas);
+    color: var(--ink-primary);
+    min-height: 100%;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  code,
+  pre,
+  kbd,
+  .font-mono {
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+
+  /* Restore pointer affordance across enabled interactive controls (R-39) */
+  a[href],
+  button:not(:disabled),
+  summary,
+  select:not(:disabled),
+  label[for],
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="tab"]:not([aria-disabled="true"]),
+  [role="switch"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  select:disabled,
+  input:disabled,
+  textarea:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 2px;
+  }
+}
+
+/* Native modal dialog top-layer scroll containment (modern-web-guidance: dialog) */
+dialog.agentos-dialog:modal {
+  overscroll-behavior: contain;
+  margin: auto;
+}
+
+dialog.agentos-dialog::backdrop {
+  background: rgba(18, 19, 22, 0.56);
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+.visually-hidden:where(:not(:focus-within, :active)) {
+  position: absolute !important;
+  clip-path: inset(50%) !important;
+  overflow: hidden !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+
+.skip-link:focus {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 100;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--accent-fill);
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+@media (pointer: coarse) {
+  button,
+  select,
+  a[href] {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -6,7 +6,6 @@ build-backend = "hatchling.build"
 name = "agentos-backend"
 version = "0.1.0"
 description = "Local-first autonomous AI desktop agent backend for AgentOS"
-readme = "../README.md"
 requires-python = ">=3.12,<3.14"
 license = { text = "Apache-2.0" }
 authors = [
@@ -53,6 +52,7 @@ src = ["agentos", "tests"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "S", "ASYNC"]
 ignore = [
+  "E501",   # line length handled by ruff format; keep descriptive error strings readable
   "S101",   # allow assert in tests
   "S104",   # checked explicitly in config validation
   "B008",   # FastAPI Depends in function defaults

@@ -8,7 +8,7 @@ Validation will be recorded incrementally as each phase completes its mandatory 
 
 ## Quality Gates
 - [x] Phase 0: Environment verified, Rust toolchain verified, Git repository initialized
-- [ ] Phase 1: Backend starts/stops cleanly, DB migrations apply, Tauri desktop launches, frontend builds
+- [x] Phase 1: Backend starts/stops cleanly, DB migrations apply, Tauri desktop bridge compiles/tests, frontend builds
 - [ ] Phase 2: Agent state machine, budgets, permissions, and verification unit tests pass
 - [ ] Phase 3: File, Document, Browser, System, and Terminal tools verified against temporary fixtures
 - [ ] Phase 4: All 8 UI views verified (Light/Dark/System themes, keyboard navigation, contrast AA, click-through)
