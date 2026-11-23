@@ -132,7 +132,7 @@ jobs:
             os: macos-15-intel
             tauri_args: "--target x86_64-apple-darwin --bundles app"
           - target: macos-apple-silicon
-            os: macos-14
+            os: macos-15
             tauri_args: "--target aarch64-apple-darwin --bundles app"
           - target: windows-x64
             os: windows-latest
