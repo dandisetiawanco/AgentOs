@@ -1,14 +1,23 @@
 # AgentOS Build State
 
 Last Updated: 2026-11-23
-Current Phase: Phase 6 (Hardening, Security Validation, E2E, Evals, Benchmarks)
+Current Phase: Phase 7 Complete (Release Candidate v0.1.0 Ready for Review)
+Branch: `main`
 
 ## Completed Milestones
-- Phase 0 complete (`f691613`): hardware/toolchain audit verified, Rust 1.100.0 installed, Git initialized.
-- Phase 1 complete (`081be86`): FastAPI + SQLite/Alembic + Keychain + 6 providers, Tauri 2 Rust bridge, React desktop shell.
-- Phase 2 complete (`96a5e7e`): ToolRegistry, PermissionEngine, 10-state StateManager, MemoryManager, VerificationEngine, RecoveryManager, LangGraph AgentOrchestrator.
-- Phase 3 complete (`09ed96b`): 22 built-in deterministic tools across File, Document, Browser, System, and Restricted Terminal verified against temp fixtures.
-- Phase 4 & Phase 5 complete: All 8 desktop UI views (Overview, Assistant, Tasks, Workflows, Tools, Memory, Activity, Settings) wired to 37 OpenAPI backend endpoints, official `mcp` SDK stdio integration, macOS Computer Use capability detection & Emergency Stop, and reusable Workflows + in-app scheduler.
+- **Phase 0 (`f691613`)**: Hardware and toolchain audit verified on MacBook Pro 2019 (Intel Core i5-8279U `x86_64`, 8 GB RAM, macOS 15.8.3). Rust 1.100.0 stable installed locally (`~/.cargo/bin`), Git initialized, WCAG AA contrast audit verified, continuity and design docs created.
+- **Phase 1 (`081be86`)**: FastAPI backend (`agentos`), SQLite + SQLAlchemy + Alembic migrations, OS keychain credential store (`keyring`), secret redactor, loopback token auth, 6 provider adapters (Gemini, OpenAI, Anthropic, Ollama, OpenAI-compatible, Offline Deterministic Test Mode), Tauri 2 Rust desktop bridge (`apps/desktop/src-tauri`), shared TypeScript client/UI packages (`packages/shared`, `packages/ui`), React + Vite + Tailwind desktop shell with FOUC-free theme init.
+- **Phase 2 (`96a5e7e`)**: Strongly typed `ToolRegistry`, deterministic `PermissionEngine`, 10-state SQLite `StateManager` with SSE event bus and rollback journal, `MemoryManager`, `VerificationEngine`, `IntentAnalyzer`, `ContextManager`, `TaskPlanner`, `RecoveryManager`, and LangGraph `AgentOrchestrator`.
+- **Phase 3 (`09ed96b`)**: Deterministic built-in tools across File Intelligence (10 tools), Document Intelligence (3 tools supporting PDF, DOCX, TXT, MD, CSV, XLSX with reopen verification), Browser Intelligence (4 isolated Playwright tools), System Intelligence (4 read-only tools), and Restricted Terminal (`terminal.run`, disabled by default).
+- **Phase 4 & Phase 5 (`aee34ad`)**: All 8 desktop UI views (Overview, Assistant, Tasks, Workflows, Tools, Memory, Activity, Settings) wired to 37 OpenAPI backend endpoints (`docs/api/openapi.json`), macOS Computer Use adapter (`desktop.observe`, `desktop.act`, Emergency Stop; total 24 built-in tools), official `mcp` SDK stdio integration, and reusable Workflows + in-app scheduler.
+- **Phase 6 & Phase 7 (Final Release Prep)**:
+  - Security boundary test suite (`tests/security/test_security_boundaries.py`, 5/5 passed).
+  - Full-stack Playwright E2E test (`tests/e2e/test_full_e2e.py`, 1/1 passed) covering all 8 views, approval modal, rollback, backend restart persistence, 390 px responsive check, zero console errors, and 5 real screenshots (`assets/screenshots/`).
+  - AI evaluation benchmark (`benchmarks/ai_eval.py`, 8/8 scenarios passed in Offline Deterministic Test Mode) and Intel macOS performance benchmarks (`benchmarks/perf_benchmark.py`).
+  - Dependency security upgrades (`langgraph 1.2.24`, `pypdf 6.21.4`, `pytest 9.2.0`) resulting in 0 vulnerabilities from `pip-audit`.
+  - Parent-PID backend watchdog (`AGENTOS_PARENT_PID`) + `Drop` implementation in `BackendManager` verified via live `AgentOS.app` native launch and clean termination with zero orphaned processes.
+  - Production macOS Intel bundles built (`AgentOS.app` 13 MB, `AgentOS_0.1.0_x64.dmg` 4.1 MB).
+  - Public open-source documentation (`README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`, `ROADMAP.md`, `THIRD_PARTY_NOTICES.md`, `docs/*`, `.github/workflows/ci.yml`, GitHub templates).
 
 ## Environment Audit Results
 - OS: macOS 15.8.3 (Build 24H241, Darwin 24.6.0)
@@ -19,58 +28,29 @@ Current Phase: Phase 6 (Hardening, Security Validation, E2E, Evals, Benchmarks)
 - Node.js: v22.23.5
 - npm: 10.9.9
 - pnpm: 12.21.0
-- Python: 3.12.16 selected (also present: 3.9.6, 3.11.15, 3.13.18, 3.14.7, 3.15.2)
-- uv: 0.13.9
+- Python: 3.12.16 (pinned via `backend/.python-version` and `uv 0.13.9`)
 - SQLite: 3.50.6
 - Git: 2.50.1
-- Playwright Cache: chromium-1148, chromium_headless_shell-1148 present
-- Rust: `rustc 1.100.0`, `cargo 1.100.0`, `rustfmt 1.11.0-stable`, `clippy 0.1.100` (`stable-x86_64-apple-darwin` in `~/.cargo/bin`)
-- Ollama: Not installed (adapter will detect availability dynamically)
+- Playwright Cache: `chromium-1148`, `chromium_headless_shell-1148`
+- Rust: `rustc 1.100.0`, `cargo 1.100.0`, `rustfmt 1.11.0-stable`, `clippy 0.1.100` (`stable-x86_64-apple-darwin`)
 
-## Completed Features
-- Phase 0 complete: hardware and toolchain audit verified
-- Rust 1.100.0 stable toolchain installed locally via `rustup`
-- Git repository initialized on branch `main`
-- Base governance files created (`.gitignore`, `.env.example`, `LICENSE`, `package.json`, `pnpm-workspace.yaml`, `.prettierrc.json`, `backend/pyproject.toml`, `backend/.python-version`)
-- Design direction and contrast-verified palette documented in `docs/DESIGN.md`
-- Continuity and architecture docs initialized (`IMPLEMENTATION_PLAN.md`, `ARCHITECTURE_DECISIONS.md`, `BUILD_STATE.md`, `VALIDATION_REPORT.md`)
+## Verified Test and Quality Gate Summary
+- Python Ruff (`ruff check`, `ruff format --check` across 69 files): PASS (0 errors)
+- Python Mypy (`mypy agentos` across 55 source files): PASS (0 issues)
+- Python Pytest (`tests`, `../tests/security`, `../tests/integration`, `../tests/e2e`): 21/21 PASSED
+- Python Vulnerability Audit (`pip-audit --desc=off`): PASS (No known vulnerabilities found)
+- Frontend Prettier (`pnpm format:check`), TypeScript (`pnpm typecheck`), ESLint (`pnpm lint`): PASS (0 errors, 0 warnings)
+- Frontend Vitest (`pnpm test`): 1/1 PASSED (`App.test.tsx`)
+- Rust (`cargo fmt --check`, `cargo clippy --offline -- -D warnings`, `cargo test --offline`): PASS (0 warnings, 3/3 tests passed)
+- Native macOS Intel Build (`tauri build -- --offline`): PASS (`AgentOS.app` Mach-O `x86_64` + `AgentOS_0.1.0_x64.dmg`)
+- Native macOS Runtime Smoke Test (`AgentOS.app/Contents/MacOS/agentos-desktop`): PASS (auto-spawns local FastAPI backend, shuts down cleanly with 0 orphaned processes)
+- Secret Scan & Copy Hygiene: PASS (0 leaked credentials, 0 em dashes)
 
-## Incomplete Features
-- Rust toolchain installation verification
-- Phase 1: Desktop shell (Tauri 2 + React + Vite + Tailwind), Backend FastAPI + SQLite + Alembic + Keychain + Providers
-- Phase 2: Agent Core (LangGraph orchestrator, PermissionEngine, ToolRegistry, StateManager, VerificationEngine, RecoveryManager, MemoryManager, AuditLogger)
-- Phase 3: Built-in Tool Categories (File, Document, Browser, System, Terminal)
-- Phase 4: Complete 8-view Desktop UI/UX
-- Phase 5: MCP Integration, macOS Computer Use adapter, Workflow Automation & Scheduler
-- Phase 6: Full Test Suite, Security Tests, E2E Tests, AI Evals, Performance Benchmarks
-- Phase 7: Final Docs, Real Screenshots, CI/CD, Production Build Verification
-
-## Changed Files
-- `.gitignore`
-- `.env.example`
-- `LICENSE`
-- `docs/IMPLEMENTATION_PLAN.md`
-- `docs/ARCHITECTURE_DECISIONS.md`
-- `docs/BUILD_STATE.md`
-- `docs/VALIDATION_REPORT.md`
-
-## Actual Executed Commands
-- `sw_vers && uname -a && sysctl -n machdep.cpu.brand_string hw.memsize && df -h /`
-- `node -v; npm -v; pnpm -v; python3 --version; uv --version; git --version; xcode-select -p`
-- `uv python list --only-installed`
-- `xcodebuild -version`
-- `git init -b main /Users/dandisetiawan/Documents/AgentOs`
-
-## Verified Test Results
-- Pending (Phase 0 in progress)
-
-## Known Defects
-- None recorded yet.
-
-## Unresolved Blockers
-- None.
-
-## Next Exact Development Tasks
-1. Complete `rustup` installation and verify `rustc`, `cargo`, `rustfmt`, `clippy`.
-2. Commit Phase 0 milestone to Git.
-3. Begin Phase 1: scaffold backend (`backend/`), shared packages (`packages/shared`, `packages/ui`), and desktop app (`apps/desktop` + `src-tauri`).
+## Known Limitations & Unresolved Blockers
+- **Unresolved Blockers**: None for v0.1.0 macOS Intel (`x86_64`) delivery.
+- **Documented Limitations**:
+  - Runtime verified natively on macOS Intel (`x86_64`) only; macOS Apple Silicon (`arm64`), Windows 11, and Ubuntu Linux are configured as GitHub Actions CI build-matrix targets and require native verification on those platforms before claiming runtime support.
+  - Standalone `AgentOS.app` locates the local `backend/.venv` inside a source checkout or an explicitly configured `AGENTOS_BACKEND_BIN`; standalone Python sidecar packaging (e.g. PyInstaller/PyOxidizer) is scheduled for a subsequent release.
+  - macOS builds are currently unsigned/unnotarized; Apple Developer ID code signing and notarization require release maintainer certificates.
+  - AI evaluation metrics (`benchmarks/results/eval_results.json`) were measured using the Offline Deterministic Test Mode (`mock-deterministic-v1`); live third-party LLM scores vary by provider and model.
+  - `@typescript-eslint/typescript-estree@8.25.0` prints an informational notice for TypeScript `5.8.2` while exiting cleanly with 0 errors and 0 warnings.

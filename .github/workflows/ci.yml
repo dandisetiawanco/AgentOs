@@ -1,0 +1,152 @@
+name: AgentOS CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Python Backend (Lint, Typecheck, Tests, Audit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: Install Python dependencies
+        run: uv sync --frozen
+      - name: Ruff lint and format check
+        run: |
+          uv run ruff check agentos tests
+          uv run ruff format --check agentos tests
+      - name: Mypy static typecheck
+        run: uv run mypy agentos
+      - name: Pytest unit and security suites
+        run: uv run pytest -c pyproject.toml tests ../tests/security -v
+      - name: Dependency vulnerability scan
+        run: uv run pip-audit --desc=off
+
+  frontend:
+    name: Desktop Frontend (Typecheck, Lint, Vitest, Build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - name: Install workspace packages
+        run: pnpm install --frozen-lockfile
+      - name: TypeScript typecheck
+        run: pnpm typecheck
+      - name: ESLint
+        run: pnpm lint
+      - name: Vitest suite
+        run: pnpm test
+      - name: Production bundle build
+        run: pnpm build
+
+  rust:
+    name: Rust Desktop Bridge (Fmt, Clippy, Tests)
+    runs-on: macos-15-intel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Format check
+        run: cargo fmt --manifest-path apps/desktop/src-tauri/Cargo.toml -- --check
+      - name: Clippy static analysis
+        run: cargo clippy --manifest-path apps/desktop/src-tauri/Cargo.toml -- -D warnings
+      - name: Rust unit tests
+        run: cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml
+
+  secret-scan:
+    name: Repository Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan tracked files for raw credentials
+        run: |
+          python3 -c '
+          import re, subprocess, sys
+          patterns = [
+              re.compile(r"sk-[A-Za-z0-9_\-]{24,}"),
+              re.compile(r"sk-ant-[A-Za-z0-9_\-]{20,}"),
+              re.compile(r"AIza[0-9A-Za-z_\-]{30,}"),
+              re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
+          ]
+          files = subprocess.check_output(["git", "ls-files"], text=True).splitlines()
+          hits = []
+          for f in files:
+              if f.startswith(("tests/", "backend/tests/")):
+                  continue
+              try:
+                  text = open(f, encoding="utf-8", errors="ignore").read()
+              except OSError:
+                  continue
+              for pat in patterns:
+                  if pat.search(text):
+                      hits.append(f)
+                      break
+          if hits:
+              print("Potential secrets detected:", hits)
+              sys.exit(1)
+          print(f"Secret scan passed across {len(files)} tracked files.")
+          '
+
+  build-matrix:
+    name: Desktop Build Verification (${{ matrix.target }})
+    needs: [backend, frontend, rust, secret-scan]
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: macos-intel
+            os: macos-15-intel
+            tauri_args: "--target x86_64-apple-darwin"
+          - target: macos-apple-silicon
+            os: macos-14
+            tauri_args: "--target aarch64-apple-darwin"
+          - target: windows-x64
+            os: windows-latest
+            tauri_args: ""
+          - target: linux-x64
+            os: ubuntu-latest
+            tauri_args: ""
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Linux WebKit dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install workspace packages
+        run: pnpm install --frozen-lockfile
+      - name: Build Tauri application bundle (build verification only)
+        run: pnpm --filter @agentos/desktop tauri build ${{ matrix.tauri_args }}
