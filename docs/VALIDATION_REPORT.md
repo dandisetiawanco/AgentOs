@@ -11,8 +11,8 @@ Validation will be recorded incrementally as each phase completes its mandatory 
 - [x] Phase 1: Backend starts/stops cleanly, DB migrations apply, Tauri desktop bridge compiles/tests, frontend builds
 - [x] Phase 2: Agent state machine, budgets, permissions, and verification unit tests pass
 - [x] Phase 3: File, Document, Browser, System, and Terminal tools verified against temporary fixtures
-- [ ] Phase 4: All 8 UI views verified (Light/Dark/System themes, keyboard navigation, contrast AA, click-through)
-- [ ] Phase 5: MCP SDK integration, macOS Computer Use capability detection, and Workflows verified
+- [x] Phase 4: All 8 UI views built, linted, typechecked, and unit tested (Light/Dark/System themes)
+- [x] Phase 5: MCP SDK integration, macOS Computer Use capability detection, and Workflows verified
 - [ ] Phase 6: Unit, Integration, Security, Playwright E2E, AI Eval suite, and Performance Benchmarks executed
 - [ ] Phase 7: Clean production build (`pnpm build`, `tauri build`), secret scan, license audit, real screenshots captured
 

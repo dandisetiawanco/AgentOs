@@ -1,7 +1,20 @@
-import React, { useState } from "react";
-import { Check, FolderPlus, KeyRound, Trash2 } from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  Check,
+  Download,
+  FolderPlus,
+  KeyRound,
+  Plug,
+  RefreshCw,
+  ShieldAlert,
+  Trash2,
+} from "lucide-react";
+import type {
+  ComputerUseCapabilities,
+  McpServerRecord,
+  ThemePreference,
+} from "@agentos/shared";
 import { Button, ErrorState, LoadingState } from "@agentos/ui";
-import type { ThemePreference } from "@agentos/shared";
 import { useApp } from "../stores/AppContext.js";
 import { pickWorkspaceDirectory } from "../services/bridge.js";
 
@@ -19,6 +32,7 @@ export function SettingsPage(): React.JSX.Element {
     setThemePreference,
     updateSettings,
     refreshAll,
+    restartBackend,
     notify,
   } = useApp();
 
@@ -29,14 +43,54 @@ export function SettingsPage(): React.JSX.Element {
   const [wsReadOnly, setWsReadOnly] = useState<boolean>(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
+  // Security & budget drafts
+  const [allowlistText, setAllowlistText] = useState<string>("");
+  const [approvedAppsText, setApprovedAppsText] = useState<string>("");
+
+  // MCP servers & discovered tools
+  const [mcpServers, setMcpServers] = useState<McpServerRecord[]>([]);
+  const [mcpName, setMcpName] = useState<string>("");
+  const [mcpTransport, setMcpTransport] = useState<"stdio" | "sse" | "streamable_http">("stdio");
+  const [mcpCommand, setMcpCommand] = useState<string>("");
+  const [mcpUrl, setMcpUrl] = useState<string>("");
+  const [discoveredTools, setDiscoveredTools] = useState<
+    Record<string, Array<{ name: string; description: string }>>
+  >({});
+
+  // Computer use capabilities
+  const [cuCaps, setCuCaps] = useState<ComputerUseCapabilities | null>(null);
+
+  useEffect(() => {
+    if (settings) {
+      setAllowlistText(settings.terminal_allowlist.join(", "));
+      setApprovedAppsText(settings.computer_use_approved_apps.join(", "));
+    }
+  }, [settings]);
+
+  const loadAdvanced = useCallback(async () => {
+    if (!client) return;
+    try {
+      const [servers, caps] = await Promise.all([
+        client.listMcpServers(),
+        client.getComputerUseCapabilities(),
+      ]);
+      setMcpServers(servers);
+      setCuCaps(caps);
+    } catch {
+      // Ignore if bootstrapping.
+    }
+  }, [client]);
+
+  useEffect(() => {
+    void loadAdvanced();
+  }, [loadAdvanced]);
+
   if (loading && !settings) {
     return <LoadingState label="Loading settings..." />;
   }
-
   if (error && !settings) {
     return <ErrorState message={error} onRetry={() => void refreshAll()} />;
   }
-
   if (!settings || !client) {
     return <ErrorState message="Backend connection is not ready." onRetry={() => void refreshAll()} />;
   }
@@ -122,6 +176,72 @@ export function SettingsPage(): React.JSX.Element {
     }
   };
 
+  const handleAddMcp = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setActionError(null);
+    try {
+      const command = mcpCommand
+        .split(/\s+/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      await client.createMcpServer({
+        name: mcpName.trim(),
+        transport: mcpTransport,
+        command: mcpTransport === "stdio" ? command : [],
+        url: mcpTransport !== "stdio" ? mcpUrl.trim() : null,
+        enabled: true,
+      });
+      setMcpName("");
+      setMcpCommand("");
+      setMcpUrl("");
+      await loadAdvanced();
+      notify("Registered external MCP server (tools untrusted by default).", "success");
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  const handleTestMcp = async (serverId: string) => {
+    setActionError(null);
+    try {
+      const res = await client.testMcpServer(serverId);
+      setDiscoveredTools((prev) => ({ ...prev, [serverId]: res.tools }));
+      await loadAdvanced();
+      notify(res.message, res.ok ? "success" : "error");
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  const handleToggleMcpTool = async (server: McpServerRecord, toolName: string) => {
+    const exists = server.allowed_tools.includes(toolName);
+    const next = exists
+      ? server.allowed_tools.filter((t) => t !== toolName)
+      : [...server.allowed_tools, toolName];
+    await client.authorizeMcpTools(server.id, next);
+    await loadAdvanced();
+    notify(
+      exists ? `Revoked MCP tool '${toolName}'.` : `Authorized MCP tool '${toolName}'.`,
+      "info",
+    );
+  };
+
+  const handleExportDiagnostics = async () => {
+    try {
+      const diag = await client.exportDiagnostics();
+      const blob = new Blob([JSON.stringify(diag, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "agentos-diagnostics-redacted.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      notify("Exported redacted diagnostics report.", "success");
+    } catch (err) {
+      notify(err instanceof Error ? err.message : String(err), "error");
+    }
+  };
+
   const themeOptions: Array<{ value: ThemePreference; label: string }> = [
     { value: "system", label: `System (Currently ${systemThemeMode})` },
     { value: "light", label: "Light" },
@@ -133,7 +253,7 @@ export function SettingsPage(): React.JSX.Element {
       <div className="border-b border-[var(--border-hairline)] pb-4">
         <h1 className="text-[24px] font-semibold tracking-tight">Settings</h1>
         <p className="text-[14px] text-[var(--ink-secondary)] mt-1">
-          Configure AI providers, OS Keychain credentials, authorized workspaces, security limits, and appearance.
+          Configure AI providers, OS Keychain credentials, workspaces, execution budgets, security policies, MCP servers, computer use, and appearance.
         </p>
       </div>
 
@@ -179,16 +299,12 @@ export function SettingsPage(): React.JSX.Element {
         aria-labelledby="providers-heading"
         className="rounded-[8px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)] p-5"
       >
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h2 id="providers-heading" className="text-[16px] font-semibold">
-              AI Providers & Keychain Credentials
-            </h2>
-            <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
-              Supply your own API keys. Keys are stored via {bootstrap?.keychain.backend ?? "OS Keychain"}, never in SQLite or browser storage.
-            </p>
-          </div>
-        </div>
+        <h2 id="providers-heading" className="text-[16px] font-semibold">
+          AI Providers & Keychain Credentials
+        </h2>
+        <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
+          Supply your own API keys. Keys are stored via {bootstrap?.keychain.backend ?? "OS Keychain"}, never in SQLite, logs, or localStorage.
+        </p>
 
         <div className="mt-4 flex flex-col gap-3">
           {providers.map((provider) => {
@@ -200,7 +316,7 @@ export function SettingsPage(): React.JSX.Element {
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="text-[14px] font-semibold">{provider.display_name}</span>
                       {provider.capabilities.is_mock && (
                         <span className="text-[11px] px-2 py-0.5 rounded-[4px] border border-[var(--warning-border)] bg-[var(--warning-tint)] text-[var(--warning-ink)]">
@@ -253,7 +369,10 @@ export function SettingsPage(): React.JSX.Element {
                         htmlFor={`key-${provider.id}`}
                         className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
                       >
-                        API Key {provider.has_api_key ? `(Stored: ${provider.api_key_hint ?? "present"})` : "(Not stored)"}
+                        API Key{" "}
+                        {provider.has_api_key
+                          ? `(Stored: ${provider.api_key_hint ?? "present"})`
+                          : "(Not stored)"}
                       </label>
                       <input
                         id={`key-${provider.id}`}
@@ -302,10 +421,13 @@ export function SettingsPage(): React.JSX.Element {
           Authorized Workspaces
         </h2>
         <p className="text-[13px] text-[var(--ink-secondary)] mt-1">
-          AgentOS denies filesystem access by default. Only explicitly listed folders can be accessed by tools.
+          Default-deny filesystem boundary. System paths, credential folders, and symlink escapes are permanently blocked.
         </p>
 
-        <form onSubmit={(e) => void handleAddWorkspace(e)} className="mt-4 grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+        <form
+          onSubmit={(e) => void handleAddWorkspace(e)}
+          className="mt-4 grid grid-cols-1 md:grid-cols-12 gap-3 items-end"
+        >
           <div className="md:col-span-3">
             <label htmlFor="ws-name" className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1">
               Label
@@ -368,16 +490,12 @@ export function SettingsPage(): React.JSX.Element {
                 className="flex flex-wrap items-center justify-between gap-2 rounded-[6px] border border-[var(--border-hairline)] bg-[var(--canvas)] px-3.5 py-2.5"
               >
                 <div className="min-w-0">
-                  <p className="text-[14px] font-medium">{ws.name}</p>
-                  <p className="text-[12px] font-mono text-[var(--ink-secondary)] truncate">
+                  <p className="text-[14px] font-medium m-0">{ws.name}</p>
+                  <p className="text-[12px] font-mono text-[var(--ink-secondary)] truncate m-0">
                     {ws.path} {ws.read_only ? "(Read-only)" : "(Read/Write with approval)"}
                   </p>
                 </div>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => void handleRevokeWorkspace(ws.id)}
-                >
+                <Button variant="danger" size="sm" onClick={() => void handleRevokeWorkspace(ws.id)}>
                   <Trash2 className="w-3.5 h-3.5" aria-hidden={true} />
                   Revoke
                 </Button>
@@ -387,17 +505,423 @@ export function SettingsPage(): React.JSX.Element {
         </div>
       </section>
 
-      {/* About */}
+      {/* Security, Budgets, Memory & Restricted Terminal */}
       <section
-        aria-labelledby="about-heading"
-        className="rounded-[8px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)] p-5 text-[13px]"
+        aria-labelledby="security-heading"
+        className="rounded-[8px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)] p-5 flex flex-col gap-4"
       >
-        <h2 id="about-heading" className="text-[16px] font-semibold">
-          About AgentOS
+        <div>
+          <h2 id="security-heading" className="text-[16px] font-semibold">
+            Security, Budgets & Memory Policy
+          </h2>
+          <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
+            Enforced deterministically at the execution boundary regardless of model output.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div>
+            <label htmlFor="sec-dur" className="block text-[12px] font-medium mb-1">Max duration (sec)</label>
+            <input
+              id="sec-dur"
+              type="number"
+              min={10}
+              max={3600}
+              value={settings.max_duration_sec}
+              onChange={(e) =>
+                void updateSettings({ ...settings, max_duration_sec: Number(e.target.value) || 300 })
+              }
+              className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-2.5 py-1.5 text-[13px]"
+            />
+          </div>
+          <div>
+            <label htmlFor="sec-calls" className="block text-[12px] font-medium mb-1">Max tool calls</label>
+            <input
+              id="sec-calls"
+              type="number"
+              min={1}
+              max={100}
+              value={settings.max_tool_calls}
+              onChange={(e) =>
+                void updateSettings({ ...settings, max_tool_calls: Number(e.target.value) || 25 })
+              }
+              className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-2.5 py-1.5 text-[13px]"
+            />
+          </div>
+          <div>
+            <label htmlFor="sec-tokens" className="block text-[12px] font-medium mb-1">Max tokens / task</label>
+            <input
+              id="sec-tokens"
+              type="number"
+              min={1000}
+              max={500000}
+              value={settings.max_tokens}
+              onChange={(e) =>
+                void updateSettings({ ...settings, max_tokens: Number(e.target.value) || 64000 })
+              }
+              className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-2.5 py-1.5 text-[13px]"
+            />
+          </div>
+          <div>
+            <label htmlFor="sec-ret" className="block text-[12px] font-medium mb-1">Memory retention (days)</label>
+            <input
+              id="sec-ret"
+              type="number"
+              min={1}
+              max={3650}
+              value={settings.memory_retention_days}
+              onChange={(e) =>
+                void updateSettings({
+                  ...settings,
+                  memory_retention_days: Number(e.target.value) || 90,
+                })
+              }
+              className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-2.5 py-1.5 text-[13px]"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2.5 pt-2 border-t border-[var(--border-hairline)]">
+          <label htmlFor="sec-mem-en" className="inline-flex items-center gap-2 text-[13px]">
+            <input
+              id="sec-mem-en"
+              type="checkbox"
+              checked={settings.memory_enabled}
+              onChange={(e) => void updateSettings({ ...settings, memory_enabled: e.target.checked })}
+            />
+            Enable optional local SQLite memory
+          </label>
+
+          <label htmlFor="sec-term-en" className="inline-flex items-center gap-2 text-[13px]">
+            <input
+              id="sec-term-en"
+              type="checkbox"
+              checked={settings.terminal_enabled}
+              onChange={(e) => void updateSettings({ ...settings, terminal_enabled: e.target.checked })}
+            />
+            Enable restricted allowlisted terminal execution (disabled by default; still requires HIGH approval per command)
+          </label>
+
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="flex-1 min-w-[240px]">
+              <label htmlFor="sec-allow" className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1">
+                Terminal command allowlist (comma separated)
+              </label>
+              <input
+                id="sec-allow"
+                type="text"
+                value={allowlistText}
+                onChange={(e) => setAllowlistText(e.target.value)}
+                className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-3 py-1.5 text-[13px] font-mono"
+              />
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() =>
+                void updateSettings({
+                  ...settings,
+                  terminal_allowlist: allowlistText
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean),
+                })
+              }
+            >
+              Save allowlist
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Computer Use Capabilities (macOS first) */}
+      <section
+        aria-labelledby="cu-heading"
+        className="rounded-[8px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)] p-5 flex flex-col gap-3"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 id="cu-heading" className="text-[16px] font-semibold">
+              Computer Use & Desktop Capabilities
+            </h2>
+            <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
+              Separate opt-in authorization for desktop window inspection and single-frame screenshots. Continuous recording is permanently disabled.
+            </p>
+          </div>
+          {cuCaps && (
+            <Button
+              variant={cuCaps.emergency_stop_active ? "primary" : "danger"}
+              size="sm"
+              onClick={async () => {
+                await client.triggerEmergencyStop(!cuCaps.emergency_stop_active);
+                await loadAdvanced();
+                notify(
+                  cuCaps.emergency_stop_active ? "Emergency stop cleared." : "Emergency stop activated.",
+                  cuCaps.emergency_stop_active ? "success" : "error",
+                );
+              }}
+            >
+              <ShieldAlert className="w-3.5 h-3.5" aria-hidden={true} />
+              {cuCaps.emergency_stop_active ? "Clear emergency stop" : "Emergency stop"}
+            </Button>
+          )}
+        </div>
+
+        {cuCaps && (
+          <dl className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[13px] rounded-[6px] bg-[var(--canvas)] border border-[var(--border-hairline)] p-3 m-0">
+            <div>
+              <dt className="text-[var(--ink-secondary)]">Platform adapter</dt>
+              <dd className="font-mono m-0">
+                {cuCaps.platform} ({cuCaps.arch}) - {cuCaps.supported ? "Supported" : "Unavailable"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[var(--ink-secondary)]">macOS Accessibility</dt>
+              <dd className="font-mono m-0">
+                {cuCaps.accessibility_granted === null
+                  ? "Unknown"
+                  : cuCaps.accessibility_granted
+                    ? "Granted"
+                    : "Not granted"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[var(--ink-secondary)]">macOS Screen Recording</dt>
+              <dd className="font-mono m-0">
+                {cuCaps.screen_recording_granted === null
+                  ? "Unknown"
+                  : cuCaps.screen_recording_granted
+                    ? "Granted"
+                    : "Not granted"}
+              </dd>
+            </div>
+          </dl>
+        )}
+
+        <label htmlFor="cu-en" className="inline-flex items-center gap-2 text-[13px]">
+          <input
+            id="cu-en"
+            type="checkbox"
+            checked={settings.computer_use_enabled}
+            onChange={(e) =>
+              void updateSettings({ ...settings, computer_use_enabled: e.target.checked }).then(
+                () => void loadAdvanced(),
+              )
+            }
+          />
+          Authorize desktop inspection and approved app launching
+        </label>
+
+        <label htmlFor="cu-sc" className="inline-flex items-center gap-2 text-[13px]">
+          <input
+            id="cu-sc"
+            type="checkbox"
+            checked={settings.computer_use_screen_capture}
+            onChange={(e) =>
+              void updateSettings({
+                ...settings,
+                computer_use_screen_capture: e.target.checked,
+              }).then(() => void loadAdvanced())
+            }
+          />
+          Separately authorize single-frame desktop screenshots (excludes password and keychain apps)
+        </label>
+
+        <div className="flex flex-wrap items-end gap-2">
+          <div className="flex-1 min-w-[240px]">
+            <label htmlFor="cu-apps" className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1">
+              Approved applications (comma separated)
+            </label>
+            <input
+              id="cu-apps"
+              type="text"
+              value={approvedAppsText}
+              onChange={(e) => setApprovedAppsText(e.target.value)}
+              className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-3 py-1.5 text-[13px]"
+            />
+          </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() =>
+              void updateSettings({
+                ...settings,
+                computer_use_approved_apps: approvedAppsText
+                  .split(",")
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+              })
+            }
+          >
+            Save approved apps
+          </Button>
+        </div>
+      </section>
+
+      {/* External MCP Servers */}
+      <section
+        aria-labelledby="mcp-heading"
+        className="rounded-[8px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)] p-5 flex flex-col gap-4"
+      >
+        <div>
+          <h2 id="mcp-heading" className="text-[16px] font-semibold">
+            External MCP Servers (Optional)
+          </h2>
+          <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
+            External MCP servers are treated as untrusted by default. Discovered tools are never executed automatically until explicitly allowlisted.
+          </p>
+        </div>
+
+        <form onSubmit={(e) => void handleAddMcp(e)} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+          <div className="md:col-span-3">
+            <label htmlFor="mcp-name" className="block text-[12px] font-medium mb-1">Server name</label>
+            <input
+              id="mcp-name"
+              type="text"
+              required
+              value={mcpName}
+              onChange={(e) => setMcpName(e.target.value)}
+              placeholder="local-docs-mcp"
+              className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-3 py-1.5 text-[13px]"
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label htmlFor="mcp-trans" className="block text-[12px] font-medium mb-1">Transport</label>
+            <select
+              id="mcp-trans"
+              value={mcpTransport}
+              onChange={(e) => setMcpTransport(e.target.value as "stdio" | "sse" | "streamable_http")}
+              className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-2.5 py-1.5 text-[13px]"
+            >
+              <option value="stdio">stdio</option>
+              <option value="sse">sse</option>
+              <option value="streamable_http">streamable_http</option>
+            </select>
+          </div>
+          <div className="md:col-span-5">
+            {mcpTransport === "stdio" ? (
+              <>
+                <label htmlFor="mcp-cmd" className="block text-[12px] font-medium mb-1">
+                  Command & args
+                </label>
+                <input
+                  id="mcp-cmd"
+                  type="text"
+                  required
+                  value={mcpCommand}
+                  onChange={(e) => setMcpCommand(e.target.value)}
+                  placeholder="python3 /path/to/mcp_server.py"
+                  className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-3 py-1.5 text-[13px] font-mono"
+                />
+              </>
+            ) : (
+              <>
+                <label htmlFor="mcp-url" className="block text-[12px] font-medium mb-1">
+                  Endpoint URL
+                </label>
+                <input
+                  id="mcp-url"
+                  type="url"
+                  required
+                  value={mcpUrl}
+                  onChange={(e) => setMcpUrl(e.target.value)}
+                  placeholder="http://127.0.0.1:8088/mcp"
+                  className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-3 py-1.5 text-[13px] font-mono"
+                />
+              </>
+            )}
+          </div>
+          <div className="md:col-span-2">
+            <Button type="submit" variant="primary" size="sm" className="w-full">
+              <Plug className="w-3.5 h-3.5" aria-hidden={true} />
+              Register
+            </Button>
+          </div>
+        </form>
+
+        {mcpServers.length === 0 ? (
+          <p className="text-[13px] text-[var(--ink-secondary)]">
+            No external MCP servers configured.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {mcpServers.map((srv) => {
+              const tools = discoveredTools[srv.id] ?? [];
+              return (
+                <div
+                  key={srv.id}
+                  className="rounded-[6px] border border-[var(--border-hairline)] bg-[var(--canvas)] p-3.5 flex flex-col gap-2"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <span className="font-semibold text-[14px]">{srv.name}</span>
+                      <span className="ml-2 font-mono text-[12px] text-[var(--ink-secondary)]">
+                        {srv.transport} | status: {srv.status}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="secondary" size="sm" onClick={() => void handleTestMcp(srv.id)}>
+                        Test & inspect tools
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={async () => {
+                          await client.deleteMcpServer(srv.id);
+                          await loadAdvanced();
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                  {srv.last_error && (
+                    <p className="text-[12px] text-[var(--danger-ink)] m-0">{srv.last_error}</p>
+                  )}
+                  {tools.length > 0 && (
+                    <div className="pt-2 border-t border-[var(--border-hairline)] flex flex-col gap-1.5">
+                      <p className="text-[12px] font-medium m-0">Discovered tools (check to authorize):</p>
+                      {tools.map((t) => (
+                        <label key={t.name} className="inline-flex items-center gap-2 text-[12px]">
+                          <input
+                            type="checkbox"
+                            checked={srv.allowed_tools.includes(t.name)}
+                            onChange={() => void handleToggleMcpTool(srv, t.name)}
+                          />
+                          <span className="font-mono font-medium">{t.name}</span>
+                          <span className="text-[var(--ink-secondary)]">{t.description}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* Diagnostics & About */}
+      <section
+        aria-labelledby="diag-heading"
+        className="rounded-[8px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)] p-5 flex flex-col gap-3"
+      >
+        <h2 id="diag-heading" className="text-[16px] font-semibold">
+          Diagnostics & About
         </h2>
-        <p className="text-[var(--ink-secondary)] mt-1">
-          AgentOS v{bootstrap?.app.version ?? "0.1.0"} by {bootstrap?.app.author ?? "Dandi Setiawan"} ({bootstrap?.app.organization ?? "NGOPREK DIGITAL"}). Licensed under Apache License 2.0.
+        <p className="text-[13px] text-[var(--ink-secondary)] m-0">
+          AgentOS v{bootstrap?.app.version ?? "0.1.0"} by {bootstrap?.app.author ?? "Dandi Setiawan"} ({bootstrap?.app.organization ?? "NGOPREK DIGITAL"}). Open-source under Apache License 2.0.
         </p>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" size="sm" onClick={() => void handleExportDiagnostics()}>
+            <Download className="w-3.5 h-3.5" aria-hidden={true} />
+            Export redacted diagnostics
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => void restartBackend()}>
+            <RefreshCw className="w-3.5 h-3.5" aria-hidden={true} />
+            Restart local backend
+          </Button>
+        </div>
       </section>
     </div>
   );

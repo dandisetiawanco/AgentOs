@@ -1,3 +1,1 @@
-from agentos.api.app import create_app
-
-__all__ = ["create_app"]
+"""FastAPI application and typed request/response schemas."""

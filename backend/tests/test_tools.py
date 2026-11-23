@@ -196,7 +196,9 @@ async def test_system_and_restricted_terminal_tools(
     procs = await SystemProcessesTool().execute(SystemProcessesInput(limit=5), ctx_disabled)
     assert procs.ok and len(procs.data["processes"]) >= 1
 
-    large = await SystemLargeFilesTool().execute(LargeFilesInput(directory=str(ws), limit=5), ctx_disabled)
+    large = await SystemLargeFilesTool().execute(
+        LargeFilesInput(directory=str(ws), limit=5), ctx_disabled
+    )
     assert large.data["files"][0]["size_bytes"] == 4096
 
     # Terminal disabled by default via PermissionEngine

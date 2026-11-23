@@ -142,7 +142,9 @@ class DocCompareTool(BaseTool):
     id = "doc.compare"
     name = "Compare Two Documents"
     category = "document"
-    description = "Compare text extracted from two authorized documents and return a structured unified diff."
+    description = (
+        "Compare text extracted from two authorized documents and return a structured unified diff."
+    )
     input_model = DocCompareInput
     required_permissions = ("file.read",)
     risk_level = RiskLevel.READ_ONLY

@@ -44,7 +44,9 @@ class BrowserExtractTool(BaseTool):
     required_permissions = ("browser.read",)
     risk_level = RiskLevel.LOW
     timeout_sec = 40
-    verification_procedure = "Confirm page loaded with HTTP < 400 and extracted structured DOM data."
+    verification_procedure = (
+        "Confirm page loaded with HTTP < 400 and extracted structured DOM data."
+    )
 
     async def execute(self, args: BaseModel, ctx: ToolContext) -> ToolExecutionOutput:
         assert isinstance(args, BrowserExtractInput)
@@ -93,7 +95,9 @@ class BrowserExtractTool(BaseTool):
                     },
                 )
             except Exception as exc:  # noqa: BLE001
-                raise ToolExecutionError(f"Browser extraction failed for '{args.url}': {exc}") from exc
+                raise ToolExecutionError(
+                    f"Browser extraction failed for '{args.url}': {exc}"
+                ) from exc
             finally:
                 await context.close()
                 await browser.close()
@@ -159,7 +163,9 @@ class BrowserScreenshotTool(BaseTool):
         return VerificationOutcome(
             verified=ok,
             method=self.verification_procedure,
-            summary=f"Verified PNG screenshot at {target}." if ok else "Screenshot file invalid or missing.",
+            summary=f"Verified PNG screenshot at {target}."
+            if ok
+            else "Screenshot file invalid or missing.",
         )
 
 
@@ -271,7 +277,11 @@ class BrowserExportTool(BaseTool):
             ok=size > 0,
             summary=f"Exported webpage data to '{target.name}' ({size} bytes).",
             untrusted_content=True,
-            data={"output_path": str(target), "size_bytes": size, "title": extracted.data.get("title")},
+            data={
+                "output_path": str(target),
+                "size_bytes": size,
+                "title": extracted.data.get("title"),
+            },
             artifacts=[str(target)],
             rollback_record={
                 "operation_type": "copy",

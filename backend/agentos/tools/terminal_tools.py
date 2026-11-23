@@ -35,14 +35,18 @@ class TerminalRunTool(BaseTool):
     risk_level = RiskLevel.HIGH
     timeout_sec = 60
     has_side_effects = True
-    verification_procedure = "Confirm structured subprocess terminated cleanly and captured bounded output."
+    verification_procedure = (
+        "Confirm structured subprocess terminated cleanly and captured bounded output."
+    )
 
     async def execute(self, args: BaseModel, ctx: ToolContext) -> ToolExecutionOutput:
         assert isinstance(args, TerminalRunInput)
         cwd_path = resolve_authorized_path(args.cwd, ctx.authorized_workspaces, must_exist=True)
         resolved_exe = await asyncio.to_thread(shutil.which, args.executable)
         if not resolved_exe:
-            raise ToolExecutionError(f"Allowlisted command '{args.executable}' is not installed on PATH.")
+            raise ToolExecutionError(
+                f"Allowlisted command '{args.executable}' is not installed on PATH."
+            )
 
         # Strip all sensitive credentials and custom tokens from child environment.
         sanitized_env = {k: v for k, v in os.environ.items() if k in SAFE_ENV_KEYS}

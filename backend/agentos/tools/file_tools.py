@@ -91,7 +91,9 @@ class FileSearchTool(BaseTool):
     id = "file.search"
     name = "Search Workspace Files"
     category = "file"
-    description = "Search files by filename glob and optional text content inside an authorized directory."
+    description = (
+        "Search files by filename glob and optional text content inside an authorized directory."
+    )
     input_model = FileSearchInput
     required_permissions = ("file.read",)
     risk_level = RiskLevel.READ_ONLY
@@ -224,7 +226,9 @@ class FileDuplicatesTool(BaseTool):
     id = "file.duplicates"
     name = "Detect Duplicate Files"
     category = "file"
-    description = "Detect exact duplicate files in an authorized directory using SHA-256 content hashes."
+    description = (
+        "Detect exact duplicate files in an authorized directory using SHA-256 content hashes."
+    )
     input_model = FileDuplicatesInput
     required_permissions = ("file.read",)
     risk_level = RiskLevel.READ_ONLY
@@ -384,7 +388,9 @@ class FileCreateFolderTool(BaseTool):
         return VerificationOutcome(
             verified=ok,
             method=self.verification_procedure,
-            summary=f"Verified directory exists at {target}." if ok else f"Directory missing at {target}.",
+            summary=f"Verified directory exists at {target}."
+            if ok
+            else f"Directory missing at {target}.",
         )
 
 
@@ -397,7 +403,9 @@ class FileRenameTool(BaseTool):
     id = "file.rename"
     name = "Rename File"
     category = "file"
-    description = "Rename an authorized file within its workspace without overwriting existing targets."
+    description = (
+        "Rename an authorized file within its workspace without overwriting existing targets."
+    )
     input_model = FileTransferInput
     required_permissions = ("file.write",)
     risk_level = RiskLevel.MEDIUM
@@ -436,7 +444,9 @@ class FileRenameTool(BaseTool):
         return VerificationOutcome(
             verified=ok,
             method=self.verification_procedure,
-            summary="Verified file rename completed cleanly." if ok else "File rename verification failed.",
+            summary="Verified file rename completed cleanly."
+            if ok
+            else "File rename verification failed.",
         )
 
 
@@ -450,7 +460,9 @@ class FileMoveTool(BaseTool):
     risk_level = RiskLevel.MEDIUM
     has_side_effects = True
     supports_rollback = True
-    verification_procedure = "Confirm destination exists with matching SHA-256 and source was moved."
+    verification_procedure = (
+        "Confirm destination exists with matching SHA-256 and source was moved."
+    )
 
     def _run_sync(self, args: FileTransferInput, ctx: ToolContext) -> ToolExecutionOutput:
         src = resolve_authorized_path(args.source_path, ctx.authorized_workspaces, must_exist=True)
@@ -494,7 +506,9 @@ class FileMoveTool(BaseTool):
         return VerificationOutcome(
             verified=ok,
             method=self.verification_procedure,
-            summary="Verified moved file integrity via SHA-256." if ok else "Move verification failed.",
+            summary="Verified moved file integrity via SHA-256."
+            if ok
+            else "Move verification failed.",
         )
 
 
@@ -547,5 +561,7 @@ class FileCopyTool(BaseTool):
         return VerificationOutcome(
             verified=ok,
             method=self.verification_procedure,
-            summary="Verified copied file SHA-256 matches source." if ok else "Copy integrity check failed.",
+            summary="Verified copied file SHA-256 matches source."
+            if ok
+            else "Copy integrity check failed.",
         )

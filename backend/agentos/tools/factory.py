@@ -6,6 +6,7 @@ from agentos.tools.browser_tools import (
     BrowserFillFormTool,
     BrowserScreenshotTool,
 )
+from agentos.tools.computer_use import ComputerListWindowsTool, ComputerScreenshotTool
 from agentos.tools.document_tools import DocCompareTool, DocGenerateReportTool, DocReadTool
 from agentos.tools.file_tools import (
     FileCopyTool,
@@ -59,6 +60,9 @@ def create_default_registry() -> ToolRegistry:
         SystemOpenAppTool(),
         # Terminal Intelligence (disabled by default via PermissionEngine)
         TerminalRunTool(),
+        # Computer Use (macOS-first, disabled by default via PermissionEngine)
+        ComputerListWindowsTool(),
+        ComputerScreenshotTool(),
     ):
         registry.register(tool)
     return registry

@@ -1,13 +1,14 @@
 # AgentOS Build State
 
 Last Updated: 2026-11-23
-Current Phase: Phase 4 (Complete User Experience)
+Current Phase: Phase 6 (Hardening, Security Validation, E2E, Evals, Benchmarks)
 
 ## Completed Milestones
-- Phase 0 complete: hardware/toolchain audit verified, Rust 1.100.0 installed, Git initialized (`f691613`).
+- Phase 0 complete (`f691613`): hardware/toolchain audit verified, Rust 1.100.0 installed, Git initialized.
 - Phase 1 complete (`081be86`): FastAPI + SQLite/Alembic + Keychain + 6 providers, Tauri 2 Rust bridge, React desktop shell.
 - Phase 2 complete (`96a5e7e`): ToolRegistry, PermissionEngine, 10-state StateManager, MemoryManager, VerificationEngine, RecoveryManager, LangGraph AgentOrchestrator.
-- Phase 3 complete: 22 built-in deterministic tools across File, Document, Browser (Playwright isolated contexts), System, and Restricted Terminal verified against temp fixtures (12/12 unit + Playwright integration pass).
+- Phase 3 complete (`09ed96b`): 22 built-in deterministic tools across File, Document, Browser, System, and Restricted Terminal verified against temp fixtures.
+- Phase 4 & Phase 5 complete: All 8 desktop UI views (Overview, Assistant, Tasks, Workflows, Tools, Memory, Activity, Settings) wired to 37 OpenAPI backend endpoints, official `mcp` SDK stdio integration, macOS Computer Use capability detection & Emergency Stop, and reusable Workflows + in-app scheduler.
 
 ## Environment Audit Results
 - OS: macOS 15.8.3 (Build 24H241, Darwin 24.6.0)

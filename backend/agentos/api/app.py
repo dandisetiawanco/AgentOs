@@ -16,6 +16,8 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import func, select
 
 from agentos import APP_NAME, APP_TAGLINE, AUTHOR, ORG_NAME, SCHEMA_VERSION, __version__
+from agentos.agents.orchestrator import AgentOrchestrator
+from agentos.api.routes_agent import build_agent_router
 from agentos.api.schemas import (
     AppSettingsPayload,
     HealthResponse,
@@ -27,8 +29,12 @@ from agentos.api.schemas import (
 )
 from agentos.config import AgentOSSettings
 from agentos.errors import AgentOSError, NotFoundError
+from agentos.execution.state_manager import StateManager
+from agentos.integrations.mcp_client import McpManager
+from agentos.memory.manager import MemoryManager
 from agentos.observability.audit import AuditLogger
 from agentos.observability.logging import configure_logging
+from agentos.permissions.engine import PermissionEngine
 from agentos.providers.manager import ProviderManager
 from agentos.security.auth import require_session_auth
 from agentos.security.keychain import CredentialStore
@@ -36,6 +42,9 @@ from agentos.security.paths import validate_workspace_root
 from agentos.security.redactor import global_redactor, redact_text, redact_value
 from agentos.storage.database import DatabaseManager
 from agentos.storage.models import AppSetting, ProviderConfig, Task, Workspace
+from agentos.tools.factory import create_default_registry
+from agentos.verification.engine import VerificationEngine
+from agentos.workflows.engine import WorkflowManager
 
 logger = logging.getLogger("agentos.api")
 
@@ -69,6 +78,24 @@ def create_app(
     credentials = CredentialStore(force_memory=force_memory_keychain)
     providers = ProviderManager(credentials)
     audit = AuditLogger()
+    registry = create_default_registry()
+    permissions = PermissionEngine()
+    state_manager = StateManager()
+    verification = VerificationEngine()
+    memory = MemoryManager()
+    orchestrator = AgentOrchestrator(
+        db=db,
+        settings=runtime_settings,
+        providers=providers,
+        registry=registry,
+        permissions=permissions,
+        state_manager=state_manager,
+        verification=verification,
+        memory=memory,
+        audit=audit,
+    )
+    workflows = WorkflowManager(db=db, orchestrator=orchestrator)
+    mcp_manager = McpManager()
     started_at = time.monotonic()
 
     @asynccontextmanager
@@ -77,8 +104,10 @@ def create_app(
         configure_logging(runtime_settings.log_level, runtime_settings.logs_dir)
         await db.initialize()
         await load_app_settings(db)
+        workflows.start_scheduler(lambda: load_app_settings(db))
         logger.info("AgentOS backend ready on %s:%s", runtime_settings.host, runtime_settings.port)
         yield
+        await workflows.stop_scheduler()
         await db.dispose()
         logger.info("AgentOS backend shut down cleanly.")
 
@@ -93,7 +122,16 @@ def create_app(
     app.state.credentials = credentials
     app.state.providers = providers
     app.state.audit = audit
+    app.state.registry = registry
+    app.state.permissions = permissions
+    app.state.state_manager = state_manager
+    app.state.verification = verification
+    app.state.memory = memory
+    app.state.orchestrator = orchestrator
+    app.state.workflows = workflows
+    app.state.mcp = mcp_manager
     app.state.started_at = started_at
+    app.include_router(build_agent_router(load_app_settings))
 
     app.add_middleware(
         CORSMiddleware,

@@ -1,11 +1,36 @@
-import React from "react";
-import { FolderLock, Play, RefreshCw, ShieldCheck } from "lucide-react";
-import { Button, ErrorState, LoadingState } from "@agentos/ui";
+import React, { useEffect, useState } from "react";
+import { FolderLock, Play, RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
+import type { TaskRecord } from "@agentos/shared";
+import { Button, EmptyState, ErrorState, LoadingState, TaskStatusBadge } from "@agentos/ui";
 import { useApp } from "../stores/AppContext.js";
 
 export function OverviewPage(): React.JSX.Element {
-  const { bootstrap, providers, workspaces, loading, error, refreshAll, restartBackend, setRoute } =
-    useApp();
+  const {
+    client,
+    bootstrap,
+    providers,
+    workspaces,
+    loading,
+    error,
+    refreshAll,
+    restartBackend,
+    setRoute,
+    notify,
+  } = useApp();
+  const [recentTasks, setRecentTasks] = useState<TaskRecord[]>([]);
+  const [emergencyActive, setEmergencyActive] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!client || !bootstrap) return;
+    void Promise.all([client.listTasks(), client.getComputerUseCapabilities()])
+      .then(([tasks, caps]) => {
+        setRecentTasks(tasks.slice(0, 6));
+        setEmergencyActive(caps.emergency_stop_active);
+      })
+      .catch(() => {
+        // Handled cleanly if backend restarts.
+      });
+  }, [client, bootstrap]);
 
   if (loading && !bootstrap) {
     return <LoadingState label="Connecting to local AgentOS backend..." />;
@@ -33,6 +58,22 @@ export function OverviewPage(): React.JSX.Element {
   const readyProviders = providers.filter((p) => p.ready);
   const activeProvider = providers.find((p) => p.id === bootstrap?.settings.default_provider_id);
 
+  const handleToggleEmergencyStop = async () => {
+    if (!client) return;
+    try {
+      const res = await client.triggerEmergencyStop(!emergencyActive);
+      setEmergencyActive(res.emergency_stop_active);
+      notify(
+        res.emergency_stop_active
+          ? `Emergency stop activated (${res.cancelled_tasks} active task signal(s) halted).`
+          : "Emergency stop cleared. Operations may resume.",
+        res.emergency_stop_active ? "error" : "success",
+      );
+    } catch (err) {
+      notify(err instanceof Error ? err.message : String(err), "error");
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[var(--border-hairline)] pb-5">
@@ -45,15 +86,28 @@ export function OverviewPage(): React.JSX.Element {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
+          <Button
+            variant={emergencyActive ? "primary" : "danger"}
+            onClick={() => void handleToggleEmergencyStop()}
+          >
+            <ShieldAlert className="w-4 h-4" aria-hidden={true} />
+            {emergencyActive ? "Clear emergency stop" : "Emergency stop"}
+          </Button>
           <Button variant="primary" onClick={() => setRoute("assistant")}>
             <Play className="w-4 h-4" aria-hidden={true} />
             Open Assistant
           </Button>
-          <Button variant="secondary" onClick={() => setRoute("settings")}>
-            Configure Providers
-          </Button>
         </div>
       </div>
+
+      {emergencyActive && (
+        <div
+          role="alert"
+          className="rounded-[8px] border border-[var(--danger-border)] bg-[var(--danger-tint)] text-[var(--danger-ink)] px-4 py-3 text-[13px] font-medium"
+        >
+          Emergency stop is active. All non-read-only tool executions are blocked until cleared.
+        </div>
+      )}
 
       {/* Operational readiness ledger */}
       <section aria-labelledby="readiness-heading" className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -109,13 +163,51 @@ export function OverviewPage(): React.JSX.Element {
               {bootstrap?.keychain.persistent ? "OS Keychain active" : "Ephemeral session vault"}
             </p>
             <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
-              Terminal execution is {bootstrap?.settings.terminal_enabled ? "enabled (allowlisted)" : "disabled by default"}.
+              Terminal execution is{" "}
+              {bootstrap?.settings.terminal_enabled ? "enabled (allowlisted)" : "disabled by default"}.
             </p>
           </div>
           <Button variant="secondary" size="sm" onClick={() => setRoute("activity")}>
             Inspect audit log
           </Button>
         </div>
+      </section>
+
+      {/* Recent real tasks */}
+      <section aria-labelledby="recent-tasks-heading" className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <h2 id="recent-tasks-heading" className="text-[16px] font-semibold">
+            Recent Tasks
+          </h2>
+          <Button variant="ghost" size="sm" onClick={() => setRoute("tasks")}>
+            View all tasks
+          </Button>
+        </div>
+        {recentTasks.length === 0 ? (
+          <EmptyState
+            title="No tasks have been run yet"
+            description="Open the Assistant to submit your first natural-language instruction, or trigger a built-in template from Workflows."
+            actionLabel="Start first task"
+            onAction={() => setRoute("assistant")}
+          />
+        ) : (
+          <div className="rounded-[8px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)] divide-y divide-[var(--border-hairline)]">
+            {recentTasks.map((task) => (
+              <div
+                key={task.id}
+                className="px-4 py-3 flex flex-wrap items-center justify-between gap-2 text-[13px]"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium truncate m-0">{task.instruction}</p>
+                  <p className="font-mono text-[11px] text-[var(--ink-secondary)] mt-0.5 m-0">
+                    {task.id} | {task.steps.length} step(s) | {task.provider_id}
+                  </p>
+                </div>
+                <TaskStatusBadge status={task.status} />
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Runtime details */}
