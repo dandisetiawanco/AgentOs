@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+backend/.venv/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+
+# Build outputs
+dist/
+build/
+out/
+apps/desktop/dist/
+apps/desktop/src-tauri/target/
+packages/*/dist/
+*.tsbuildinfo
+
+# Test & coverage artifacts
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage/
+playwright-report/
+test-results/
+
+# Local runtime & database files
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+.agentos/
+logs/
+*.log
+
+# Environment & secrets (never commit credentials)
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.p12
+secrets.json
+
+# OS & editor artifacts
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo

@@ -1,0 +1,31 @@
+{
+  "name": "agentos-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AgentOS - Local-first open-source autonomous AI desktop agent",
+  "author": "Dandi Setiawan <dandisetiawan.co@gmail.com> (NGOPREK DIGITAL)",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@12.21.0",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "dev:desktop": "pnpm --filter @agentos/desktop dev",
+    "dev:tauri": "pnpm --filter @agentos/desktop tauri dev",
+    "build": "pnpm -r build",
+    "build:tauri": "pnpm --filter @agentos/desktop tauri build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "format": "prettier --write \"apps/desktop/src/**/*.{ts,tsx,css}\" \"packages/*/src/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"apps/desktop/src/**/*.{ts,tsx,css}\" \"packages/*/src/**/*.{ts,tsx}\"",
+    "backend:dev": "cd backend && uv run uvicorn agentos.api.app:create_app --factory --host 127.0.0.1 --port 47821",
+    "backend:test": "cd backend && uv run pytest",
+    "backend:lint": "cd backend && uv run ruff check agentos tests",
+    "backend:typecheck": "cd backend && uv run mypy agentos"
+  },
+  "devDependencies": {
+    "prettier": "3.5.3"
+  }
+}
