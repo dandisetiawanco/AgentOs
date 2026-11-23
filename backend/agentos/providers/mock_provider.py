@@ -245,9 +245,10 @@ class DeterministicMockProvider(BaseAIProvider):
                 "steps": steps,
             }
 
-        # Document / CSV / PDF / report
-        if any(
-            k in lower for k in ("pdf", "csv", "docx", "xlsx", "summarize", "report", "compare")
+        # Document / CSV / PDF / report (skip when instruction explicitly requests folder creation)
+        if not any(k in lower for k in ("create folder", "mkdir")) and (
+            any(k in lower for k in ("pdf", "csv", "docx", "xlsx", "summarize", "compare"))
+            or bool(re.search(r"\breport\b", lower))
         ):
             steps = []
             if workspace:
