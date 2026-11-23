@@ -44,6 +44,6 @@
 
 ## ADR-008: Monorepo Structure at Repository Root
 - Status: Accepted
-- Context: The workspace `/Users/dandisetiawan/Documents/AgentOs` was empty; placing the repository root directly in the workspace avoids an unnecessary extra nesting directory (`AgentOs/agentos`).
-- Decision: Initialize the Git repository directly at `/Users/dandisetiawan/Documents/AgentOs` following the planned directory structure (`apps/desktop`, `packages/shared`, `packages/ui`, `backend`, `tests`, `benchmarks`, `docs`, `scripts`, `assets`, `.github`).
+- Context: The project workspace root was empty; placing the repository root directly in the workspace avoids an unnecessary extra nesting directory.
+- Decision: Initialize the Git repository directly at the workspace root (`AgentOs/`) following the planned directory structure (`apps/desktop`, `packages/shared`, `packages/ui`, `backend`, `tests`, `benchmarks`, `docs`, `scripts`, `assets`, `.github`).
 - Consequences: Cleaner developer workflow and direct alignment with IDE workspace root.

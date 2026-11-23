@@ -8,7 +8,7 @@ Target Primary Machine: MacBook Pro 2019 (Intel Core i5-8279U, x86_64, 8 GB RAM,
 ## Phase 0: Environment Audit and Repository Setup
 - Audit OS, CPU architecture, RAM, disk space, Xcode, Node.js, pnpm, Python, uv, SQLite, Playwright cache, Git, and Rust availability.
 - Install Rust stable toolchain via `rustup` locally into `~/.cargo` and `~/.rustup` (user-authorized).
-- Initialize isolated Git repository in `/Users/dandisetiawan/Documents/AgentOs`.
+- Initialize isolated Git repository at the workspace root (`AgentOs/`).
 - Establish monorepo layout, `.gitignore`, `.env.example`, Apache 2.0 `LICENSE`, architecture decisions, implementation plan, build state, and validation report.
 
 ## Phase 1: Application Foundation

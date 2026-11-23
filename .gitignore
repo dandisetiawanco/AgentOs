@@ -13,6 +13,7 @@ __pycache__/
 dist/
 build/
 out/
+.vite/
 apps/desktop/dist/
 apps/desktop/src-tauri/target/
 packages/*/dist/

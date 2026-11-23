@@ -2,236 +2,248 @@
 
 **Intelligence that takes action.**
 
-A local-first, open-source autonomous AI desktop agent that turns natural-language instructions into controlled, observable, and verifiable computer actions.
+A local-first, open-source AI desktop assistant that plans, executes, and verifies authorized computer tasks.
 
-- Organization: **NGOPREK DIGITAL**
-- Author: **Dandi Setiawan**
-- License: **Apache License 2.0**
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![CI](https://github.com/dandisetiawanco/AgentOs/actions/workflows/ci.yml/badge.svg)](https://github.com/dandisetiawanco/AgentOs/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/badge/Release-v0.1.0--prerelease-informational.svg)](CHANGELOG.md)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB.svg)](backend/pyproject.toml)
+[![Rust 1.100+](https://img.shields.io/badge/Rust-stable-000000.svg)](apps/desktop/src-tauri/Cargo.toml)
+[![Tauri 2](https://img.shields.io/badge/Tauri-2-24C8DB.svg)](apps/desktop/src-tauri/tauri.conf.json)
 
 ---
 
-## Overview
+## Project Overview
 
-AgentOS connects natural-language reasoning to deterministic local tools inside explicit human-controlled permission boundaries. Every request passes through structured intent analysis, task planning, risk classification, permission enforcement, execution previews, deterministic verification, and secret-redacted audit logging.
+Ordinary AI chatbots generate text and leave every manual step to the user. Autonomous scripting tools can execute actions, yet often lack structured permissions, previews, audit trails, or verification.
 
-AgentOS runs locally without requiring a paid subscription to open or evaluate. Users bring their own API keys (stored in OS Keychain) or connect local models through Ollama or an OpenAI-compatible server. An explicitly labeled Offline Deterministic Test Mode is included for automated tests and offline walkthroughs.
+**AgentOS** bridges that gap locally on your machine:
 
-## Implemented Capabilities
+1. **Intent & Planning**: Converts natural-language instructions into structured, typed execution plans using LangGraph.
+2. **Default-Deny Permissions**: Classifies risk (`READ_ONLY`, `LOW`, `MEDIUM`, `HIGH`, `BLOCKED`) and enforces canonical workspace boundaries deterministically in Python before any tool runs.
+3. **Human-in-the-Loop Approval**: Pauses mutating or sensitive actions in `awaiting_approval`, shows the exact tool and arguments in a native modal preview, and runs only after explicit user consent.
+4. **Deterministic Verification & Rollback**: Verifies actual filesystem and document outcomes after execution, records step-level audit logs in local SQLite, and supports one-click file rollback for recorded operations.
 
-- **Desktop Application (Tauri 2 + Rust + React + TypeScript + Tailwind CSS)**: Native macOS WKWebView shell with strict Content Security Policy, least-privilege capabilities, Light/Dark/System themes, keyboard navigation, and 8 functional operational views (Overview, Assistant, Tasks, Workflows, Tools, Memory, Activity, Settings).
-- **Authenticated Local Backend Lifecycle**: Rust desktop bridge selects a free `127.0.0.1` loopback port, generates a 256-bit random session token passed over `Authorization: Bearer` headers, probes `/api/v1/health`, and shuts down the Python backend cleanly with `SIGTERM` on exit.
-- **Provider-Independent AI Abstraction**: Adapters for Google Gemini API, OpenAI API, Anthropic API, Ollama local models, OpenAI-compatible endpoints, and Offline Deterministic Test Mode, with model discovery, connection testing, timeouts, bounded exponential backoff, context-window trimming, token tracking, and cost estimation where published pricing exists.
-- **LangGraph Agent Core & 10-State Persistence**: Typed states (`created`, `planning`, `awaiting_approval`, `approved`, `running`, `paused`, `verifying`, `completed`, `failed`, `cancelled`) persisted in SQLite (WAL mode + Alembic migrations), per-task execution budgets, duplicate side-effect prevention, safe recovery for transient non-mutating failures, cancellation, rollback, and mandatory result verification.
-- **24 Strongly Typed Built-in Tools**:
-  - **File Intelligence**: list, search, read, metadata/SHA-256, duplicate detection, folder organization proposals, create folder, rename, move, copy, and rollback restoration.
-  - **Document Intelligence**: read PDF, DOCX, TXT, Markdown, CSV, XLSX; compare documents; generate Markdown, PDF, DOCX, CSV, and XLSX reports with reopen-parse verification.
-  - **Browser Intelligence**: isolated Playwright contexts for webpage extraction, bounded screenshots, approved form filling, and Markdown/JSON export (never bypasses CAPTCHA or authentication).
-  - **System Intelligence**: read-only OS/CPU/RAM/disk diagnostics, running processes, large workspace file discovery, and approved macOS application launching.
-  - **Terminal Intelligence**: disabled by default; structured `exec` argument lists without shell interpolation, command allowlist, permanent destructive blocklist, working-directory bounds, output caps, timeouts, and sanitized environment variables.
-  - **Computer Use (macOS Intel Verified)**: capability detection for macOS Accessibility and Screen Recording permissions, visible non-sensitive window inspection, separately authorized single-frame screenshots, and a global Emergency Stop control.
-- **Local Memory, Workflows, and MCP**: Searchable SQLite memory with retention policies, export, and disable toggle; built-in and custom workflows with manual run and in-app interval scheduling (active while AgentOS is open); optional Model Context Protocol integration via the official Python `mcp` SDK with default-untrusted explicit tool allowlisting.
+**Intended users**: Developers, technical operators, researchers, and privacy-conscious desktop users who want observable local AI automation with explicit human oversight and bring-your-own AI credentials.
 
-## Real Application Screenshots
+## Features
 
-Captured from the live running production bundle paired with the local FastAPI backend during automated Playwright end-to-end verification:
+### Implemented in v0.1.0
+- **Desktop Application (`apps/desktop`)**: Tauri 2 + Rust desktop bridge and React 19 + TypeScript (strict) + Tailwind CSS 4 interface with 8 operational views (Overview, Assistant, Tasks, Workflows, Tools, Memory, Activity, Settings) and Light, Dark, and System themes.
+- **Authenticated Local Backend (`backend/agentos`)**: FastAPI server bound strictly to `127.0.0.1` on an ephemeral port with a 256-bit `getrandom` bearer session token, OS Keychain credential storage (`keyring`), secret redaction, SQLite WAL persistence with Alembic migrations, and parent-PID orphan prevention.
+- **Multi-Provider AI Abstraction**: Google Gemini API, OpenAI API, Anthropic API, Ollama local models, custom OpenAI-compatible endpoints, and an explicitly labeled Offline Deterministic Test Mode (`mock-deterministic-v1`). Includes model discovery, connection checks, bounded retries, timeouts, context trimming, and token/cost tracking where published pricing exists.
+- **LangGraph Agent Orchestration**: Typed 10-state machine (`created`, `planning`, `awaiting_approval`, `approved`, `running`, `paused`, `verifying`, `completed`, `failed`, `cancelled`), per-task execution budgets, duplicate side-effect prevention, transient read-only recovery, cancellation, and verification.
+- **File Intelligence (10 tools)**: Authorized directory listing, search, file reading, metadata/SHA-256 hashing, duplicate detection, folder organization proposals, folder creation, rename, move, copy, change preview, and rollback restoration.
+- **Document Intelligence (3 tools)**: Read PDF, DOCX, TXT, Markdown, CSV, and XLSX; compare documents; generate Markdown, PDF, DOCX, CSV, and XLSX reports with reopen-parse validation.
+- **Browser Intelligence (4 tools)**: Isolated Playwright Chromium contexts for public webpage extraction, bounded screenshots, approved form filling, and Markdown/JSON export with SSRF/private-IP guards.
+- **System Diagnostics (4 tools)**: Read-only OS/CPU/RAM/disk health inspection, running process summary, large workspace file scan, and explicitly approved macOS application launching.
+- **Persistent Task History, Memory & Workflows**: SQLite task timelines, searchable local memory with retention controls and export, and reusable workflow templates with manual runs and in-app interval scheduling (active while AgentOS is open).
 
-### Overview (Light Theme)
-![AgentOS Overview in Light Mode](assets/screenshots/overview-light.png)
+### Experimental / Opt-In Capabilities (Disabled by Default)
+- **Restricted Terminal Tool (`terminal.run`)**: Disabled until explicitly enabled in Settings. Uses `create_subprocess_exec` with structured argument arrays (no shell interpolation), command allowlists, permanent destructive blocklists, cwd bounds, output limits, timeouts, and sanitized environments.
+- **MCP Integration**: Official Python `mcp` SDK stdio server registry in Settings. External MCP servers are untrusted by default, run with stripped environment variables, and require explicit per-tool allowlisting.
+- **macOS Computer Use (`desktop.observe`, `desktop.act`)**: Disabled by default. Detects macOS Accessibility and Screen Recording permissions, inspects non-sensitive visible windows, supports separately authorized single-frame screenshots, and provides a global Emergency Stop switch.
 
-### Explicit Permission Approval Gate (Native Modal Dialog)
-![AgentOS Permission Approval Dialog](assets/screenshots/approval-dialog.png)
+### Planned Roadmap Items
+- Standalone bundled Python sidecar installers (`.dmg`, Windows MSI, Linux AppImage) that require no local Python or `uv` installation (`v0.2.0`).
+- Physical hardware runtime verification on Apple Silicon (`arm64`), Windows 11, and Ubuntu Linux, plus Apple Developer ID code signing and notarization (`v0.2.0`).
+- Live token streaming in the Assistant view for remote LLM providers (`v0.2.0`).
+- Optional OS-level background scheduling (`launchd`) with explicit opt-in (`v0.3.0`).
 
-### Assistant Plan, Verification & Rollback (Dark Theme)
-![AgentOS Assistant in Dark Mode](assets/screenshots/assistant-dark.png)
+See [ROADMAP.md](ROADMAP.md) for the full release plan.
 
-### Persistent Task Timeline Inspector
-![AgentOS Tasks Inspector](assets/screenshots/tasks-inspector.png)
+## Screenshots
 
-### AI Providers & Keychain Settings
-![AgentOS Settings and Providers](assets/screenshots/settings-providers.png)
+Captured from the production Vite desktop bundle connected to the live local FastAPI backend during automated Playwright end-to-end verification ([tests/e2e/test_full_e2e.py](tests/e2e/test_full_e2e.py)):
+
+| Overview (Light Theme) | Explicit Permission Approval Gate |
+| --- | --- |
+| ![AgentOS Overview in Light Mode](assets/screenshots/overview-light.png) | ![AgentOS Permission Approval Dialog](assets/screenshots/approval-dialog.png) |
+
+| Assistant Plan, Verification & Rollback (Dark Theme) | Persistent Task Timeline Inspector |
+| --- | --- |
+| ![AgentOS Assistant in Dark Mode](assets/screenshots/assistant-dark.png) | ![AgentOS Tasks Inspector](assets/screenshots/tasks-inspector.png) |
+
+| AI Providers & Keychain Settings |
+| --- |
+| ![AgentOS Settings and Providers](assets/screenshots/settings-providers.png) |
 
 ## Architecture
 
 ```mermaid
 flowchart TD
-    UI["Desktop UI (React 19 + TypeScript + Tailwind)"]
-    Bridge["Tauri 2 Rust Bridge (Loopback Port + 256-bit Bearer Token + Lifecycle)"]
-    API["FastAPI Local Server (127.0.0.1 + Bearer Auth + Redaction)"]
-    Orch["LangGraph Orchestrator (Intent -> Context -> Plan -> Permissions -> Execute -> Verify)"]
+    UI["Desktop UI (React 19 + TypeScript + Tailwind CSS)"]
+    Tauri["Tauri 2 / Rust Desktop Bridge (Port Allocation + 256-bit Token + Watchdog)"]
+    LocalAPI["Authenticated Local API (127.0.0.1 + Authorization: Bearer + Strict CORS)"]
+    FastAPI["FastAPI Backend (37 OpenAPI Endpoints + SSE Stream + Secret Redactor)"]
+    Core["LangGraph Agent Core (Intent, Context, Planner, Recovery, Verification)"]
     Perm["Permission Engine (Default-Deny, Canonical Paths, Symlink & Allowlist Guards)"]
-    Tools["Deterministic Tool Registry (File, Document, Browser, System, Terminal, Computer Use)"]
-    Prov["AI Provider Abstraction (Gemini, OpenAI, Anthropic, Ollama, OpenAI-Compat, Mock)"]
-    MCP["Optional MCP Client (Official mcp SDK, Untrusted by Default)"]
-    DB["SQLite (WAL Mode + Alembic Migrations)"]
-    KC["OS Credential Storage (macOS Keychain via keyring)"]
+    Tools["Tool Registry (24 Deterministic Tools + Optional MCP SDK)"]
+    Providers["AI Providers (Gemini, OpenAI, Anthropic, Ollama, OpenAI-Compat, Offline Mock)"]
+    SQLite["SQLite Persistence (WAL Mode + SQLAlchemy 2 + Alembic Migrations + OS Keychain)"]
 
-    UI <-->|"Tauri IPC + Authenticated HTTP / SSE"| Bridge
-    Bridge <-->|"Spawn + Health Probe + SIGTERM"| API
-    UI <-->|"Authorization: Bearer"| API
-    API --> Orch
-    Orch --> Prov
-    Orch --> Perm
+    UI --> Tauri
+    Tauri --> LocalAPI
+    LocalAPI --> FastAPI
+    FastAPI --> Core
+    Core --> Perm
     Perm --> Tools
-    Orch --> DB
-    API --> MCP
-    Prov --> KC
+    Core --> Providers
+    Core --> SQLite
 ```
 
-## System Requirements
-
-- **Primary Verified Machine**: MacBook Pro 2019, Intel Core i5-8279U (`x86_64`), 8 GB RAM, macOS 15.8.3
-- **Development Toolchains**:
-  - Node.js `>= 22.0.0` and `pnpm >= 10.0.0`
-  - Python `3.12` (managed cleanly via `uv`)
-  - Rust stable (`rustc`, `cargo`, `rustfmt`, `clippy`) for Tauri 2
-  - Playwright Chromium browser binary for Browser Intelligence tools
-
-No dedicated GPU, CUDA, or Apple Silicon hardware is required.
+Detailed architecture and threat documentation: [docs/architecture/OVERVIEW.md](docs/architecture/OVERVIEW.md), [docs/ARCHITECTURE_DECISIONS.md](docs/ARCHITECTURE_DECISIONS.md), and [docs/api/openapi.json](docs/api/openapi.json).
 
 ## Installation
 
+### Prerequisites
+- **Node.js**: `>= 22.0.0`
+- **pnpm**: `12.x` (managed via `packageManager` field or `corepack enable`)
+- **Python**: `3.12` (recommended via [`uv`](https://docs.astral.sh/uv/))
+- **Rust**: Stable toolchain (`rustc`, `cargo`, `rustfmt`, `clippy`) for Tauri 2
+- **Platform dependencies**:
+  - **macOS**: Xcode Command Line Tools (`xcode-select --install`)
+  - **Linux (Ubuntu/Debian, build verification)**: `libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev patchelf`
+  - **Windows (build verification)**: Microsoft C++ Build Tools and WebView2 Runtime
+
+No dedicated GPU, CUDA, or Apple Silicon hardware is required.
+
+### Source Installation
+
 ```bash
 # 1. Clone the repository
-git clone https://github.com/dandisetiawan-co/agentos.git
-cd agentos
+git clone https://github.com/dandisetiawanco/AgentOs.git
+cd AgentOs
 
 # 2. Install frontend monorepo dependencies
-pnpm install
+pnpm install --frozen-lockfile
 
 # 3. Install isolated Python 3.12 backend dependencies
-uv sync --directory backend --python 3.12
+uv sync --directory backend --python 3.12 --frozen
 
-# 4. Install Playwright Chromium if not already cached
+# 4. Install Playwright Chromium for Browser Intelligence tools (if not cached)
 cd backend && uv run playwright install chromium && cd ..
 ```
 
-## Quick Start
+### Running Locally
 
-### Run in Desktop Development Mode (Tauri 2 + Local Backend)
-
-Ensure `~/.cargo/bin` is on your `PATH`, then launch Tauri:
+**Desktop Mode (Tauri 2 + Automatic Local Backend):**
 
 ```bash
 export PATH="$HOME/.cargo/bin:$PATH"
 pnpm dev:tauri
 ```
 
-The Rust bridge automatically selects a free localhost port, generates an ephemeral session token, boots `backend/.venv/bin/python -m agentos`, waits for `/api/v1/health`, and shuts the backend down cleanly when you close the window.
+The Rust desktop bridge allocates a free localhost port, creates a 256-bit random session token, spawns `backend/.venv/bin/python -m agentos`, waits for `/api/v1/health`, and terminates the backend cleanly on exit.
 
-### Run Backend and Frontend Separately (Browser Dev Mode)
+**Browser Dev Mode (Separate Backend + Vite Dev Server):**
 
 ```bash
-# Terminal 1: start authenticated local backend
+# Terminal 1: Start local authenticated backend
 export AGENTOS_SESSION_TOKEN="dev-local-token-change-me"
 pnpm backend:dev
 
-# Terminal 2: start Vite dev server
+# Terminal 2: Start Vite frontend
 VITE_AGENTOS_API_URL="http://127.0.0.1:47821" \
 VITE_AGENTOS_SESSION_TOKEN="dev-local-token-change-me" \
 pnpm dev:desktop
 ```
 
-## Supported AI Providers
-
-| Provider | Credentials | Local / Cloud | Model Discovery |
-| --- | --- | --- | --- |
-| Google Gemini API | User API key (OS Keychain) | Cloud | Live `/models` + curated defaults |
-| OpenAI API | User API key (OS Keychain) | Cloud | Live `/models` + curated defaults |
-| Anthropic API | User API key (OS Keychain) | Cloud | Live `/models` + curated defaults |
-| Ollama | None required | Local (`127.0.0.1:11434`) | Live `/api/tags` |
-| OpenAI-Compatible | Optional key (OS Keychain) | Local or self-hosted | Live `/models` |
-| Offline Deterministic Test Mode | None required | Local (zero network) | Deterministic planner (`mock-deterministic-v1`) |
-
 ## Configuration
 
-Copy `.env.example` only for headless CLI testing. Desktop users configure providers, API keys, workspaces, execution budgets, memory retention, terminal allowlists, MCP servers, and appearance inside **Settings**.
+AgentOS follows a **Bring Your Own API Key (BYOK)** model. No developer API keys are bundled, and opening the application never requires a paid account.
 
-Data directory defaults to `~/Library/Application Support/AgentOS` on macOS (override with `AGENTOS_DATA_DIR`).
+| Provider | Credentials | Endpoint / Mode | Model Discovery |
+| --- | --- | --- | --- |
+| **Google Gemini API** | User API key (OS Keychain) | Cloud | Live `/models` + defaults |
+| **OpenAI API** | User API key (OS Keychain) | Cloud | Live `/models` + defaults |
+| **Anthropic API** | User API key (OS Keychain) | Cloud | Live `/models` + defaults |
+| **Ollama** | None required | Local (`http://127.0.0.1:11434`) | Live `/api/tags` |
+| **OpenAI-Compatible** | Optional key (OS Keychain) | Custom base URL | Live `/models` |
+| **Offline Deterministic Test Mode** | None required | Local (zero network) | `mock-deterministic-v1` |
 
-## Usage Examples
+> **Important note on Google Gemini**: Consumer Gemini subscriptions (such as Gemini Advanced / Google AI Pro) do not automatically grant Gemini API credits or API keys. API usage requires an API key created in Google AI Studio or Google Cloud with appropriate API quota/billing enabled.
 
-1. **Authorize a workspace**: Open **Settings -> Authorized Workspaces**, select a folder (system and credential folders such as `/etc`, `/System`, and `~/.ssh` are permanently rejected), and click **Authorize**.
-2. **Audit workspace duplicates**: Open **Assistant**, pick your authorized workspace, and run: `Organize workspace files and detect duplicate files`. Read-only tools execute and verify automatically.
-3. **Mutate with preview and rollback**: Run `Create folder deliverables`. AgentOS pauses in `awaiting_approval`, displays the exact tool and canonical path inside a native modal dialog, executes only after explicit approval, verifies the directory on disk, and offers one-click **Restore files**.
-4. **Generate verified reports**: Run `Generate a Markdown report for metrics.csv` to write and reopen-validate the generated document.
+All desktop settings (providers, workspaces, budgets, memory retention, terminal allowlists, MCP servers, appearance) are configured inside **Settings**. Application data is stored locally under `~/Library/Application Support/AgentOS` on macOS (override with `AGENTOS_DATA_DIR`). See [.env.example](.env.example) for CLI/development environment variables and [docs/user-guide/USER_GUIDE.md](docs/user-guide/USER_GUIDE.md) for walkthroughs.
 
-## Security & Privacy Model
+## Security
 
-- **Local-first by default**: All SQLite task records, audit logs, and memory entries remain on your machine.
-- **OS Keychain secrets**: Raw API keys are stored via `keyring` (macOS Keychain) and scrubbed from logs, error responses, and diagnostic exports by `SecretRedactor`.
-- **Execution-boundary enforcement**: Untrusted content from files, webpages, or command output can never modify permissions, bypass allowlists, or trigger unapproved mutations.
-- **No false claims**: No software is impossible to compromise. See [SECURITY.md](SECURITY.md) and [docs/security/THREAT_MODEL.md](docs/security/THREAT_MODEL.md) for boundaries and MCP risks.
+- **Local-First Operation**: SQLite task state, memory records, and audit logs remain strictly on the local host.
+- **Workspace Authorization**: File and document tools are default-deny and only access explicitly authorized directories. System paths (`/System`, `/etc`, `/usr`, `/Library`, `/`, home root), credential paths (`~/.ssh`, `~/.aws`, `~/Library/Keychains`, `.env`), directory traversal (`../`), and escaping symlinks are blocked.
+- **Execution-Boundary Prompt Injection Defense**: Untrusted external content from files, webpages, or command output is isolated as data and cannot alter permissions, bypass allowlists, or skip approval gates.
+- **Credential Storage**: Raw API keys are saved in macOS Keychain via `keyring` and scrubbed from logs, error messages, and diagnostic exports by `SecretRedactor`.
+- **User Approval & Emergency Stop**: Every mutating or high-risk step pauses for native modal confirmation; an Emergency Stop control halts active tasks and blocks non-read-only tools immediately.
+- **Restricted Tools**: Terminal execution, Computer Use, and external MCP servers are disabled or untrusted by default.
+
+See [SECURITY.md](SECURITY.md) and [docs/security/THREAT_MODEL.md](docs/security/THREAT_MODEL.md) for the complete threat model and vulnerability reporting process.
 
 ## Testing
 
 ```bash
-# Backend static checks + full unit, integration, security, and Playwright E2E suites
+# Python lint, formatting, static typecheck, and vulnerability scan
 cd backend
-uv run ruff check agentos tests
-uv run ruff format --check agentos tests
+uv run ruff check agentos tests ../tests ../benchmarks ../scripts
+uv run ruff format --check agentos tests ../tests ../benchmarks ../scripts
 uv run mypy agentos
-uv run pytest -c pyproject.toml tests ../tests/integration ../tests/security ../tests/e2e -v
 uv run pip-audit --desc=off
 
-# Frontend strict typecheck, ESLint, Vitest, and Vite production build
-pnpm typecheck && pnpm lint && pnpm test && pnpm build
+# Python unit and security suites (18 tests)
+uv run pytest -c pyproject.toml tests ../tests/security -v
 
-# Rust desktop bridge formatting, Clippy, and unit tests
+# Integration and full-stack Playwright E2E suites (3 tests, requires `pnpm build` first)
+uv run pytest -c pyproject.toml ../tests/integration ../tests/e2e -v
+cd ..
+
+# Frontend formatting, typecheck, ESLint, Vitest, and production build
+pnpm format:check && pnpm typecheck && pnpm lint && pnpm test && pnpm build
+
+# Rust desktop bridge formatting, Clippy, and unit tests (3 tests)
 cargo fmt --manifest-path apps/desktop/src-tauri/Cargo.toml -- --check
 cargo clippy --manifest-path apps/desktop/src-tauri/Cargo.toml -- -D warnings
 cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml
 ```
 
-## Measured Benchmarks & AI Quality Evaluations
+### Measured Local Benchmarks (macOS 15.8.3 Intel `x86_64`, 8 GB RAM)
 
-All measurements below were actually executed on **MacBook Pro 2019, Intel Core i5-8279U (`x86_64`), 8 GB RAM, macOS 15.8.3, Python 3.12.16**.
+Recorded via `benchmarks/perf_benchmark.py` and `benchmarks/ai_eval.py` on MacBook Pro 2019 (Intel Core i5-8279U, Python 3.12.16):
+- **Backend cold startup**: `4039.6 ms` | **Idle RSS memory**: `145.86 MB` | **HTTP task overhead**: `315.0 ms`
+- **`file.list` (40 files)**: `11.66 ms` | **`file.duplicates` SHA-256 (40 files)**: `149.18 ms` | **SQLite avg query (100 reads)**: `2.095 ms`
+- **Document generate + reopen parse**: PDF `19.69 ms`, XLSX `42.09 ms`, DOCX `108.61 ms`
+- **Offline Deterministic AI Eval (8 scenarios)**: 8/8 intent, tool selection, and plan validity; 6/6 completion and verification; 2/2 unauthorized blocking; 1/1 transient recovery (see [benchmarks/results/EVAL_REPORT.md](benchmarks/results/EVAL_REPORT.md)).
 
-### Performance Benchmarks (`benchmarks/perf_benchmark.py`)
+## Supported Platforms
 
-| Measurement | Actual Result |
-| --- | --- |
-| Backend cold startup (subprocess to `/api/v1/health` 200 OK) | `4039.6 ms` |
-| Backend idle RSS memory | `145.86 MB` |
-| End-to-end HTTP task overhead (plan + execute + verify) | `315.0 ms` |
-| `file.list` (40 workspace files) | `11.66 ms` |
-| `file.duplicates` (40 files SHA-256) | `149.18 ms` |
-| `system.health` (OS/CPU/RAM/disk) | `151.77 ms` |
-| PDF generate + reopen parse | `19.69 ms` |
-| DOCX generate + reopen parse | `108.61 ms` |
-| XLSX generate + reopen parse | `42.09 ms` |
-| SQLite indexed read average (100 queries) | `2.095 ms` |
-
-### AI Evaluation Suite (`benchmarks/ai_eval.py`, Offline Deterministic Mode, 8 Scenarios)
-
-| Metric | Measured Score |
-| --- | --- |
-| Intent recognition accuracy | `100%` (8/8) |
-| Correct tool selection rate | `100%` (8/8) |
-| Plan validity rate | `100%` (8/8) |
-| Task completion rate (allowed scenarios) | `100%` (6/6) |
-| Verification accuracy | `100%` (6/6) |
-| Unauthorized action rejection rate | `100%` (2/2) |
-| Transient failure recovery rate | `100%` (1/1) |
-| Average tool calls / tokens / latency | `1.62` calls / `1834.8` tokens / `404.6 ms` |
-
-*Note: Offline evaluation validates deterministic orchestration, permission enforcement, tool accuracy, and verification without external API variability. Live external provider evaluations depend on user-supplied API credentials and remote model behavior.*
+| Platform | Verification Status | Notes |
+| --- | --- | --- |
+| **macOS 15.8.3 Intel (`x86_64`)** | **Native Runtime Verified** | Full unit, security, integration, Playwright E2E, `tauri build`, and live `AgentOS.app` startup/shutdown verified on physical Intel MacBook Pro. |
+| **macOS Apple Silicon (`arm64`)** | **CI Build Configured** | Configured in `.github/workflows/ci.yml`; runtime behavior not yet verified on physical `arm64` hardware. |
+| **Windows 11 (`x86_64`)** | **CI Build Configured** | Compilation configured in CI (`--no-bundle`); Windows runtime behavior is untested. |
+| **Linux (`x86_64`, Ubuntu)** | **CI Build Configured** | Compilation configured in CI (`--no-bundle`); Linux runtime behavior is untested. |
 
 ## Known Limitations
 
-- **Runtime verification scope**: Verified natively on **macOS Intel (`x86_64`, macOS 15.8.3)**. Apple Silicon (`arm64`), Windows, and Linux build configurations are included in CI, but runtime behavior on those platforms has not been tested on physical hardware yet.
-- **Bundled Python runtime**: The initial `v0.1.0` macOS `.app` bundle expects the local repository `.venv` or an `AGENTOS_BACKEND_BIN` sidecar binary. Standalone bundled Python packaging for zero-setup end-user installers is scheduled for `v0.2.0`.
-- **Workflow scheduling**: Scheduled workflows execute while AgentOS is running. Closed-app background scheduling (`launchd`) is not enabled in `v0.1.0`.
-- **macOS signing & notarization**: Local production builds are unsigned; public macOS distribution requires Apple Developer ID signing and notarization (`APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`).
+- **Source-coupled backend runtime in `v0.1.0`**: The built macOS `AgentOS.app` locates `backend/.venv` inside the repository checkout (or an explicit `AGENTOS_BACKEND_BIN`). It is **not** a standalone zero-dependency end-user installer yet; install from source until standalone sidecar bundling ships in `v0.2.0`.
+- **Unsigned macOS bundles**: Local macOS builds are ad-hoc signed only; Apple Developer ID signing and notarization are not configured yet.
+- **Cross-platform runtime coverage**: Only macOS Intel (`x86_64`) has been runtime-tested on real hardware.
+- **In-app workflow scheduler**: Scheduled workflows execute while AgentOS is open; OS-level background scheduling (`launchd`) is planned for `v0.3.0`.
+- **Offline eval scope**: Published AI evaluation scores measure deterministic local orchestration (`mock-deterministic-v1`); remote LLM accuracy depends on the model and provider configured by the user.
 
-## Roadmap & Contributing
+## Contributing & Documentation
 
-- Roadmap: [ROADMAP.md](ROADMAP.md)
-- Changelog: [CHANGELOG.md](CHANGELOG.md)
-- Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Contributing Guidelines: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Developer Guide: [docs/development/DEVELOPMENT.md](docs/development/DEVELOPMENT.md)
+- User Guide: [docs/user-guide/USER_GUIDE.md](docs/user-guide/USER_GUIDE.md)
+- Validation Report: [docs/VALIDATION_REPORT.md](docs/VALIDATION_REPORT.md)
 - Code of Conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- Changelog: [CHANGELOG.md](CHANGELOG.md)
 - Third-Party Notices: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
 
-## License & Attribution
+## License
 
-Copyright 2026 **NGOPREK DIGITAL** (**Dandi Setiawan**).
-Licensed under the [Apache License, Version 2.0](LICENSE).
+AgentOS is licensed under the [Apache License 2.0](LICENSE).
+
+## Author
+
+- **Author**: Dandi Setiawan
+- **Organization**: NGOPREK DIGITAL
+- **Website**: https://www.ngoprekdigital.site/
