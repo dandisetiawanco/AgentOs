@@ -5,10 +5,12 @@ import {
   Button,
   EmptyState,
   ErrorState,
+  GlassPanel,
   LoadingState,
-  RiskBadge,
+  SectionHeader,
   TaskStatusBadge,
 } from "@agentos/ui";
+import { TaskTimeline } from "../components/TaskTimeline.js";
 import { useApp } from "../stores/AppContext.js";
 
 const STATUS_FILTERS: Array<{ value: string; label: string }> = [
@@ -97,38 +99,39 @@ export function TasksPage(): React.JSX.Element {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-hairline)] pb-4">
-        <div>
-          <h1 className="text-[22px] font-semibold tracking-tight">Tasks</h1>
-          <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
-            Persistent execution ledger stored in local SQLite. Inspect tool invocations,
-            permissions, and verification evidence.
-          </p>
-        </div>
-        <Button variant="secondary" size="sm" onClick={() => void loadTasks()}>
-          <RefreshCw className="w-3.5 h-3.5" aria-hidden={true} />
-          Refresh
-        </Button>
-      </div>
+      <SectionHeader
+        as="h1"
+        title="Tasks"
+        description="Persistent execution ledger stored in local SQLite. Inspect tool invocations, permissions, progress, and verification evidence."
+        action={
+          <Button variant="secondary" size="sm" onClick={() => void loadTasks()}>
+            <RefreshCw className="w-3.5 h-3.5" aria-hidden={true} />
+            Refresh
+          </Button>
+        }
+      />
 
-      {/* Filter bar */}
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Filter tasks by status">
-        {STATUS_FILTERS.map((f) => (
-          <button
-            key={f.value || "all"}
-            type="button"
-            aria-pressed={statusFilter === f.value}
-            onClick={() => setStatusFilter(f.value)}
-            className={[
-              "px-3 py-1.5 rounded-[6px] text-[13px] border transition-colors",
-              statusFilter === f.value
-                ? "bg-[var(--accent-fill)] text-white border-transparent font-medium"
-                : "bg-[var(--surface-elevated)] text-[var(--ink-primary)] border-[var(--border-control)] hover:bg-[var(--surface-recessed)]",
-            ].join(" ")}
-          >
-            {f.label}
-          </button>
-        ))}
+      {/* Segmented status filter bar */}
+      <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter tasks by status">
+        {STATUS_FILTERS.map((f) => {
+          const active = statusFilter === f.value;
+          return (
+            <button
+              key={f.value || "all"}
+              type="button"
+              aria-pressed={active}
+              onClick={() => setStatusFilter(f.value)}
+              className={[
+                "px-3 py-1.5 rounded-full text-[12.5px] border transition-colors duration-150",
+                active
+                  ? "bg-[var(--accent-fill)] text-white border-transparent font-medium"
+                  : "bg-[var(--glass-panel)] text-[var(--ink-secondary)] border-[var(--border-hairline)] hover:text-[var(--ink-primary)] hover:border-[var(--border-control)]",
+              ].join(" ")}
+            >
+              {f.label}
+            </button>
+          );
+        })}
       </div>
 
       {loading && <LoadingState label="Loading task history..." />}
@@ -149,16 +152,23 @@ export function TasksPage(): React.JSX.Element {
           <div className="lg:col-span-5 flex flex-col gap-2">
             {tasks.map((task) => {
               const active = task.id === selected?.id;
+              const isFailed = task.status === "failed";
+              const totalSteps = task.steps.length;
+              const completedSteps = task.steps.filter((s) => s.status === "completed").length;
+              const pct = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+
               return (
                 <button
                   key={task.id}
                   type="button"
                   onClick={() => setSelectedId(task.id)}
                   className={[
-                    "text-left rounded-[8px] border p-3.5 transition-colors",
+                    "text-left rounded-[12px] border p-3.5 transition-[border-color,background-color] duration-150",
                     active
-                      ? "bg-[var(--surface-elevated)] border-[var(--accent)]"
-                      : "bg-[var(--surface-elevated)] border-[var(--border-hairline)] hover:border-[var(--border-control)]",
+                      ? "bg-[var(--surface-elevated)] border-[var(--accent)] shadow-[var(--shadow-sm)]"
+                      : isFailed
+                        ? "bg-[var(--danger-tint)]/35 border-[var(--danger-border)] hover:bg-[var(--danger-tint)]/50"
+                        : "glass-panel hover:border-[var(--border-control)]",
                   ].join(" ")}
                 >
                   <div className="flex items-center justify-between gap-2">
@@ -167,30 +177,52 @@ export function TasksPage(): React.JSX.Element {
                     </span>
                     <TaskStatusBadge status={task.status as TaskStatus} />
                   </div>
-                  <p className="text-[14px] font-medium mt-1.5 line-clamp-2">{task.instruction}</p>
-                  <p className="text-[12px] text-[var(--ink-secondary)] mt-1 font-mono">
-                    {task.steps.length} step(s) | {task.provider_id}
+                  <p className="text-[13.5px] font-semibold text-[var(--ink-primary)] mt-1.5 mb-0 line-clamp-2">
+                    {task.instruction}
                   </p>
+                  <div className="mt-2.5 flex items-center justify-between gap-3">
+                    <span className="text-[11.5px] text-[var(--ink-secondary)] font-mono">
+                      {completedSteps}/{totalSteps} step(s) · {task.provider_id}
+                    </span>
+                    <div
+                      className="w-20 h-1.5 rounded-full bg-[var(--surface-recessed)] overflow-hidden shrink-0"
+                      aria-hidden="true"
+                    >
+                      <div
+                        className={[
+                          "h-full rounded-full transition-[width] duration-200",
+                          isFailed
+                            ? "bg-[var(--danger-ink)]"
+                            : task.status === "completed"
+                              ? "bg-[var(--success-ink)]"
+                              : "bg-[var(--accent)]",
+                        ].join(" ")}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
                 </button>
               );
             })}
           </div>
 
-          {/* Detail inspector */}
+          {/* Task detail inspector */}
           <div className="lg:col-span-7">
             {selected && (
-              <div className="rounded-[8px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)] p-5 flex flex-col gap-4">
-                <div className="flex flex-wrap items-start justify-between gap-2 border-b border-[var(--border-hairline)] pb-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-[12px] text-[var(--ink-secondary)]">
+              <GlassPanel variant="frosted" padding="md" className="flex flex-col gap-4">
+                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--border-hairline)] pb-3.5">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-[11.5px] text-[var(--ink-secondary)]">
                         {selected.id}
                       </span>
                       <TaskStatusBadge status={selected.status} />
                     </div>
-                    <h2 className="text-[16px] font-semibold mt-1">{selected.instruction}</h2>
+                    <h2 className="text-[16px] font-semibold mt-1.5 mb-0 text-[var(--ink-primary)]">
+                      {selected.instruction}
+                    </h2>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {selected.status === "awaiting_approval" && (
                       <>
                         <Button
@@ -250,44 +282,25 @@ export function TasksPage(): React.JSX.Element {
                 </div>
 
                 {selected.result_summary && (
-                  <p className="text-[13px] whitespace-pre-wrap bg-[var(--canvas)] border border-[var(--border-hairline)] rounded-[6px] p-3 m-0">
+                  <div
+                    className={[
+                      "text-[13px] whitespace-pre-wrap break-words [overflow-wrap:anywhere] rounded-[10px] border p-3.5",
+                      selected.status === "failed"
+                        ? "bg-[var(--danger-tint)] border-[var(--danger-border)] text-[var(--danger-ink)]"
+                        : "bg-[var(--surface-recessed)]/80 border-[var(--border-hairline)] text-[var(--ink-primary)]",
+                    ].join(" ")}
+                  >
                     {selected.result_summary}
-                  </p>
+                  </div>
                 )}
 
-                <div className="flex flex-col gap-2.5">
-                  <h3 className="text-[14px] font-semibold">Execution Timeline</h3>
-                  {selected.steps.map((step) => (
-                    <div
-                      key={step.id}
-                      className="rounded-[6px] border border-[var(--border-hairline)] bg-[var(--canvas)] p-3 text-[13px]"
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="font-medium">
-                          {step.step_index + 1}. {step.title}
-                        </span>
-                        <div className="flex items-center gap-1.5">
-                          <RiskBadge level={step.risk_level} />
-                          <span className="font-mono text-[12px] text-[var(--ink-secondary)]">
-                            {step.status}
-                          </span>
-                        </div>
-                      </div>
-                      <p className="font-mono text-[12px] text-[var(--ink-secondary)] mt-1">
-                        Tool: {step.tool_id} | Approval: {step.approval_status}
-                      </p>
-                      {step.error_message && (
-                        <p className="text-[var(--danger-ink)] mt-1.5 mb-0">{step.error_message}</p>
-                      )}
-                      {step.verification && (
-                        <p className="text-[12px] text-[var(--ink-secondary)] mt-1 mb-0">
-                          Verification: {String(step.verification.summary ?? "")}
-                        </p>
-                      )}
-                    </div>
-                  ))}
+                <div className="flex flex-col gap-3">
+                  <h3 className="text-[13.5px] font-semibold text-[var(--ink-primary)] m-0">
+                    Execution Timeline
+                  </h3>
+                  <TaskTimeline steps={selected.steps} showResults={true} />
                 </div>
-              </div>
+              </GlassPanel>
             )}
           </div>
         </div>

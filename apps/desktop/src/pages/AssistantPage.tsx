@@ -1,25 +1,19 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  CheckCircle2,
-  Download,
-  Paperclip,
-  Play,
-  Plus,
-  RotateCcw,
-  ShieldAlert,
-  Square,
-  X,
-} from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
+import { Download, Plus, RotateCcw, ShieldAlert, Sparkles, Square } from "lucide-react";
 import type { ConversationRecord, TaskRecord } from "@agentos/shared";
 import {
   Button,
   EmptyState,
   ErrorState,
+  GlassPanel,
   LoadingState,
   ModalDialog,
   RiskBadge,
+  SectionHeader,
   TaskStatusBadge,
 } from "@agentos/ui";
+import { AgentComposer, type ComposerAttachment } from "../components/AgentComposer.js";
+import { TaskTimeline } from "../components/TaskTimeline.js";
 import { useApp } from "../stores/AppContext.js";
 
 function downloadTextFile(filename: string, content: string, mime = "text/markdown"): void {
@@ -31,6 +25,13 @@ function downloadTextFile(filename: string, content: string, mime = "text/markdo
   link.click();
   URL.revokeObjectURL(url);
 }
+
+const STARTER_PROMPTS = [
+  "Inspect system health diagnostics",
+  "List files and detect duplicate files in workspace",
+  "Suggest folder organization for this workspace",
+  "Create folder reports in workspace",
+];
 
 export function AssistantPage(): React.JSX.Element {
   const { client, settings, providers, workspaces, notify, setRoute } = useApp();
@@ -46,13 +47,12 @@ export function AssistantPage(): React.JSX.Element {
     settings?.default_model ?? "mock-deterministic-v1",
   );
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>(workspaces[0]?.id ?? "");
-  const [attachments, setAttachments] = useState<Array<{ name: string; size_bytes: number }>>([]);
+  const [attachments, setAttachments] = useState<ComposerAttachment[]>([]);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [loadingInit, setLoadingInit] = useState<boolean>(true);
   const [pageError, setPageError] = useState<string | null>(null);
   const [approvalDialogOpen, setApprovalDialogOpen] = useState<boolean>(false);
   const [liveEvents, setLiveEvents] = useState<string[]>([]);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (settings) {
@@ -96,7 +96,6 @@ export function AssistantPage(): React.JSX.Element {
     void loadConversations();
   }, [loadConversations]);
 
-  // Subscribe to live SSE updates while a task is active.
   const activeTaskId = activeTask?.id ?? null;
   const activeTaskStatus = activeTask?.status ?? null;
   useEffect(() => {
@@ -162,16 +161,6 @@ export function AssistantPage(): React.JSX.Element {
     if (found) {
       setSelectedModel(found.default_model);
     }
-  };
-
-  const handleFileAttach = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files ?? []);
-    if (files.length === 0) return;
-    setAttachments((prev) => [
-      ...prev,
-      ...files.map((f) => ({ name: f.name, size_bytes: f.size })),
-    ]);
-    event.target.value = "";
   };
 
   const handleSubmitInstruction = async (event: React.FormEvent) => {
@@ -292,128 +281,131 @@ export function AssistantPage(): React.JSX.Element {
 
   const activeProviderObj = providers.find((p) => p.id === selectedProvider);
   const canRollback = Boolean(activeTask?.steps.some((s) => Boolean(s.rollback)));
+  const isTaskRunning = Boolean(
+    activeTask && !["completed", "failed", "cancelled"].includes(activeTask.status),
+  );
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-hairline)] pb-4">
-        <div>
-          <h1 className="text-[22px] font-semibold tracking-tight">Assistant</h1>
-          <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
-            Turn natural-language instructions into structured plans, explicit permission gates, and
-            verified results.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="secondary" size="sm" onClick={() => void handleNewConversation()}>
-            <Plus className="w-3.5 h-3.5" aria-hidden={true} />
-            New session
-          </Button>
-          {activeTask && !["completed", "failed", "cancelled"].includes(activeTask.status) && (
-            <Button variant="danger" size="sm" onClick={() => void handleCancelTask()}>
-              <Square className="w-3.5 h-3.5" aria-hidden={true} />
-              Stop task
+      <SectionHeader
+        as="h1"
+        title="Assistant"
+        description="Turn natural-language instructions into structured plans, explicit permission gates, and verified results."
+        action={
+          <>
+            <Button variant="secondary" size="sm" onClick={() => void handleNewConversation()}>
+              <Plus className="w-3.5 h-3.5" aria-hidden={true} />
+              New session
             </Button>
-          )}
-        </div>
-      </div>
+            {isTaskRunning && (
+              <Button variant="danger" size="sm" onClick={() => void handleCancelTask()}>
+                <Square className="w-3.5 h-3.5" aria-hidden={true} />
+                Stop task
+              </Button>
+            )}
+          </>
+        }
+      />
 
       {pageError && <ErrorState message={pageError} />}
 
-      {/* Context bar: Provider, Model, Workspace */}
-      <div className="rounded-[8px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)] p-3.5 grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div>
-          <label
-            htmlFor="asst-provider"
-            className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
-          >
-            AI Provider
-          </label>
-          <select
-            id="asst-provider"
-            value={selectedProvider}
-            onChange={(e) => handleProviderChange(e.target.value)}
-            className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-2.5 py-1.5 text-[13px]"
-          >
-            {providers.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.display_name} {p.ready ? "" : "(API key required)"}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label
-            htmlFor="asst-model"
-            className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
-          >
-            Model
-          </label>
-          <input
-            id="asst-model"
-            type="text"
-            value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
-            className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-2.5 py-1.5 text-[13px] font-mono"
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="asst-workspace"
-            className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
-          >
-            Authorized Workspace
-          </label>
-          <div className="flex gap-1.5">
-            <select
-              id="asst-workspace"
-              value={selectedWorkspaceId}
-              onChange={(e) => setSelectedWorkspaceId(e.target.value)}
-              className="flex-1 min-w-0 rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-2.5 py-1.5 text-[13px]"
+      {/* Compact glass runtime context bar */}
+      <GlassPanel variant="surface" padding="sm">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label
+              htmlFor="asst-provider"
+              className="block text-[11.5px] font-medium text-[var(--ink-secondary)] mb-1"
             >
-              <option value="">No workspace (read-only diagnostics/web)</option>
-              {workspaces.map((ws) => (
-                <option key={ws.id} value={ws.id}>
-                  {ws.name} ({ws.read_only ? "RO" : "RW"})
+              AI Provider
+            </label>
+            <select
+              id="asst-provider"
+              value={selectedProvider}
+              onChange={(e) => handleProviderChange(e.target.value)}
+              className="glass-input w-full px-2.5 py-1.5 text-[13px]"
+            >
+              {providers.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.display_name} {p.ready ? "" : "(API key required)"}
                 </option>
               ))}
             </select>
-            {workspaces.length === 0 && (
-              <Button variant="secondary" size="sm" onClick={() => setRoute("settings")}>
-                Add
-              </Button>
-            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="asst-model"
+              className="block text-[11.5px] font-medium text-[var(--ink-secondary)] mb-1"
+            >
+              Model
+            </label>
+            <input
+              id="asst-model"
+              type="text"
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className="glass-input w-full px-2.5 py-1.5 text-[13px] font-mono"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="asst-workspace"
+              className="block text-[11.5px] font-medium text-[var(--ink-secondary)] mb-1"
+            >
+              Authorized Workspace
+            </label>
+            <div className="flex gap-1.5">
+              <select
+                id="asst-workspace"
+                value={selectedWorkspaceId}
+                onChange={(e) => setSelectedWorkspaceId(e.target.value)}
+                className="glass-input flex-1 min-w-0 px-2.5 py-1.5 text-[13px]"
+              >
+                <option value="">No workspace (read-only diagnostics/web)</option>
+                {workspaces.map((ws) => (
+                  <option key={ws.id} value={ws.id}>
+                    {ws.name} ({ws.read_only ? "RO" : "RW"})
+                  </option>
+                ))}
+              </select>
+              {workspaces.length === 0 && (
+                <Button variant="secondary" size="sm" onClick={() => setRoute("settings")}>
+                  Add
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </GlassPanel>
 
       {activeProviderObj?.capabilities.is_mock && (
-        <div className="rounded-[6px] border border-[var(--warning-border)] bg-[var(--warning-tint)] text-[var(--warning-ink)] px-3.5 py-2 text-[12px]">
-          Offline Deterministic Test Mode is active. Plans use deterministic local rules without
-          calling external AI APIs. Configure a live provider in Settings whenever ready.
+        <div className="rounded-[10px] border border-[var(--warning-border)] bg-[var(--warning-tint)] text-[var(--warning-ink)] px-4 py-2.5 text-[12.5px]">
+          Offline Deterministic Test Mode is active. Plans use local deterministic rules without
+          calling external APIs. Configure a live provider in Settings whenever ready.
         </div>
       )}
 
-      {/* Split Workspace: Conversation + Plan/Inspector */}
+      {/* Centerpiece split workspace: Chat + Execution Inspector */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-        {/* Left: Conversation history & command composer */}
+        {/* Conversation stream & floating glass composer */}
         <section
           aria-label="Conversation and command input"
-          className="xl:col-span-6 flex flex-col gap-4"
+          className="xl:col-span-7 flex flex-col gap-4"
         >
           {conversations.length > 1 && (
-            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
               {conversations.slice(0, 8).map((conv) => (
                 <button
                   key={conv.id}
                   type="button"
                   onClick={() => void handleSelectConversation(conv.id)}
                   className={[
-                    "px-2.5 py-1 rounded-[6px] text-[12px] border shrink-0 transition-colors",
+                    "px-3 py-1 rounded-full text-[12px] border shrink-0 transition-colors duration-150",
                     activeConv?.id === conv.id
-                      ? "bg-[var(--surface-elevated)] border-[var(--accent)] font-medium text-[var(--ink-primary)]"
-                      : "bg-[var(--surface-recessed)] border-[var(--border-hairline)] text-[var(--ink-secondary)]",
+                      ? "bg-[var(--accent-tint)] border-[var(--accent-border)] font-medium text-[var(--accent-ink)]"
+                      : "bg-[var(--glass-panel)] border-[var(--border-hairline)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]",
                   ].join(" ")}
                 >
                   {conv.title}
@@ -422,27 +414,33 @@ export function AssistantPage(): React.JSX.Element {
             </div>
           )}
 
-          <div className="rounded-[8px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)] p-4 min-h-[260px] max-h-[420px] overflow-y-auto flex flex-col gap-3">
+          <GlassPanel
+            variant="surface"
+            padding="none"
+            className="min-h-[310px] max-h-[460px] overflow-y-auto p-5 flex flex-col gap-4"
+          >
             {!activeConv?.messages || activeConv.messages.length === 0 ? (
-              <div className="text-[13px] text-[var(--ink-secondary)]">
-                <p className="font-medium text-[var(--ink-primary)]">Ready for an instruction</p>
-                <p className="mt-1">
-                  Describe a concrete task. Read-only steps execute and verify automatically; file
-                  mutations, form submissions, and terminal commands pause for your explicit
-                  approval.
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {[
-                    "Inspect system health diagnostics",
-                    "List files and detect duplicate files in workspace",
-                    "Suggest folder organization for this workspace",
-                    "Create folder reports in workspace",
-                  ].map((sample) => (
+              <div className="my-auto py-4 flex flex-col gap-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-8 h-8 rounded-[10px] bg-[var(--accent-tint)] border border-[var(--accent-border)] flex items-center justify-center text-[var(--accent-ink)] shrink-0">
+                    <Sparkles className="w-4 h-4" aria-hidden={true} />
+                  </span>
+                  <div>
+                    <p className="text-[14.5px] font-semibold text-[var(--ink-primary)] m-0">
+                      Ready for an instruction
+                    </p>
+                    <p className="text-[12.5px] text-[var(--ink-secondary)] mt-0.5 mb-0">
+                      Read-only tools run and verify automatically. Mutations pause for approval.
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {STARTER_PROMPTS.map((sample) => (
                     <button
                       key={sample}
                       type="button"
                       onClick={() => setInstruction(sample)}
-                      className="text-left text-[12px] px-2.5 py-1.5 rounded-[6px] border border-[var(--border-hairline)] bg-[var(--canvas)] hover:border-[var(--border-control)] text-[var(--ink-primary)]"
+                      className="text-left text-[12.5px] px-3.5 py-2.5 rounded-[10px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)]/80 hover:border-[var(--accent-border)] hover:bg-[var(--accent-tint)]/35 text-[var(--ink-primary)] transition-colors duration-150"
                     >
                       {sample}
                     </button>
@@ -450,116 +448,83 @@ export function AssistantPage(): React.JSX.Element {
                 </div>
               </div>
             ) : (
-              activeConv.messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={[
-                    "rounded-[6px] px-3.5 py-2.5 text-[13px] border",
-                    msg.role === "user"
-                      ? "bg-[var(--canvas)] border-[var(--border-control)] ml-6"
-                      : "bg-[var(--surface-recessed)] border-[var(--border-hairline)] mr-6",
-                  ].join(" ")}
-                >
-                  <div className="flex items-center justify-between text-[11px] text-[var(--ink-secondary)] mb-1">
-                    <span className="font-medium">{msg.role === "user" ? "You" : "AgentOS"}</span>
-                    {msg.task_id && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          client && void client.getTask(msg.task_id!).then((t) => setActiveTask(t))
-                        }
-                        className="font-mono underline text-[var(--accent-ink)]"
-                      >
-                        {msg.task_id}
-                      </button>
-                    )}
-                  </div>
-                  <p className="whitespace-pre-wrap m-0">{msg.content}</p>
-                  {msg.attachments && msg.attachments.length > 0 && (
-                    <div className="mt-1.5 flex flex-wrap gap-1.5">
-                      {msg.attachments.map((att, idx) => (
-                        <span
-                          key={`${att.name}-${idx}`}
-                          className="text-[11px] font-mono px-2 py-0.5 rounded bg-[var(--surface-elevated)] border border-[var(--border-hairline)]"
-                        >
-                          {att.name}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-
-          {/* Command composer */}
-          <form
-            onSubmit={(e) => void handleSubmitInstruction(e)}
-            className="rounded-[8px] border border-[var(--border-control)] bg-[var(--surface-elevated)] p-3.5 flex flex-col gap-3"
-          >
-            <label
-              htmlFor="asst-instruction"
-              className="text-[12px] font-medium text-[var(--ink-secondary)]"
-            >
-              Instruction
-            </label>
-            <textarea
-              id="asst-instruction"
-              rows={3}
-              required
-              value={instruction}
-              onChange={(e) => setInstruction(e.target.value)}
-              placeholder="Example: Analyze workspace files, detect duplicates, and generate a Markdown summary report."
-              className="w-full resize-y rounded-[6px] border border-[var(--border-hairline)] bg-[var(--canvas)] px-3 py-2 text-[14px]"
-            />
-
-            {attachments.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {attachments.map((att, idx) => (
-                  <span
-                    key={`${att.name}-${idx}`}
-                    className="inline-flex items-center gap-1.5 text-[12px] font-mono px-2 py-0.5 rounded-[4px] border border-[var(--border-hairline)] bg-[var(--surface-recessed)]"
+              activeConv.messages.map((msg) => {
+                const isUser = msg.role === "user";
+                return (
+                  <div
+                    key={msg.id}
+                    className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}
                   >
-                    {att.name}
-                    <button
-                      type="button"
-                      aria-label={`Remove attachment ${att.name}`}
-                      onClick={() => setAttachments((prev) => prev.filter((_, i) => i !== idx))}
+                    <div
+                      className={[
+                        "max-w-[90%] rounded-[14px] px-4 py-3 text-[13.5px] leading-relaxed border",
+                        isUser
+                          ? "bg-[var(--accent-tint)]/70 border-[var(--accent-border)] text-[var(--ink-primary)] rounded-br-[4px]"
+                          : "bg-[var(--surface-elevated)] border-[var(--border-hairline)] text-[var(--ink-primary)] rounded-bl-[4px] shadow-[var(--shadow-sm)]",
+                      ].join(" ")}
                     >
-                      <X className="w-3 h-3" aria-hidden={true} />
-                    </button>
-                  </span>
-                ))}
-              </div>
+                      <div className="flex items-center justify-between gap-4 text-[11px] text-[var(--ink-secondary)] mb-1.5">
+                        <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--ink-primary)]">
+                          {!isUser && (
+                            <span
+                              aria-hidden="true"
+                              className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]"
+                            />
+                          )}
+                          {isUser ? "You" : "AgentOS"}
+                        </span>
+                        {msg.task_id && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              client &&
+                              void client.getTask(msg.task_id!).then((t) => setActiveTask(t))
+                            }
+                            className="font-mono text-[11px] underline text-[var(--accent-ink)]"
+                          >
+                            {msg.task_id}
+                          </button>
+                        )}
+                      </div>
+                      <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere] m-0">
+                        {msg.content}
+                      </p>
+                      {msg.attachments && msg.attachments.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {msg.attachments.map((att, idx) => (
+                            <span
+                              key={`${att.name}-${idx}`}
+                              className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-recessed)] border border-[var(--border-hairline)]"
+                            >
+                              {att.name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
             )}
+          </GlassPanel>
 
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  className="visually-hidden"
-                  aria-label="Attach files"
-                  onChange={handleFileAttach}
-                />
-                <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
-                  <Paperclip className="w-3.5 h-3.5" aria-hidden={true} />
-                  Attach file
-                </Button>
-              </div>
-              <Button type="submit" variant="primary" loading={submitting}>
-                <Play className="w-3.5 h-3.5" aria-hidden={true} />
-                Plan & run
-              </Button>
-            </div>
-          </form>
+          <AgentComposer
+            instruction={instruction}
+            onInstructionChange={setInstruction}
+            attachments={attachments}
+            onAddAttachments={(files) => setAttachments((prev) => [...prev, ...files])}
+            onRemoveAttachment={(index) =>
+              setAttachments((prev) => prev.filter((_, i) => i !== index))
+            }
+            submitting={submitting}
+            onSubmit={(e) => void handleSubmitInstruction(e)}
+          />
         </section>
 
-        {/* Right: Structured Execution Plan, Approval Gate, Live Verification & Report */}
+        {/* Right: Structured Execution Plan, Approval Gate & Verification Inspector */}
         <section
           aria-label="Execution plan and verification inspector"
-          className="xl:col-span-6 flex flex-col gap-4"
+          className="xl:col-span-5 flex flex-col gap-4"
         >
           {!activeTask ? (
             <EmptyState
@@ -567,18 +532,20 @@ export function AssistantPage(): React.JSX.Element {
               description="Submit an instruction on the left to inspect its structured plan, risk classifications, permission previews, and verified tool outputs here."
             />
           ) : (
-            <div className="rounded-[8px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)] p-5 flex flex-col gap-4">
-              <div className="flex flex-wrap items-start justify-between gap-2 border-b border-[var(--border-hairline)] pb-3">
-                <div>
+            <GlassPanel variant="frosted" padding="md" className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-start justify-between gap-2 pb-3.5 border-b border-[var(--border-hairline)]">
+                <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-[12px] text-[var(--ink-secondary)]">
+                    <span className="font-mono text-[11.5px] text-[var(--ink-secondary)]">
                       {activeTask.id}
                     </span>
                     <TaskStatusBadge status={activeTask.status} />
                   </div>
-                  <h2 className="text-[15px] font-semibold mt-1">{activeTask.instruction}</h2>
+                  <h2 className="text-[15px] font-semibold mt-1.5 mb-0 text-[var(--ink-primary)]">
+                    {activeTask.instruction}
+                  </h2>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {canRollback && (
                     <Button variant="secondary" size="sm" onClick={() => void handleRollback()}>
                       <RotateCcw className="w-3.5 h-3.5" aria-hidden={true} />
@@ -592,15 +559,15 @@ export function AssistantPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Approval banner when awaiting_approval */}
+              {/* High-contrast opaque approval callout (never obscured by glass) */}
               {activeTask.status === "awaiting_approval" && (
-                <div className="rounded-[6px] border border-[var(--warning-border)] bg-[var(--warning-tint)] p-4 text-[var(--warning-ink)] flex flex-col gap-2.5">
-                  <div className="flex items-center gap-2 font-semibold text-[14px]">
+                <div className="rounded-[10px] border border-[var(--warning-border)] bg-[var(--warning-tint)] p-4 text-[var(--warning-ink)] flex flex-col gap-2.5">
+                  <div className="flex items-center gap-2 font-semibold text-[13.5px]">
                     <ShieldAlert className="w-4 h-4 shrink-0" aria-hidden={true} />
                     <span>Approval required before sensitive execution</span>
                   </div>
-                  <p className="text-[13px] m-0">
-                    Review the planned steps and affected targets below. Nothing has been modified
+                  <p className="text-[12.5px] m-0">
+                    Review the planned steps and exact arguments below. Nothing has been modified
                     yet.
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -618,27 +585,29 @@ export function AssistantPage(): React.JSX.Element {
                 </div>
               )}
 
-              {/* Budget & usage strip */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[12px] rounded-[6px] bg-[var(--canvas)] border border-[var(--border-hairline)] p-3">
+              {/* Compact budget strip */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[12px] rounded-[10px] bg-[var(--surface-recessed)]/85 border border-[var(--border-hairline)] p-3">
                 <div>
-                  <span className="text-[var(--ink-secondary)] block">Tool calls</span>
-                  <span className="font-mono font-medium">
+                  <span className="text-[11px] text-[var(--ink-secondary)] block">Tool calls</span>
+                  <span className="font-mono font-semibold text-[var(--ink-primary)]">
                     {activeTask.usage.tool_calls}/{activeTask.budget.max_tool_calls}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[var(--ink-secondary)] block">Tokens</span>
-                  <span className="font-mono font-medium">
+                  <span className="text-[11px] text-[var(--ink-secondary)] block">Tokens</span>
+                  <span className="font-mono font-semibold text-[var(--ink-primary)]">
                     {activeTask.usage.total_tokens}/{activeTask.budget.max_tokens}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[var(--ink-secondary)] block">Duration</span>
-                  <span className="font-mono font-medium">{activeTask.usage.elapsed_sec}s</span>
+                  <span className="text-[11px] text-[var(--ink-secondary)] block">Duration</span>
+                  <span className="font-mono font-semibold text-[var(--ink-primary)]">
+                    {activeTask.usage.elapsed_sec}s
+                  </span>
                 </div>
                 <div>
-                  <span className="text-[var(--ink-secondary)] block">Est. cost</span>
-                  <span className="font-mono font-medium">
+                  <span className="text-[11px] text-[var(--ink-secondary)] block">Est. cost</span>
+                  <span className="font-mono font-semibold text-[var(--ink-primary)]">
                     {activeTask.usage.estimated_cost_usd !== null
                       ? `$${activeTask.usage.estimated_cost_usd.toFixed(5)}`
                       : "n/a"}
@@ -646,95 +615,24 @@ export function AssistantPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Execution Steps */}
-              <ol className="m-0 p-0 list-none flex flex-col gap-3">
-                {activeTask.steps.map((step) => {
-                  const verified = Boolean(step.verification?.verified);
-                  return (
-                    <li
-                      key={step.id}
-                      className={[
-                        "relative rounded-[6px] border p-3.5 bg-[var(--canvas)]",
-                        step.status === "running"
-                          ? "border-[var(--accent)]"
-                          : "border-[var(--border-hairline)]",
-                      ].join(" ")}
-                    >
-                      {step.status === "running" && (
-                        <span
-                          aria-hidden="true"
-                          className="absolute left-0 top-2 bottom-2 w-[2.5px] rounded-r bg-[var(--accent)]"
-                        />
-                      )}
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-[12px] font-mono text-[var(--ink-secondary)]">
-                            #{step.step_index + 1}
-                          </span>
-                          <span className="text-[14px] font-medium truncate">{step.title}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <RiskBadge level={step.risk_level} />
-                          <span className="text-[12px] font-mono text-[var(--ink-secondary)]">
-                            {step.status}
-                          </span>
-                        </div>
-                      </div>
-
-                      <p className="text-[12px] font-mono text-[var(--ink-secondary)] mt-1">
-                        {step.tool_id}
-                        {step.duration_ms !== null ? ` (${step.duration_ms} ms)` : ""}
-                      </p>
-
-                      {step.description && (
-                        <p className="text-[13px] text-[var(--ink-secondary)] mt-1 mb-0">
-                          {step.description}
-                        </p>
-                      )}
-
-                      {step.error_message && (
-                        <p className="text-[13px] text-[var(--danger-ink)] mt-2 mb-0 font-medium">
-                          {step.error_message}
-                        </p>
-                      )}
-
-                      {step.result && (
-                        <details className="mt-2.5 text-[12px]">
-                          <summary className="font-medium text-[var(--ink-primary)]">
-                            Result: {String(step.result.summary ?? "Completed")}
-                            {verified && (
-                              <span className="ml-2 inline-flex items-center gap-1 text-[var(--success-ink)]">
-                                <CheckCircle2 className="w-3.5 h-3.5" aria-hidden={true} />
-                                Verified
-                              </span>
-                            )}
-                          </summary>
-                          <pre className="mt-2 p-2.5 rounded bg-[var(--surface-recessed)] overflow-x-auto text-[11px] max-h-[220px]">
-                            {JSON.stringify(step.result.data ?? step.result, null, 2)}
-                          </pre>
-                        </details>
-                      )}
-                    </li>
-                  );
-                })}
-              </ol>
+              <TaskTimeline steps={activeTask.steps} showResults={true} />
 
               {liveEvents.length > 0 && (
                 <details className="text-[12px]">
-                  <summary className="text-[var(--ink-secondary)]">
+                  <summary className="text-[var(--ink-secondary)] select-none">
                     Live SSE stream ({liveEvents.length} events)
                   </summary>
-                  <pre className="mt-2 p-2.5 rounded bg-[var(--surface-recessed)] overflow-x-auto text-[11px]">
+                  <pre className="mt-2 p-2.5 rounded-[8px] bg-[var(--surface-recessed)] border border-[var(--border-hairline)] overflow-x-auto text-[11px] m-0">
                     {liveEvents.join("\n")}
                   </pre>
                 </details>
               )}
-            </div>
+            </GlassPanel>
           )}
         </section>
       </div>
 
-      {/* Native <dialog> permission confirmation modal (safe Cancel gets autofocus) */}
+      {/* Native <dialog> permission confirmation modal */}
       <ModalDialog
         open={approvalDialogOpen && activeTask?.status === "awaiting_approval"}
         title="Approve sensitive execution plan"
@@ -750,22 +648,22 @@ export function AssistantPage(): React.JSX.Element {
                 .map((s) => (
                   <li
                     key={s.id}
-                    className="rounded-[6px] border border-[var(--border-hairline)] bg-[var(--canvas)] p-3 text-[13px]"
+                    className="rounded-[10px] border border-[var(--border-hairline)] bg-[var(--surface-recessed)]/70 p-3.5 text-[13px]"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold">{s.title}</span>
+                      <span className="font-semibold text-[var(--ink-primary)]">{s.title}</span>
                       <RiskBadge level={s.risk_level} />
                     </div>
-                    <p className="font-mono text-[12px] text-[var(--ink-secondary)] mt-1">
+                    <p className="font-mono text-[12px] text-[var(--ink-secondary)] mt-1 mb-0">
                       {s.tool_id}
                     </p>
-                    <pre className="mt-1.5 p-2 rounded bg-[var(--surface-recessed)] text-[11px] overflow-x-auto">
+                    <pre className="mt-2 p-2.5 rounded-[8px] bg-[var(--surface-elevated)] border border-[var(--border-hairline)] text-[11.5px] overflow-x-auto m-0">
                       {JSON.stringify(s.arguments, null, 2)}
                     </pre>
                   </li>
                 ))}
             </ul>
-            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border-hairline)]">
+            <div className="flex justify-end gap-2 pt-3 border-t border-[var(--border-hairline)]">
               <Button
                 variant="secondary"
                 autoFocus

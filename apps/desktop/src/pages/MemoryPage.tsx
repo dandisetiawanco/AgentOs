@@ -1,7 +1,16 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Download, Pencil, Plus, Trash2 } from "lucide-react";
+import { Download, Pencil, Pin, Plus, Search, Trash2 } from "lucide-react";
 import type { MemoryCategory, MemoryItem } from "@agentos/shared";
-import { Button, EmptyState, ErrorState, LoadingState, ModalDialog } from "@agentos/ui";
+import {
+  Button,
+  ConfirmationDialog,
+  EmptyState,
+  ErrorState,
+  GlassPanel,
+  LoadingState,
+  ModalDialog,
+  SectionHeader,
+} from "@agentos/ui";
 import { useApp } from "../stores/AppContext.js";
 
 const CATEGORIES: MemoryCategory[] = [
@@ -136,86 +145,84 @@ export function MemoryPage(): React.JSX.Element {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-hairline)] pb-4">
-        <div>
-          <h1 className="text-[22px] font-semibold tracking-tight">Local Memory</h1>
-          <p className="text-[13px] text-[var(--ink-secondary)] mt-0.5">
-            Optional SQLite memory store. Retention: {settings?.memory_retention_days ?? 90} days.
-            Credentials are automatically rejected.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" size="sm" onClick={() => void handleExport()}>
-            <Download className="w-3.5 h-3.5" aria-hidden={true} />
-            Export JSON
-          </Button>
-          {entries.length > 0 && (
-            <Button variant="danger" size="sm" onClick={() => setClearConfirmOpen(true)}>
-              Clear all
+      <SectionHeader
+        as="h1"
+        title="Local Memory"
+        description={`Optional SQLite memory store. Retention: ${settings?.memory_retention_days ?? 90} days. Credentials are automatically rejected.`}
+        action={
+          <>
+            <Button variant="secondary" size="sm" onClick={() => void handleExport()}>
+              <Download className="w-3.5 h-3.5" aria-hidden={true} />
+              Export JSON
             </Button>
-          )}
-          <Button
-            variant="primary"
-            size="sm"
-            disabled={settings?.memory_enabled === false}
-            onClick={openCreate}
-          >
-            <Plus className="w-3.5 h-3.5" aria-hidden={true} />
-            Add memory
-          </Button>
-        </div>
-      </div>
+            {entries.length > 0 && (
+              <Button variant="danger" size="sm" onClick={() => setClearConfirmOpen(true)}>
+                Clear all
+              </Button>
+            )}
+            <Button
+              variant="primary"
+              size="sm"
+              disabled={settings?.memory_enabled === false}
+              onClick={openCreate}
+            >
+              <Plus className="w-3.5 h-3.5" aria-hidden={true} />
+              Add memory
+            </Button>
+          </>
+        }
+      />
 
       {settings?.memory_enabled === false && (
-        <div className="rounded-[6px] border border-[var(--warning-border)] bg-[var(--warning-tint)] text-[var(--warning-ink)] px-4 py-3 text-[13px] flex flex-wrap items-center justify-between gap-2">
+        <div className="rounded-[10px] border border-[var(--warning-border)] bg-[var(--warning-tint)] text-[var(--warning-ink)] px-4 py-3 text-[13px] flex flex-wrap items-center justify-between gap-2">
           <span>
             Local memory is currently disabled in Settings. No new memories are saved or retrieved.
           </span>
           <Button variant="secondary" size="sm" onClick={() => setRoute("settings")}>
-            Change in Settings
+            Enable policy
           </Button>
         </div>
       )}
 
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="flex-1 min-w-[220px]">
-          <label
-            htmlFor="mem-search"
-            className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
-          >
-            Search memory
-          </label>
-          <input
-            id="mem-search"
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search titles, content, or tags"
-            className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--surface-elevated)] px-3 py-1.5 text-[13px]"
-          />
+      <GlassPanel variant="surface" padding="sm" className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-[220px]">
+            <label htmlFor="mem-search" className="visually-hidden">
+              Search memory
+            </label>
+            <Search
+              className="w-4 h-4 text-[var(--ink-secondary)] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              aria-hidden={true}
+            />
+            <input
+              id="mem-search"
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search titles, content, or tags..."
+              className="glass-input w-full pl-9 pr-3 py-2 text-[13px]"
+            />
+          </div>
+          <div className="shrink-0">
+            <label htmlFor="mem-cat" className="visually-hidden">
+              Category
+            </label>
+            <select
+              id="mem-cat"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="glass-input px-3 py-2 text-[13px]"
+            >
+              <option value="">All categories</option>
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {c.replace("_", " ")}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div>
-          <label
-            htmlFor="mem-cat"
-            className="block text-[12px] font-medium text-[var(--ink-secondary)] mb-1"
-          >
-            Category
-          </label>
-          <select
-            id="mem-cat"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="rounded-[6px] border border-[var(--border-control)] bg-[var(--surface-elevated)] px-3 py-1.5 text-[13px]"
-          >
-            <option value="">All categories</option>
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {c.replace("_", " ")}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      </GlassPanel>
 
       {loading && <LoadingState label="Searching local memory..." />}
       {error && <ErrorState message={error} onRetry={() => void loadMemory()} />}
@@ -229,57 +236,66 @@ export function MemoryPage(): React.JSX.Element {
         />
       )}
 
-      <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
         {entries.map((item) => (
-          <article
+          <GlassPanel
             key={item.id}
-            className="rounded-[8px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)] p-4 flex flex-col gap-2"
+            as="article"
+            variant="surface"
+            padding="md"
+            className="flex flex-col justify-between gap-3"
           >
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-[4px] bg-[var(--surface-recessed)] border border-[var(--border-hairline)]">
+            <div>
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-recessed)] border border-[var(--border-hairline)] text-[var(--ink-secondary)]">
                     {item.category}
                   </span>
                   {item.pinned && (
-                    <span className="text-[11px] px-2 py-0.5 rounded-[4px] bg-[var(--accent-tint)] text-[var(--accent-ink)] border border-[var(--accent-border)]">
+                    <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-[var(--accent-tint)] text-[var(--accent-ink)] border border-[var(--accent-border)] font-medium">
+                      <Pin className="w-3 h-3" aria-hidden={true} />
                       Pinned
                     </span>
                   )}
                 </div>
-                <h2 className="text-[15px] font-semibold mt-1.5">{item.title}</h2>
+                <div className="flex items-center gap-1 shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label={`Edit ${item.title}`}
+                    onClick={() => openEdit(item)}
+                  >
+                    <Pencil className="w-3.5 h-3.5" aria-hidden={true} />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    aria-label={`Delete ${item.title}`}
+                    onClick={() => void handleDelete(item.id)}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" aria-hidden={true} />
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  aria-label={`Edit ${item.title}`}
-                  onClick={() => openEdit(item)}
-                >
-                  <Pencil className="w-3.5 h-3.5" aria-hidden={true} />
-                  Edit
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  aria-label={`Delete ${item.title}`}
-                  onClick={() => void handleDelete(item.id)}
-                >
-                  <Trash2 className="w-3.5 h-3.5" aria-hidden={true} />
-                </Button>
-              </div>
+              <h2 className="text-[14.5px] font-semibold text-[var(--ink-primary)] mt-2 mb-1">
+                {item.title}
+              </h2>
+              <p className="text-[13px] text-[var(--ink-secondary)] whitespace-pre-wrap m-0">
+                {item.content}
+              </p>
             </div>
-            <p className="text-[13px] whitespace-pre-wrap m-0">{item.content}</p>
+
             {item.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 pt-1">
+              <div className="flex flex-wrap gap-1.5 pt-2 border-t border-[var(--border-hairline)]">
                 {item.tags.map((tag) => (
-                  <span key={tag} className="text-[11px] font-mono text-[var(--ink-secondary)]">
+                  <span key={tag} className="text-[11.5px] font-mono text-[var(--ink-secondary)]">
                     #{tag}
                   </span>
                 ))}
               </div>
             )}
-          </article>
+          </GlassPanel>
         ))}
       </div>
 
@@ -298,7 +314,7 @@ export function MemoryPage(): React.JSX.Element {
                 id="m-cat"
                 value={catDraft}
                 onChange={(e) => setCatDraft(e.target.value as MemoryCategory)}
-                className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-3 py-1.5 text-[13px]"
+                className="glass-input w-full px-3 py-1.5 text-[13px]"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -319,7 +335,7 @@ export function MemoryPage(): React.JSX.Element {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Preferred report format"
-              className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-3 py-1.5 text-[13px]"
+              className="glass-input w-full px-3 py-1.5 text-[13px]"
             />
           </div>
           <div>
@@ -333,7 +349,7 @@ export function MemoryPage(): React.JSX.Element {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Use concise Markdown bullet summaries with file paths."
-              className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-3 py-1.5 text-[13px]"
+              className="glass-input w-full px-3 py-1.5 text-[13px]"
             />
           </div>
           <div>
@@ -346,7 +362,7 @@ export function MemoryPage(): React.JSX.Element {
               value={tagsDraft}
               onChange={(e) => setTagsDraft(e.target.value)}
               placeholder="reports, markdown"
-              className="w-full rounded-[6px] border border-[var(--border-control)] bg-[var(--canvas)] px-3 py-1.5 text-[13px]"
+              className="glass-input w-full px-3 py-1.5 text-[13px]"
             />
           </div>
           <label htmlFor="m-pin" className="inline-flex items-center gap-2 text-[13px]">
@@ -358,7 +374,7 @@ export function MemoryPage(): React.JSX.Element {
             />
             Pin record (exempt from retention expiry)
           </label>
-          <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border-hairline)]">
+          <div className="flex justify-end gap-2 pt-3 border-t border-[var(--border-hairline)]">
             <Button variant="secondary" onClick={() => setEditorOpen(false)}>
               Cancel
             </Button>
@@ -369,21 +385,15 @@ export function MemoryPage(): React.JSX.Element {
         </form>
       </ModalDialog>
 
-      <ModalDialog
+      <ConfirmationDialog
         open={clearConfirmOpen}
         title="Clear all local memory?"
         description="This permanently removes all stored memory records from SQLite. Audit logs and task history remain intact."
-        onClose={() => setClearConfirmOpen(false)}
-      >
-        <div className="flex justify-end gap-2">
-          <Button variant="secondary" autoFocus onClick={() => setClearConfirmOpen(false)}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={() => void handleClearAll()}>
-            Clear all records
-          </Button>
-        </div>
-      </ModalDialog>
+        confirmLabel="Clear all records"
+        tone="danger"
+        onConfirm={() => void handleClearAll()}
+        onCancel={() => setClearConfirmOpen(false)}
+      />
     </div>
   );
 }

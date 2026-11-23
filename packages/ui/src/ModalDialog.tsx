@@ -94,16 +94,19 @@ export function ModalDialog({
       ref={dialogRef}
       aria-labelledby={titleId}
       aria-describedby={description ? descId : undefined}
-      className="agentos-dialog w-[min(92vw,540px)] rounded-[10px] border border-[var(--border-control)] bg-[var(--surface-elevated)] text-[var(--ink-primary)] p-0 shadow-lg"
+      className="agentos-dialog glass-modal w-[min(92vw,540px)] rounded-[14px] text-[var(--ink-primary)] p-0 overflow-hidden"
       {...closedByProp}
     >
       <div className="px-5 py-4 border-b border-[var(--border-hairline)] flex items-start justify-between gap-4">
-        <div>
-          <h2 id={titleId} className="text-[16px] font-semibold leading-snug">
+        <div className="min-w-0">
+          <h2
+            id={titleId}
+            className="text-[16px] font-semibold tracking-[-0.01em] leading-snug m-0"
+          >
             {title}
           </h2>
           {description && (
-            <p id={descId} className="text-[13px] text-[var(--ink-secondary)] mt-1">
+            <p id={descId} className="text-[13px] text-[var(--ink-secondary)] mt-1 mb-0">
               {description}
             </p>
           )}
@@ -112,7 +115,7 @@ export function ModalDialog({
           type="button"
           onClick={() => dialogRef.current?.close()}
           aria-label="Close dialog"
-          className="rounded-[6px] px-2 py-1 text-[13px] text-[var(--ink-secondary)] hover:bg-[var(--surface-recessed)] hover:text-[var(--ink-primary)]"
+          className="rounded-[7px] px-2.5 py-1 text-[12.5px] font-medium text-[var(--ink-secondary)] hover:bg-[var(--surface-recessed)] hover:text-[var(--ink-primary)] transition-colors duration-150 shrink-0"
         >
           Close
         </button>
