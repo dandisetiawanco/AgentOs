@@ -1,17 +1,13 @@
 # AgentOS Build State
 
 Last Updated: 2026-11-23
-Current Phase: Phase 3 (Built-in Intelligent Tools)
+Current Phase: Phase 4 (Complete User Experience)
 
 ## Completed Milestones
 - Phase 0 complete: hardware/toolchain audit verified, Rust 1.100.0 installed, Git initialized (`f691613`).
 - Phase 1 complete (`081be86`): FastAPI + SQLite/Alembic + Keychain + 6 providers, Tauri 2 Rust bridge, React desktop shell.
-- Phase 2 complete:
-  - Strongly typed ToolRegistry (`BaseTool`, schema validation, timeout, untrusted content envelopes).
-  - PermissionEngine (`READ_ONLY`/`LOW`/`MEDIUM`/`HIGH`/`BLOCKED`, default-deny, canonical path & symlink checks, terminal/browser/computer-use policy guards, per-task time-limited grants, prompt-injection signals).
-  - StateManager (`TaskState` 10-state machine with transition guards, SQLite persistence, SSE `TaskEventBus`, rollback restoration).
-  - MemoryManager (local SQLite CRUD, TF-IDF relevance search, retention purge, export, disable guard, secret rejection).
-  - VerificationEngine, IntentAnalyzer, ContextManager, TaskPlanner, RecoveryManager, and LangGraph `AgentOrchestrator`.
+- Phase 2 complete (`96a5e7e`): ToolRegistry, PermissionEngine, 10-state StateManager, MemoryManager, VerificationEngine, RecoveryManager, LangGraph AgentOrchestrator.
+- Phase 3 complete: 22 built-in deterministic tools across File, Document, Browser (Playwright isolated contexts), System, and Restricted Terminal verified against temp fixtures (12/12 unit + Playwright integration pass).
 
 ## Environment Audit Results
 - OS: macOS 15.8.3 (Build 24H241, Darwin 24.6.0)
