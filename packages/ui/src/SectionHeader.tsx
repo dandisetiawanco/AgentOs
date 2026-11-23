@@ -20,19 +20,19 @@ export function SectionHeader({
   const Heading = as;
   const headingClass =
     as === "h1"
-      ? "text-[22px] font-semibold tracking-[-0.02em] text-[var(--ink-primary)] m-0"
+      ? "type-page-title text-[var(--ink-primary)] m-0"
       : as === "h2"
-        ? "text-[15px] font-semibold tracking-[-0.01em] text-[var(--ink-primary)] m-0"
-        : "text-[14px] font-semibold text-[var(--ink-primary)] m-0";
+        ? "type-section-title text-[var(--ink-primary)] m-0"
+        : "type-body font-semibold text-[var(--ink-primary)] m-0";
 
   return (
-    <div className={`flex flex-wrap items-start justify-between gap-3 ${className}`}>
+    <div className={`flex flex-wrap items-start justify-between gap-4 ${className}`}>
       <div className="min-w-0">
         <Heading id={id} className={headingClass}>
           {title}
         </Heading>
         {description && (
-          <p className="text-[13px] text-[var(--ink-secondary)] mt-1 mb-0 max-w-[66ch]">
+          <p className="type-secondary text-[var(--ink-secondary)] mt-1 mb-0 max-w-[66ch]">
             {description}
           </p>
         )}

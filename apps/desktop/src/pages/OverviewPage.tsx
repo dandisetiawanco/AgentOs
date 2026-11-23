@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import type { TaskRecord, WorkflowRecord } from "@agentos/shared";
 import {
+  AgentOSLogo,
   Button,
   EmptyState,
   ErrorState,
@@ -64,7 +65,7 @@ export function OverviewPage(): React.JSX.Element {
 
   if (error && !bootstrap) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
         <SectionHeader as="h1" title="Overview" />
         <ErrorState
           title="Local backend unavailable"
@@ -103,41 +104,45 @@ export function OverviewPage(): React.JSX.Element {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Frosted command banner */}
+      {/* Floating Liquid Glass Hero */}
       <GlassPanel variant="frosted" padding="lg">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <StatusIndicator
-                tone={emergencyActive ? "error" : "ready"}
-                label={emergencyActive ? "Emergency stop active" : "Local runtime active"}
-              />
-              {bootstrap && (
-                <span className="font-mono text-[11.5px] text-[var(--ink-secondary)]">
-                  {bootstrap.app.platform} {bootstrap.app.arch} · Python{" "}
-                  {bootstrap.app.python_version}
-                </span>
-              )}
+        <div className="flex flex-wrap items-start justify-between gap-6">
+          <div className="min-w-0 flex items-start gap-4">
+            <div className="hidden sm:block pt-0.5 shrink-0">
+              <AgentOSLogo size={32} showWordmark={false} />
             </div>
-            <h1 className="text-[24px] font-semibold tracking-[-0.025em] text-[var(--ink-primary)] m-0">
-              AgentOS Workspace
-            </h1>
-            <p className="text-[13.5px] text-[var(--ink-secondary)] mt-1.5 mb-0 max-w-[60ch]">
-              Intelligence that takes action. Local-first autonomous workspace with explicit
-              permission boundaries and deterministic verification.
-            </p>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                <StatusIndicator
+                  tone={emergencyActive ? "error" : "ready"}
+                  label={emergencyActive ? "Emergency stop active" : "Local runtime active"}
+                />
+                {bootstrap && (
+                  <span className="type-meta font-normal text-[var(--ink-secondary)]">
+                    {bootstrap.app.platform} {bootstrap.app.arch} · Python{" "}
+                    {bootstrap.app.python_version}
+                  </span>
+                )}
+              </div>
+              <h1 className="type-display text-[var(--ink-primary)] m-0">AgentOS Workspace</h1>
+              <p className="type-body text-[var(--ink-secondary)] mt-2 mb-0 max-w-[58ch]">
+                Intelligence that takes action. Local-first autonomous workspace with explicit
+                permission boundaries and verifiable execution.
+              </p>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
+
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-center">
             <Button
               variant={emergencyActive ? "primary" : "danger"}
               size="sm"
               onClick={() => void handleToggleEmergencyStop()}
             >
-              <ShieldAlert className="w-3.5 h-3.5" aria-hidden={true} />
+              <ShieldAlert className="w-4 h-4" aria-hidden={true} />
               {emergencyActive ? "Clear emergency stop" : "Emergency stop"}
             </Button>
             <Button variant="primary" size="md" onClick={() => setRoute("assistant")}>
-              <Play className="w-3.5 h-3.5" aria-hidden={true} />
+              <Play className="w-4 h-4" aria-hidden={true} />
               Start session
             </Button>
           </div>
@@ -147,16 +152,15 @@ export function OverviewPage(): React.JSX.Element {
       {emergencyActive && (
         <div
           role="alert"
-          className="rounded-[12px] border border-[var(--danger-border)] bg-[var(--danger-tint)] text-[var(--danger-ink)] px-4 py-3 text-[13px] font-medium"
+          className="rounded-[12px] border border-[var(--danger-border)] bg-[var(--danger-tint)] text-[var(--danger-ink)] px-5 py-3.5 type-secondary font-medium"
         >
           Emergency stop is active. All non-read-only tool executions are blocked until cleared.
         </div>
       )}
 
-      {/* Primary two-column command center */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        {/* Left column: Recent Tasks + Active Workflows */}
-        <div className="lg:col-span-7 flex flex-col gap-5">
+      {/* Primary Two-Column Layout: Recent Work (8 cols) + Quiet Status Inspector (4 cols) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="lg:col-span-8 flex flex-col gap-6">
           <section aria-labelledby="recent-tasks-heading" className="flex flex-col gap-3">
             <SectionHeader
               id="recent-tasks-heading"
@@ -172,7 +176,7 @@ export function OverviewPage(): React.JSX.Element {
             {recentTasks.length === 0 ? (
               <EmptyState
                 title="No tasks have been run yet"
-                description="Open the Assistant to submit your first natural-language instruction, or run a reusable template from Workflows."
+                description="Start a session to submit your first natural-language instruction, or launch a reusable template below."
                 actionLabel="Start first task"
                 onAction={() => setRoute("assistant")}
               />
@@ -187,14 +191,20 @@ export function OverviewPage(): React.JSX.Element {
                     key={task.id}
                     type="button"
                     onClick={() => setRoute("tasks")}
-                    className="w-full text-left px-4 py-3.5 flex flex-wrap items-center justify-between gap-3 hover:bg-[var(--surface-elevated)]/80 transition-colors duration-150"
+                    className="w-full text-left px-5 py-4 flex flex-wrap items-center justify-between gap-3 hover:bg-[var(--surface-elevated)]/85 transition-colors duration-150"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-[13.5px] font-medium text-[var(--ink-primary)] truncate m-0">
+                      <p className="type-body font-medium text-[var(--ink-primary)] break-words [overflow-wrap:anywhere] m-0">
                         {task.instruction}
                       </p>
-                      <p className="font-mono text-[11px] text-[var(--ink-secondary)] mt-0.5 mb-0">
-                        {task.id} · {task.steps.length} step(s) · {task.provider_id}
+                      <p className="type-meta font-normal text-[var(--ink-secondary)] mt-1 mb-0 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                        <span className="font-mono">{task.id}</span>
+                        <span aria-hidden="true">·</span>
+                        <span>
+                          {task.steps.length} {task.steps.length === 1 ? "step" : "steps"}
+                        </span>
+                        <span aria-hidden="true">·</span>
+                        <span className="font-mono">{task.provider_id}</span>
                       </p>
                     </div>
                     <TaskStatusBadge status={task.status} />
@@ -222,8 +232,9 @@ export function OverviewPage(): React.JSX.Element {
             />
             {workflows.length === 0 ? (
               <GlassPanel variant="surface" padding="md">
-                <p className="text-[13px] text-[var(--ink-secondary)] m-0">
-                  No workflows configured yet. Create reusable instruction templates in Workflows.
+                <p className="type-secondary text-[var(--ink-secondary)] m-0">
+                  No workflows configured yet. Create reusable instruction templates in the workflow
+                  library.
                 </p>
               </GlassPanel>
             ) : (
@@ -235,18 +246,18 @@ export function OverviewPage(): React.JSX.Element {
                 {workflows.map((wf) => (
                   <div
                     key={wf.id}
-                    className="px-4 py-3 flex flex-wrap items-center justify-between gap-2"
+                    className="px-5 py-4 flex flex-wrap items-start justify-between gap-3"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-[13.5px] font-medium text-[var(--ink-primary)] truncate m-0">
+                      <p className="type-body font-medium text-[var(--ink-primary)] m-0">
                         {wf.name}
                       </p>
-                      <p className="text-[12px] text-[var(--ink-secondary)] truncate mt-0.5 mb-0">
+                      <p className="type-secondary text-[var(--ink-secondary)] mt-1 mb-0 break-words [overflow-wrap:anywhere]">
                         {wf.description}
                       </p>
                     </div>
-                    <span className="inline-flex items-center gap-1 text-[11.5px] font-mono text-[var(--ink-secondary)] shrink-0">
-                      <Clock className="w-3 h-3" aria-hidden={true} />
+                    <span className="inline-flex items-center gap-1.5 type-meta text-[var(--ink-secondary)] shrink-0 pt-0.5">
+                      <Clock className="w-3.5 h-3.5" aria-hidden={true} />
                       {wf.schedule_enabled ? `Every ${wf.schedule_interval_minutes}m` : "Manual"}
                     </span>
                   </div>
@@ -256,54 +267,61 @@ export function OverviewPage(): React.JSX.Element {
           </section>
         </div>
 
-        {/* Right column: Provider Status, Workspaces & Security, System Runtime */}
-        <div className="lg:col-span-5 flex flex-col gap-4">
+        {/* Right Column: Unified Quiet Secondary Inspector */}
+        <div className="lg:col-span-4">
           <GlassPanel
             as="section"
-            aria-labelledby="readiness-heading"
+            aria-label="Workspace readiness and system status"
             variant="surface"
-            padding="md"
+            padding="none"
+            className="divide-y divide-[var(--border-hairline)] overflow-hidden"
           >
-            <div className="flex items-center justify-between gap-2">
-              <h2 id="readiness-heading" className="text-[14px] font-semibold m-0">
-                AI Provider Connection
-              </h2>
-              <StatusIndicator
-                tone={activeProvider?.ready ? "ready" : "warning"}
-                label={`${readyProviders.length} ready`}
-              />
+            {/* AI Provider Connection */}
+            <div className="p-5">
+              <div className="flex items-center justify-between gap-2">
+                <h2
+                  id="readiness-heading"
+                  className="type-section-title text-[var(--ink-primary)] m-0"
+                >
+                  AI Provider
+                </h2>
+                <StatusIndicator
+                  tone={activeProvider?.ready ? "ready" : "warning"}
+                  label={`${readyProviders.length} ready`}
+                />
+              </div>
+              <p className="type-body font-semibold text-[var(--ink-primary)] mt-3 mb-0">
+                {activeProvider?.display_name ?? "Not selected"}
+              </p>
+              <p className="type-meta font-mono font-normal text-[var(--ink-secondary)] mt-0.5 mb-0 break-words [overflow-wrap:anywhere]">
+                {bootstrap?.settings.default_model ?? "No model configured"}
+              </p>
+              <div className="mt-4">
+                <Button variant="secondary" size="sm" onClick={() => setRoute("settings")}>
+                  Manage API keys & models
+                </Button>
+              </div>
             </div>
-            <p className="text-[15px] font-semibold text-[var(--ink-primary)] mt-3 mb-0">
-              {activeProvider?.display_name ?? "Not selected"}
-            </p>
-            <p className="text-[12px] font-mono text-[var(--ink-secondary)] mt-0.5 mb-0">
-              {bootstrap?.settings.default_model ?? "No model configured"}
-            </p>
-            <div className="mt-4 pt-3 border-t border-[var(--border-hairline)]">
-              <Button variant="secondary" size="sm" onClick={() => setRoute("settings")}>
-                Manage API keys & models
-              </Button>
-            </div>
-          </GlassPanel>
 
-          <GlassPanel as="section" aria-labelledby="posture-heading" variant="surface" padding="md">
-            <h2 id="posture-heading" className="text-[14px] font-semibold m-0">
-              Permissions & Security
-            </h2>
-            <div className="mt-3 flex flex-col gap-3 text-[13px]">
+            {/* Permissions & Security */}
+            <div className="p-5 flex flex-col gap-4">
+              <h2 id="posture-heading" className="type-section-title text-[var(--ink-primary)] m-0">
+                Permissions & Security
+              </h2>
+
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-2.5 min-w-0">
                   <FolderLock
-                    className="w-4 h-4 text-[var(--ink-secondary)] mt-0.5 shrink-0"
+                    className="w-4 h-4 text-[var(--ink-secondary)] mt-1 shrink-0"
                     aria-hidden={true}
                   />
-                  <div>
-                    <p className="font-medium text-[var(--ink-primary)] m-0">
+                  <div className="min-w-0">
+                    <p className="type-secondary font-medium text-[var(--ink-primary)] m-0">
                       {workspaces.length === 0
                         ? "No workspaces authorized"
                         : `${workspaces.length} authorized ${workspaces.length === 1 ? "directory" : "directories"}`}
                     </p>
-                    <p className="text-[12px] text-[var(--ink-secondary)] mt-0.5 mb-0">
+                    <p className="type-meta font-normal text-[var(--ink-secondary)] mt-0.5 mb-0">
                       Default-deny filesystem boundaries enforced.
                     </p>
                   </div>
@@ -313,19 +331,19 @@ export function OverviewPage(): React.JSX.Element {
                 </Button>
               </div>
 
-              <div className="pt-3 border-t border-[var(--border-hairline)] flex items-start justify-between gap-3">
+              <div className="flex items-start justify-between gap-3 pt-3 border-t border-[var(--border-hairline)]">
                 <div className="flex items-start gap-2.5 min-w-0">
                   <ShieldCheck
-                    className="w-4 h-4 text-[var(--success-ink)] mt-0.5 shrink-0"
+                    className="w-4 h-4 text-[var(--success-ink)] mt-1 shrink-0"
                     aria-hidden={true}
                   />
-                  <div>
-                    <p className="font-medium text-[var(--ink-primary)] m-0">
+                  <div className="min-w-0">
+                    <p className="type-secondary font-medium text-[var(--ink-primary)] m-0">
                       {bootstrap?.keychain.persistent
                         ? "OS Keychain vault active"
                         : "Ephemeral session vault"}
                     </p>
-                    <p className="text-[12px] text-[var(--ink-secondary)] mt-0.5 mb-0">
+                    <p className="type-meta font-normal text-[var(--ink-secondary)] mt-0.5 mb-0">
                       Terminal execution{" "}
                       {bootstrap?.settings.terminal_enabled
                         ? "enabled (allowlisted)"
@@ -339,49 +357,48 @@ export function OverviewPage(): React.JSX.Element {
                 </Button>
               </div>
             </div>
-          </GlassPanel>
 
-          {bootstrap && (
-            <GlassPanel
-              as="section"
-              aria-labelledby="runtime-heading"
-              variant="subtle"
-              padding="md"
-            >
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <span className="inline-flex items-center gap-1.5">
-                  <Cpu className="w-3.5 h-3.5 text-[var(--ink-secondary)]" aria-hidden={true} />
-                  <h2 id="runtime-heading" className="text-[13.5px] font-semibold m-0">
-                    System Status
-                  </h2>
-                </span>
-                <Button variant="ghost" size="sm" onClick={() => void refreshAll()}>
-                  <RefreshCw className="w-3.5 h-3.5" aria-hidden={true} />
-                  Refresh
-                </Button>
+            {/* Quiet Technical System Status Footer */}
+            {bootstrap && (
+              <div className="p-5 bg-[var(--surface-recessed)]/55">
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <span className="inline-flex items-center gap-2">
+                    <Cpu className="w-4 h-4 text-[var(--ink-secondary)]" aria-hidden={true} />
+                    <h2
+                      id="runtime-heading"
+                      className="type-section-title text-[var(--ink-secondary)] m-0"
+                    >
+                      System Status
+                    </h2>
+                  </span>
+                  <Button variant="ghost" size="sm" onClick={() => void refreshAll()}>
+                    <RefreshCw className="w-3.5 h-3.5" aria-hidden={true} />
+                    Refresh
+                  </Button>
+                </div>
+                <dl className="grid grid-cols-2 gap-3 type-meta m-0">
+                  <div>
+                    <dt className="font-normal text-[var(--ink-secondary)]">Recorded tasks</dt>
+                    <dd className="type-secondary font-semibold tabular-nums text-[var(--ink-primary)] mt-0.5 m-0">
+                      {Math.max(bootstrap.counts.tasks, totalTaskCount)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="font-normal text-[var(--ink-secondary)]">Architecture</dt>
+                    <dd className="font-mono font-normal text-[var(--ink-primary)] mt-0.5 m-0">
+                      {bootstrap.app.arch}
+                    </dd>
+                  </div>
+                  <div className="col-span-2">
+                    <dt className="font-normal text-[var(--ink-secondary)]">Credential storage</dt>
+                    <dd className="font-mono font-normal text-[var(--ink-primary)] mt-0.5 m-0 break-words [overflow-wrap:anywhere]">
+                      {bootstrap.keychain.backend}
+                    </dd>
+                  </div>
+                </dl>
               </div>
-              <dl className="grid grid-cols-2 gap-3 text-[12px] m-0">
-                <div>
-                  <dt className="text-[var(--ink-secondary)]">Recorded tasks</dt>
-                  <dd className="font-mono font-semibold text-[var(--ink-primary)] mt-0.5 m-0">
-                    {Math.max(bootstrap.counts.tasks, totalTaskCount)}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[var(--ink-secondary)]">Architecture</dt>
-                  <dd className="font-mono text-[var(--ink-primary)] mt-0.5 m-0">
-                    {bootstrap.app.arch}
-                  </dd>
-                </div>
-                <div className="col-span-2">
-                  <dt className="text-[var(--ink-secondary)]">Credential storage</dt>
-                  <dd className="font-mono text-[var(--ink-primary)] mt-0.5 m-0 truncate">
-                    {bootstrap.keychain.backend}
-                  </dd>
-                </div>
-              </dl>
-            </GlassPanel>
-          )}
+            )}
+          </GlassPanel>
         </div>
       </div>
     </div>

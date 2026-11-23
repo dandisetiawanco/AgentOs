@@ -10,18 +10,18 @@ export interface GlassPanelProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 const VARIANT_CLASSES: Record<GlassVariant, string> = {
-  surface: "glass-panel",
-  frosted: "glass-frosted",
-  subtle: "bg-[var(--surface-recessed)]/75 border border-[var(--border-hairline)]",
+  surface: "glass-surface",
+  frosted: "glass-float",
+  subtle: "bg-[var(--surface-recessed)] border border-[var(--border-hairline)]",
   elevated:
-    "bg-[var(--surface-elevated)] border border-[var(--border-hairline)] shadow-[var(--shadow-sm)]",
+    "bg-[var(--surface-elevated)] border border-[var(--border-hairline)] shadow-[var(--shadow-surface)]",
 };
 
 const PADDING_CLASSES: Record<GlassPadding, string> = {
   none: "",
-  sm: "p-3.5",
-  md: "p-5",
-  lg: "p-6",
+  sm: "p-4",
+  md: "p-6",
+  lg: "p-7",
 };
 
 export function GlassPanel({
@@ -36,7 +36,7 @@ export function GlassPanel({
   return (
     <Component
       className={[
-        "rounded-[12px] transition-[border-color,background-color] duration-150",
+        "rounded-[14px] transition-[border-color,background-color,box-shadow] duration-200",
         VARIANT_CLASSES[variant],
         PADDING_CLASSES[padding],
         className,

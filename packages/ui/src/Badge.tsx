@@ -86,7 +86,7 @@ export function RiskBadge({ level }: { level: RiskLevel }): React.JSX.Element {
   const cfg = RISK_STYLES[level] ?? RISK_STYLES.READ_ONLY;
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 text-[11.5px] leading-tight rounded-full border font-medium ${cfg.className}`}
+      className={`inline-flex items-center whitespace-nowrap shrink-0 px-2.5 py-0.5 type-meta rounded-full border ${cfg.className}`}
     >
       {cfg.label}
     </span>
@@ -97,7 +97,7 @@ export function TaskStatusBadge({ status }: { status: TaskStatus }): React.JSX.E
   const cfg = STATUS_STYLES[status] ?? STATUS_STYLES.created;
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11.5px] leading-tight rounded-full border font-medium ${cfg.className}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 px-2.5 py-0.5 type-meta rounded-full border ${cfg.className}`}
     >
       <span
         aria-hidden="true"

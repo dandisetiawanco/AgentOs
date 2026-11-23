@@ -1,120 +1,126 @@
 @import "tailwindcss";
-@source "../../../packages/ui/src";
+@source "../../../../packages/ui/src";
 
 /*
- * AgentOS Liquid Glass Design System
- * Contrast-verified WCAG AA in both light and dark modes (5.17:1 to 17.24:1).
- * Engineered for crisp readability and smooth 60fps rendering on Intel macOS.
+ * AgentOS Native macOS Liquid Glass Design System
+ * Worst-case blended glass contrast verified WCAG AA (5.17:1 to 14.02:1).
+ * Strict 6-step typography scale: 28/34, 24/30, 16/24, 14/22, 13/20, 12/18.
  */
 :root {
   color-scheme: light dark;
 
-  /* --- Light Palette Tokens --- */
-  --canvas-light: #f5f7fa;
-  --canvas-ambient-light:
-    radial-gradient(900px 520px at 8% -6%, rgba(37, 99, 235, 0.055), transparent 65%),
-    radial-gradient(760px 480px at 94% 104%, rgba(100, 116, 139, 0.065), transparent 62%);
-  --surface-elevated-light: #ffffff;
-  --surface-recessed-light: #ebf0f5;
-  --surface-input-light: rgba(255, 255, 255, 0.88);
+  /* --- Light Palette --- */
+  --canvas-light: #e8eef6;
+  --backdrop-light:
+    radial-gradient(620px 440px at 14% 12%, rgba(59, 130, 246, 0.24), transparent 68%),
+    radial-gradient(680px 460px at 84% 10%, rgba(120, 158, 224, 0.24), transparent 66%),
+    radial-gradient(560px 420px at 52% 48%, rgba(255, 255, 255, 0.72), transparent 72%),
+    radial-gradient(720px 500px at 22% 92%, rgba(99, 132, 186, 0.22), transparent 68%),
+    radial-gradient(640px 460px at 90% 88%, rgba(148, 174, 214, 0.24), transparent 68%),
+    linear-gradient(155deg, #dde6f2 0%, #eff3f9 46%, #e1e8f3 100%);
 
-  --glass-sidebar-light: rgba(255, 255, 255, 0.68);
-  --glass-header-light: rgba(248, 250, 253, 0.74);
-  --glass-panel-light: rgba(255, 255, 255, 0.76);
-  --glass-frosted-light: rgba(255, 255, 255, 0.68);
-  --glass-composer-light: rgba(255, 255, 255, 0.84);
-  --glass-modal-light: rgba(255, 255, 255, 0.94);
+  --surface-elevated-light: #ffffff;
+  --surface-recessed-light: rgba(226, 234, 245, 0.68);
+  --surface-input-light: rgba(255, 255, 255, 0.86);
+
+  --glass-chrome-light: rgba(255, 255, 255, 0.56);
+  --glass-float-light: rgba(255, 255, 255, 0.58);
+  --glass-surface-light: rgba(255, 255, 255, 0.82);
+  --glass-modal-light: rgba(255, 255, 255, 0.9);
 
   --ink-primary-light: #18212f;
-  --ink-secondary-light: #4e5d73;
-  --ink-recessed-light: #475569;
+  --ink-secondary-light: #43536b;
+  --ink-recessed-light: #43536b;
 
-  --border-hairline-light: rgba(15, 23, 42, 0.085);
-  --border-control-light: rgba(15, 23, 42, 0.17);
-  --glass-highlight-light: rgba(255, 255, 255, 0.88);
+  --border-hairline-light: rgba(15, 23, 42, 0.08);
+  --border-glass-light: rgba(255, 255, 255, 0.72);
+  --border-control-light: rgba(15, 23, 42, 0.16);
+  --glass-highlight-light: rgba(255, 255, 255, 0.92);
 
   --accent-light: #2563eb;
   --accent-fill-light: #2563eb;
   --accent-fill-hover-light: #1d4ed8;
   --accent-ink-light: #1d4ed8;
-  --accent-tint-light: #e8f0fe;
+  --accent-tint-light: rgba(37, 99, 235, 0.12);
   --accent-border-light: rgba(37, 99, 235, 0.28);
 
-  --success-tint-light: #e8faee;
+  --success-tint-light: #e6f8ec;
   --success-ink-light: #166534;
-  --success-border-light: rgba(22, 101, 52, 0.24);
-  --warning-tint-light: #fef6db;
+  --success-border-light: rgba(22, 101, 52, 0.22);
+  --warning-tint-light: #fef4d6;
   --warning-ink-light: #92400e;
-  --warning-border-light: rgba(146, 64, 14, 0.26);
-  --danger-tint-light: #fdecec;
+  --warning-border-light: rgba(146, 64, 14, 0.25);
+  --danger-tint-light: #fdeaea;
   --danger-ink-light: #991b1b;
-  --danger-border-light: rgba(153, 27, 27, 0.26);
+  --danger-border-light: rgba(153, 27, 27, 0.24);
 
-  --shadow-sm-light: 0 1px 2px rgba(15, 23, 42, 0.05), 0 4px 12px -4px rgba(15, 23, 42, 0.06);
-  --shadow-md-light: 0 2px 6px rgba(15, 23, 42, 0.05), 0 10px 28px -10px rgba(15, 23, 42, 0.11);
-  --shadow-lg-light: 0 18px 46px -14px rgba(15, 23, 42, 0.22), 0 2px 8px rgba(15, 23, 42, 0.07);
+  --shadow-surface-light: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.1);
+  --shadow-float-light: 0 2px 6px rgba(15, 23, 42, 0.05), 0 14px 36px -14px rgba(15, 23, 42, 0.16);
+  --shadow-modal-light: 0 24px 64px -16px rgba(15, 23, 42, 0.26), 0 2px 10px rgba(15, 23, 42, 0.08);
 
-  /* --- Dark Palette Tokens --- */
-  --canvas-dark: #0d111a;
-  --canvas-ambient-dark:
-    radial-gradient(880px 500px at 10% -8%, rgba(96, 165, 250, 0.085), transparent 64%),
-    radial-gradient(720px 460px at 92% 106%, rgba(59, 130, 246, 0.055), transparent 62%);
-  --surface-elevated-dark: #161c28;
-  --surface-recessed-dark: #111723;
-  --surface-input-dark: rgba(15, 21, 33, 0.84);
+  /* --- Dark Palette --- */
+  --canvas-dark: #0a0f1a;
+  --backdrop-dark:
+    radial-gradient(640px 460px at 14% 12%, rgba(59, 130, 246, 0.28), transparent 66%),
+    radial-gradient(680px 480px at 86% 12%, rgba(96, 165, 250, 0.18), transparent 64%),
+    radial-gradient(680px 480px at 20% 92%, rgba(30, 64, 175, 0.24), transparent 66%),
+    radial-gradient(600px 440px at 88% 88%, rgba(56, 102, 184, 0.18), transparent 66%),
+    linear-gradient(155deg, #070b14 0%, #0f1729 48%, #090e1a 100%);
 
-  --glass-sidebar-dark: rgba(22, 28, 40, 0.68);
-  --glass-header-dark: rgba(16, 21, 32, 0.74);
-  --glass-panel-dark: rgba(22, 28, 40, 0.72);
-  --glass-frosted-dark: rgba(22, 28, 40, 0.68);
-  --glass-composer-dark: rgba(25, 33, 48, 0.82);
-  --glass-modal-dark: rgba(22, 28, 40, 0.94);
+  --surface-elevated-dark: #161f31;
+  --surface-recessed-dark: rgba(12, 18, 30, 0.68);
+  --surface-input-dark: rgba(13, 19, 32, 0.8);
+
+  --glass-chrome-dark: rgba(16, 23, 37, 0.58);
+  --glass-float-dark: rgba(22, 31, 49, 0.56);
+  --glass-surface-dark: rgba(18, 25, 39, 0.8);
+  --glass-modal-dark: rgba(20, 28, 44, 0.9);
 
   --ink-primary-dark: #f1f5f9;
-  --ink-secondary-dark: #a0aec0;
-  --ink-recessed-dark: #a0aec0;
+  --ink-secondary-dark: #b0bdd0;
+  --ink-recessed-dark: #b0bdd0;
 
-  --border-hairline-dark: rgba(241, 245, 249, 0.085);
+  --border-hairline-dark: rgba(241, 245, 249, 0.09);
+  --border-glass-dark: rgba(255, 255, 255, 0.13);
   --border-control-dark: rgba(241, 245, 249, 0.18);
-  --glass-highlight-dark: rgba(255, 255, 255, 0.07);
+  --glass-highlight-dark: rgba(255, 255, 255, 0.14);
 
   --accent-dark: #60a5fa;
   --accent-fill-dark: #2563eb;
   --accent-fill-hover-dark: #1d4ed8;
   --accent-ink-dark: #60a5fa;
-  --accent-tint-dark: #172554;
-  --accent-border-dark: rgba(96, 165, 250, 0.34);
+  --accent-tint-dark: rgba(59, 130, 246, 0.2);
+  --accent-border-dark: rgba(96, 165, 250, 0.36);
 
   --success-tint-dark: #12291e;
   --success-ink-dark: #86efac;
   --success-border-dark: rgba(134, 239, 172, 0.28);
-  --warning-tint-dark: #2b200d;
+  --warning-tint-dark: #2c210e;
   --warning-ink-dark: #fcd34d;
   --warning-border-dark: rgba(252, 211, 77, 0.3);
-  --danger-tint-dark: #2e1418;
+  --danger-tint-dark: #30151a;
   --danger-ink-dark: #fca5a5;
   --danger-border-dark: rgba(252, 165, 165, 0.3);
 
-  --shadow-sm-dark: 0 1px 2px rgba(0, 0, 0, 0.32), 0 6px 16px -6px rgba(0, 0, 0, 0.42);
-  --shadow-md-dark: 0 4px 12px rgba(0, 0, 0, 0.36), 0 14px 34px -12px rgba(0, 0, 0, 0.56);
-  --shadow-lg-dark: 0 24px 60px -16px rgba(0, 0, 0, 0.72), 0 2px 10px rgba(0, 0, 0, 0.4);
+  --shadow-surface-dark: 0 1px 2px rgba(0, 0, 0, 0.32), 0 10px 26px -12px rgba(0, 0, 0, 0.52);
+  --shadow-float-dark: 0 4px 12px rgba(0, 0, 0, 0.38), 0 18px 42px -14px rgba(0, 0, 0, 0.64);
+  --shadow-modal-dark: 0 28px 68px -16px rgba(0, 0, 0, 0.78), 0 2px 10px rgba(0, 0, 0, 0.44);
 
   /* --- Semantic Active Tokens (Light Default) --- */
   --canvas: var(--canvas-light);
-  --canvas-ambient: var(--canvas-ambient-light);
+  --backdrop: var(--backdrop-light);
   --surface-elevated: var(--surface-elevated-light);
   --surface-recessed: var(--surface-recessed-light);
   --surface-input: var(--surface-input-light);
-  --glass-sidebar: var(--glass-sidebar-light);
-  --glass-header: var(--glass-header-light);
-  --glass-panel: var(--glass-panel-light);
-  --glass-frosted: var(--glass-frosted-light);
-  --glass-composer: var(--glass-composer-light);
+  --glass-chrome: var(--glass-chrome-light);
+  --glass-float: var(--glass-float-light);
+  --glass-surface: var(--glass-surface-light);
   --glass-modal: var(--glass-modal-light);
   --ink-primary: var(--ink-primary-light);
   --ink-secondary: var(--ink-secondary-light);
   --ink-recessed: var(--ink-recessed-light);
   --border-hairline: var(--border-hairline-light);
+  --border-glass: var(--border-glass-light);
   --border-control: var(--border-control-light);
   --glass-highlight: var(--glass-highlight-light);
   --accent: var(--accent-light);
@@ -132,62 +138,58 @@
   --danger-tint: var(--danger-tint-light);
   --danger-ink: var(--danger-ink-light);
   --danger-border: var(--danger-border-light);
-  --shadow-sm: var(--shadow-sm-light);
-  --shadow-md: var(--shadow-md-light);
-  --shadow-lg: var(--shadow-lg-light);
+  --shadow-surface: var(--shadow-surface-light);
+  --shadow-float: var(--shadow-float-light);
+  --shadow-modal: var(--shadow-modal-light);
 
-  /* --- Structural Scale & Motion Tokens --- */
-  --blur-sm: 14px;
-  --blur-md: 18px;
-  --blur-lg: 22px;
+  /* --- Geometry & Motion --- */
+  --blur-glass: 20px;
+  --saturate-glass: 140%;
   --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --motion-fast: 150ms;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --motion-fast: 160ms;
   --motion-normal: 200ms;
   --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
 
-  font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", system-ui,
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 22px;
   accent-color: var(--accent-fill);
 }
 
 :root:has(> head > meta[name="color-scheme"][content="dark"]) {
   color-scheme: dark;
-  --canvas-ambient: var(--canvas-ambient-dark);
-  --shadow-sm: var(--shadow-sm-dark);
-  --shadow-md: var(--shadow-md-dark);
-  --shadow-lg: var(--shadow-lg-dark);
+  --backdrop: var(--backdrop-dark);
+  --shadow-surface: var(--shadow-surface-dark);
+  --shadow-float: var(--shadow-float-dark);
+  --shadow-modal: var(--shadow-modal-dark);
 }
 
 :root:has(> head > meta[name="color-scheme"][content="light"]) {
   color-scheme: light;
-  --canvas-ambient: var(--canvas-ambient-light);
-  --shadow-sm: var(--shadow-sm-light);
-  --shadow-md: var(--shadow-md-light);
-  --shadow-lg: var(--shadow-lg-light);
+  --backdrop: var(--backdrop-light);
+  --shadow-surface: var(--shadow-surface-light);
+  --shadow-float: var(--shadow-float-light);
+  --shadow-modal: var(--shadow-modal-light);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not(:has(> head > meta[name="color-scheme"][content="light"])) {
     --canvas: var(--canvas-dark);
-    --canvas-ambient: var(--canvas-ambient-dark);
+    --backdrop: var(--backdrop-dark);
     --surface-elevated: var(--surface-elevated-dark);
     --surface-recessed: var(--surface-recessed-dark);
     --surface-input: var(--surface-input-dark);
-    --glass-sidebar: var(--glass-sidebar-dark);
-    --glass-header: var(--glass-header-dark);
-    --glass-panel: var(--glass-panel-dark);
-    --glass-frosted: var(--glass-frosted-dark);
-    --glass-composer: var(--glass-composer-dark);
+    --glass-chrome: var(--glass-chrome-dark);
+    --glass-float: var(--glass-float-dark);
+    --glass-surface: var(--glass-surface-dark);
     --glass-modal: var(--glass-modal-dark);
     --ink-primary: var(--ink-primary-dark);
     --ink-secondary: var(--ink-secondary-dark);
     --ink-recessed: var(--ink-recessed-dark);
     --border-hairline: var(--border-hairline-dark);
+    --border-glass: var(--border-glass-dark);
     --border-control: var(--border-control-dark);
     --glass-highlight: var(--glass-highlight-dark);
     --accent: var(--accent-dark);
@@ -205,9 +207,9 @@
     --danger-tint: var(--danger-tint-dark);
     --danger-ink: var(--danger-ink-dark);
     --danger-border: var(--danger-border-dark);
-    --shadow-sm: var(--shadow-sm-dark);
-    --shadow-md: var(--shadow-md-dark);
-    --shadow-lg: var(--shadow-lg-dark);
+    --shadow-surface: var(--shadow-surface-dark);
+    --shadow-float: var(--shadow-float-dark);
+    --shadow-modal: var(--shadow-modal-dark);
   }
 }
 
@@ -217,16 +219,15 @@
     --surface-elevated: light-dark(var(--surface-elevated-light), var(--surface-elevated-dark));
     --surface-recessed: light-dark(var(--surface-recessed-light), var(--surface-recessed-dark));
     --surface-input: light-dark(var(--surface-input-light), var(--surface-input-dark));
-    --glass-sidebar: light-dark(var(--glass-sidebar-light), var(--glass-sidebar-dark));
-    --glass-header: light-dark(var(--glass-header-light), var(--glass-header-dark));
-    --glass-panel: light-dark(var(--glass-panel-light), var(--glass-panel-dark));
-    --glass-frosted: light-dark(var(--glass-frosted-light), var(--glass-frosted-dark));
-    --glass-composer: light-dark(var(--glass-composer-light), var(--glass-composer-dark));
+    --glass-chrome: light-dark(var(--glass-chrome-light), var(--glass-chrome-dark));
+    --glass-float: light-dark(var(--glass-float-light), var(--glass-float-dark));
+    --glass-surface: light-dark(var(--glass-surface-light), var(--glass-surface-dark));
     --glass-modal: light-dark(var(--glass-modal-light), var(--glass-modal-dark));
     --ink-primary: light-dark(var(--ink-primary-light), var(--ink-primary-dark));
     --ink-secondary: light-dark(var(--ink-secondary-light), var(--ink-secondary-dark));
     --ink-recessed: light-dark(var(--ink-recessed-light), var(--ink-recessed-dark));
     --border-hairline: light-dark(var(--border-hairline-light), var(--border-hairline-dark));
+    --border-glass: light-dark(var(--border-glass-light), var(--border-glass-dark));
     --border-control: light-dark(var(--border-control-light), var(--border-control-dark));
     --glass-highlight: light-dark(var(--glass-highlight-light), var(--glass-highlight-dark));
     --accent: light-dark(var(--accent-light), var(--accent-dark));
@@ -247,65 +248,115 @@
   }
 }
 
-/* --- Liquid Glass Surface Classes (Targeted Blur, Safe Fallbacks) --- */
-.agentos-canvas {
+/* --- Strict 6-Step Native macOS Typography Scale --- */
+.type-display {
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.type-page-title {
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.type-section-title {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+
+.type-body {
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 400;
+}
+
+.type-secondary {
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
+.type-meta {
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+}
+
+/* --- Layered Atmospheric Backdrop & Liquid Glass Materials --- */
+.agentos-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background-color: var(--canvas);
-  background-image: var(--canvas-ambient);
-  background-attachment: fixed;
+  background-image: var(--backdrop);
 }
 
 .glass-sidebar {
-  background-color: var(--glass-sidebar);
+  background-color: var(--glass-chrome);
   border-color: var(--border-hairline);
-  box-shadow: inset -1px 0 0 var(--border-hairline);
-  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(160%);
-  backdrop-filter: blur(var(--blur-lg)) saturate(160%);
+  box-shadow:
+    inset -1px 0 0 var(--border-hairline),
+    inset 0 1px 0 var(--glass-highlight);
+  -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(var(--saturate-glass));
+  backdrop-filter: blur(var(--blur-glass)) saturate(var(--saturate-glass));
 }
 
 .glass-header {
-  background-color: var(--glass-header);
+  background-color: var(--glass-chrome);
   border-color: var(--border-hairline);
-  box-shadow: inset 0 -1px 0 var(--border-hairline);
-  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(150%);
-  backdrop-filter: blur(var(--blur-md)) saturate(150%);
+  box-shadow:
+    inset 0 -1px 0 var(--border-hairline),
+    inset 0 1px 0 var(--glass-highlight);
+  -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(var(--saturate-glass));
+  backdrop-filter: blur(var(--blur-glass)) saturate(var(--saturate-glass));
 }
 
-.glass-frosted {
-  background-color: var(--glass-frosted);
+.glass-float {
+  background-color: var(--glass-float);
+  border: 1px solid var(--border-glass);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    0 0 0 1px var(--border-hairline),
+    var(--shadow-float);
+  -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(var(--saturate-glass));
+  backdrop-filter: blur(var(--blur-glass)) saturate(var(--saturate-glass));
+}
+
+.glass-surface {
+  background-color: var(--glass-surface);
   border: 1px solid var(--border-hairline);
   box-shadow:
     inset 0 1px 0 var(--glass-highlight),
-    var(--shadow-sm);
-  -webkit-backdrop-filter: blur(var(--blur-sm)) saturate(145%);
-  backdrop-filter: blur(var(--blur-sm)) saturate(145%);
-}
-
-.glass-panel {
-  background-color: var(--glass-panel);
-  border: 1px solid var(--border-hairline);
-  box-shadow:
-    inset 0 1px 0 var(--glass-highlight),
-    var(--shadow-sm);
+    var(--shadow-surface);
 }
 
 .glass-composer {
-  background-color: var(--glass-composer);
-  border: 1px solid var(--border-control);
+  background-color: var(--glass-float);
+  border: 1px solid var(--border-glass);
   box-shadow:
     inset 0 1px 0 var(--glass-highlight),
-    var(--shadow-md);
-  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(160%);
-  backdrop-filter: blur(var(--blur-md)) saturate(160%);
+    0 0 0 1px var(--border-control),
+    var(--shadow-float);
+  -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(var(--saturate-glass));
+  backdrop-filter: blur(var(--blur-glass)) saturate(var(--saturate-glass));
 }
 
 .glass-modal {
   background-color: var(--glass-modal);
-  border: 1px solid var(--border-control);
+  border: 1px solid var(--border-glass);
   box-shadow:
     inset 0 1px 0 var(--glass-highlight),
-    var(--shadow-lg);
-  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(150%);
-  backdrop-filter: blur(var(--blur-lg)) saturate(150%);
+    0 0 0 1px var(--border-control),
+    var(--shadow-modal);
+  -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(var(--saturate-glass));
+  backdrop-filter: blur(var(--blur-glass)) saturate(var(--saturate-glass));
 }
 
 .glass-input {
@@ -313,6 +364,8 @@
   border: 1px solid var(--border-control);
   color: var(--ink-primary);
   border-radius: var(--radius-sm);
+  font-size: 13px;
+  line-height: 20px;
   transition:
     border-color var(--motion-fast) var(--motion-ease),
     box-shadow var(--motion-fast) var(--motion-ease),
@@ -328,7 +381,7 @@
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass-sidebar,
   .glass-header,
-  .glass-frosted,
+  .glass-float,
   .glass-composer,
   .glass-modal {
     background-color: var(--surface-elevated);
@@ -343,6 +396,9 @@
     background-color: var(--canvas);
     color: var(--ink-primary);
     min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    font-size: 14px;
+    line-height: 22px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scrollbar-color: var(--border-control) transparent;
@@ -400,7 +456,6 @@
   }
 }
 
-/* Native modal dialog top-layer scroll containment & subtle entry (modern-web-guidance: dialog) */
 @keyframes agentos-dialog-in {
   from {
     opacity: 0;
@@ -419,9 +474,9 @@ dialog.agentos-dialog:modal {
 }
 
 dialog.agentos-dialog::backdrop {
-  background: rgba(13, 17, 26, 0.48);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  background: rgba(10, 15, 26, 0.44);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   overflow: hidden;
   overscroll-behavior: contain;
 }

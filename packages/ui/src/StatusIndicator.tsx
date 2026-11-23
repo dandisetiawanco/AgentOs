@@ -34,9 +34,9 @@ export function StatusIndicator({
   return (
     <span
       className={[
-        "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[12px] font-medium leading-tight",
+        "inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 px-2.5 py-0.5 rounded-full border type-meta",
         PILL_CLASSES[tone],
-        mono ? "font-mono text-[11px]" : "",
+        mono ? "font-mono" : "",
         className,
       ]
         .filter(Boolean)

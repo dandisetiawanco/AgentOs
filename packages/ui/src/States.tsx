@@ -13,9 +13,9 @@ export function EmptyState({
   onAction?: () => void;
 }): React.JSX.Element {
   return (
-    <div className="glass-panel rounded-[12px] p-6 text-left">
-      <h3 className="text-[14.5px] font-semibold text-[var(--ink-primary)] m-0">{title}</h3>
-      <p className="text-[13px] text-[var(--ink-secondary)] mt-1.5 mb-0 max-w-[54ch]">
+    <div className="glass-surface rounded-[14px] p-6 text-left">
+      <h3 className="type-section-title text-[var(--ink-primary)] m-0">{title}</h3>
+      <p className="type-secondary text-[var(--ink-secondary)] mt-1.5 mb-0 max-w-[54ch]">
         {description}
       </p>
       {actionLabel && onAction && (
@@ -31,8 +31,8 @@ export function EmptyState({
 
 export function LoadingState({ label }: { label: string }): React.JSX.Element {
   return (
-    <div className="glass-panel rounded-[12px] p-5 flex flex-col gap-2.5">
-      <p className="text-[13px] font-medium text-[var(--ink-secondary)] m-0">{label}</p>
+    <div className="glass-surface rounded-[14px] p-6 flex flex-col gap-3">
+      <p className="type-secondary font-medium text-[var(--ink-secondary)] m-0">{label}</p>
       <progress aria-label={label} className="w-48 h-1.5 rounded-full overflow-hidden" />
     </div>
   );
@@ -50,10 +50,10 @@ export function ErrorState({
   return (
     <div
       role="alert"
-      className="rounded-[12px] border border-[var(--danger-border)] bg-[var(--danger-tint)] p-4 text-[var(--danger-ink)]"
+      className="rounded-[14px] border border-[var(--danger-border)] bg-[var(--danger-tint)] p-5 text-[var(--danger-ink)]"
     >
-      <p className="text-[13.5px] font-semibold m-0">{title}</p>
-      <p className="text-[13px] mt-1 mb-0">{message}</p>
+      <p className="type-body font-semibold m-0">{title}</p>
+      <p className="type-secondary mt-1 mb-0">{message}</p>
       {onRetry && (
         <div className="mt-3">
           <Button variant="secondary" size="sm" onClick={onRetry}>

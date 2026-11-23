@@ -272,18 +272,18 @@ export function SettingsPage(): React.JSX.Element {
       {actionError && <ErrorState message={actionError} />}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Sticky section index on desktop */}
+        {/* Sticky floating frosted section index on desktop */}
         <nav
           aria-label="Settings sections"
-          className="hidden lg:block lg:col-span-3 sticky top-[72px]"
+          className="hidden lg:block lg:col-span-3 sticky top-[76px]"
         >
-          <GlassPanel variant="surface" padding="sm">
-            <ul className="m-0 p-0 list-none flex flex-col gap-0.5">
+          <GlassPanel variant="frosted" padding="sm">
+            <ul className="m-0 p-0 list-none flex flex-col gap-1">
               {SETTINGS_SECTIONS.map((sec) => (
                 <li key={sec.id}>
                   <a
                     href={`#${sec.id}`}
-                    className="block px-3 py-2 rounded-[8px] text-[13px] text-[var(--ink-secondary)] hover:bg-[var(--surface-elevated)] hover:text-[var(--ink-primary)] transition-colors duration-150 no-underline"
+                    className="block px-3 py-2 rounded-[9px] type-secondary text-[var(--ink-secondary)] hover:bg-[var(--glass-surface)] hover:text-[var(--ink-primary)] transition-colors duration-150 no-underline"
                   >
                     {sec.label}
                   </a>
@@ -293,7 +293,7 @@ export function SettingsPage(): React.JSX.Element {
           </GlassPanel>
         </nav>
 
-        <div className="lg:col-span-9 flex flex-col gap-5">
+        <div className="lg:col-span-9 flex flex-col gap-6">
           {/* AI Providers & Credentials */}
           <GlassPanel
             as="section"
@@ -301,7 +301,7 @@ export function SettingsPage(): React.JSX.Element {
             aria-labelledby="providers-heading"
             variant="surface"
             padding="md"
-            className="flex flex-col gap-4 scroll-mt-[72px]"
+            className="flex flex-col gap-5 scroll-mt-[76px]"
           >
             <SectionHeader
               id="providers-heading"
@@ -309,18 +309,15 @@ export function SettingsPage(): React.JSX.Element {
               description={`Bring your own API keys. Credentials are stored via ${bootstrap?.keychain.backend ?? "OS Keychain"} and never exposed in plaintext, SQLite, or logs.`}
             />
 
-            <div className="flex flex-col gap-3">
+            <div className="rounded-[12px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)]/65 divide-y divide-[var(--border-hairline)] overflow-hidden">
               {providers.map((provider) => {
                 const isDefault = settings.default_provider_id === provider.id;
                 return (
-                  <div
-                    key={provider.id}
-                    className="rounded-[10px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)]/80 p-4 flex flex-col gap-3"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="min-w-0">
+                  <div key={provider.id} className="p-4 flex flex-col gap-3.5">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                      <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-[14px] font-semibold text-[var(--ink-primary)]">
+                          <span className="type-body font-semibold text-[var(--ink-primary)]">
                             {provider.display_name}
                           </span>
                           {provider.capabilities.is_mock && (
@@ -328,12 +325,17 @@ export function SettingsPage(): React.JSX.Element {
                           )}
                           {isDefault && <StatusIndicator tone="running" label="Default" />}
                         </div>
-                        <p className="text-[12px] font-mono text-[var(--ink-secondary)] mt-1 mb-0">
-                          Model: {provider.default_model}
-                          {provider.base_url ? ` · Endpoint: ${provider.base_url}` : ""}
+                        <p className="type-meta font-normal text-[var(--ink-secondary)] mt-1 mb-0 break-words [overflow-wrap:anywhere]">
+                          Model: <span className="font-mono">{provider.default_model}</span>
+                          {provider.base_url ? (
+                            <>
+                              {" · "}Endpoint:{" "}
+                              <span className="font-mono">{provider.base_url}</span>
+                            </>
+                          ) : null}
                         </p>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2 shrink-0">
                         <Button
                           variant="secondary"
                           size="sm"
@@ -362,11 +364,11 @@ export function SettingsPage(): React.JSX.Element {
                     </div>
 
                     {provider.capabilities.requires_api_key && (
-                      <div className="flex flex-wrap items-end gap-2 pt-3 border-t border-[var(--border-hairline)]">
+                      <div className="flex flex-wrap items-end gap-2.5 pt-3 border-t border-[var(--border-hairline)]">
                         <div className="flex-1 min-w-[220px]">
                           <label
                             htmlFor={`key-${provider.id}`}
-                            className="block text-[11.5px] font-medium text-[var(--ink-secondary)] mb-1"
+                            className="block type-meta text-[var(--ink-secondary)] mb-1.5"
                           >
                             API Key{" "}
                             {provider.has_api_key
@@ -385,7 +387,7 @@ export function SettingsPage(): React.JSX.Element {
                               }))
                             }
                             placeholder="Paste your API key"
-                            className="glass-input w-full px-3 py-1.5 text-[13px]"
+                            className="glass-input w-full px-3 py-2"
                           />
                         </div>
                         <Button
@@ -421,14 +423,14 @@ export function SettingsPage(): React.JSX.Element {
             aria-labelledby="appearance-heading"
             variant="surface"
             padding="md"
-            className="scroll-mt-[72px]"
+            className="scroll-mt-[76px]"
           >
             <SectionHeader
               id="appearance-heading"
               title="Appearance"
               description="Follow macOS system appearance or pin an explicit light or dark scheme."
             />
-            <div role="radiogroup" aria-label="Color theme" className="mt-4 flex flex-wrap gap-2">
+            <div role="radiogroup" aria-label="Color theme" className="mt-4 flex flex-wrap gap-2.5">
               {themeOptions.map((opt) => {
                 const active = themePreference === opt.value;
                 return (
@@ -439,7 +441,7 @@ export function SettingsPage(): React.JSX.Element {
                     aria-checked={active}
                     onClick={() => setThemePreference(opt.value)}
                     className={[
-                      "px-3.5 py-2 rounded-[9px] text-[13px] border font-medium transition-colors duration-150",
+                      "px-4 py-2 rounded-[10px] type-secondary font-medium border transition-colors duration-150",
                       active
                         ? "bg-[var(--accent-fill)] text-white border-transparent shadow-sm"
                         : "bg-[var(--surface-elevated)] text-[var(--ink-primary)] border-[var(--border-control)] hover:bg-[var(--surface-recessed)]",
@@ -459,7 +461,7 @@ export function SettingsPage(): React.JSX.Element {
             aria-labelledby="workspaces-heading"
             variant="surface"
             padding="md"
-            className="scroll-mt-[72px]"
+            className="flex flex-col gap-5 scroll-mt-[76px]"
           >
             <SectionHeader
               id="workspaces-heading"
@@ -469,12 +471,12 @@ export function SettingsPage(): React.JSX.Element {
 
             <form
               onSubmit={(e) => void handleAddWorkspace(e)}
-              className="mt-4 grid grid-cols-1 md:grid-cols-12 gap-3 items-end"
+              className="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-end"
             >
               <div className="md:col-span-3">
                 <label
                   htmlFor="ws-name"
-                  className="block text-[11.5px] font-medium text-[var(--ink-secondary)] mb-1"
+                  className="block type-meta text-[var(--ink-secondary)] mb-1.5"
                 >
                   Label
                 </label>
@@ -485,13 +487,13 @@ export function SettingsPage(): React.JSX.Element {
                   value={wsName}
                   onChange={(e) => setWsName(e.target.value)}
                   placeholder="Project Docs"
-                  className="glass-input w-full px-3 py-1.5 text-[13px]"
+                  className="glass-input w-full px-3 py-2"
                 />
               </div>
               <div className="md:col-span-6">
                 <label
                   htmlFor="ws-path"
-                  className="block text-[11.5px] font-medium text-[var(--ink-secondary)] mb-1"
+                  className="block type-meta text-[var(--ink-secondary)] mb-1.5"
                 >
                   Directory path
                 </label>
@@ -503,7 +505,7 @@ export function SettingsPage(): React.JSX.Element {
                     value={wsPath}
                     onChange={(e) => setWsPath(e.target.value)}
                     placeholder="/Users/name/Documents/project"
-                    className="glass-input flex-1 px-3 py-1.5 text-[13px] font-mono"
+                    className="glass-input flex-1 px-3 py-2 font-mono"
                   />
                   <Button
                     variant="secondary"
@@ -517,7 +519,7 @@ export function SettingsPage(): React.JSX.Element {
               <div className="md:col-span-3 flex items-center justify-between gap-2">
                 <label
                   htmlFor="ws-readonly"
-                  className="inline-flex items-center gap-2 text-[12.5px]"
+                  className="inline-flex items-center gap-2 type-secondary"
                 >
                   <input
                     id="ws-readonly"
@@ -534,24 +536,21 @@ export function SettingsPage(): React.JSX.Element {
               </div>
             </form>
 
-            <div className="mt-4 flex flex-col gap-2">
-              {workspaces.length === 0 ? (
-                <p className="text-[13px] text-[var(--ink-secondary)] m-0">
-                  No workspaces authorized yet. Add a folder above to enable File and Document
-                  tools.
-                </p>
-              ) : (
-                workspaces.map((ws) => (
-                  <div
-                    key={ws.id}
-                    className="flex items-center justify-between gap-3 rounded-[10px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)]/80 px-3.5 py-2.5"
-                  >
+            {workspaces.length === 0 ? (
+              <p className="type-secondary text-[var(--ink-secondary)] m-0">
+                No workspaces authorized yet. Add a folder above to enable File and Document tools.
+              </p>
+            ) : (
+              <div className="rounded-[12px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)]/65 divide-y divide-[var(--border-hairline)] overflow-hidden">
+                {workspaces.map((ws) => (
+                  <div key={ws.id} className="flex items-center justify-between gap-3 px-4 py-3.5">
                     <div className="min-w-0 flex-1">
-                      <p className="text-[13.5px] font-semibold m-0 text-[var(--ink-primary)]">
+                      <p className="type-body font-medium m-0 text-[var(--ink-primary)]">
                         {ws.name}
                       </p>
-                      <p className="text-[12px] font-mono text-[var(--ink-secondary)] truncate m-0">
-                        {ws.path} {ws.read_only ? "(Read-only)" : "(Read/Write with approval)"}
+                      <p className="type-meta font-normal text-[var(--ink-secondary)] mt-0.5 mb-0 break-words [overflow-wrap:anywhere]">
+                        <span className="font-mono">{ws.path}</span>{" "}
+                        <span>{ws.read_only ? "(Read-only)" : "(Read/Write with approval)"}</span>
                       </p>
                     </div>
                     <Button
@@ -564,9 +563,9 @@ export function SettingsPage(): React.JSX.Element {
                       Revoke
                     </Button>
                   </div>
-                ))
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </GlassPanel>
 
           {/* Memory & Execution Budgets */}
@@ -576,7 +575,7 @@ export function SettingsPage(): React.JSX.Element {
             aria-labelledby="memory-budgets-heading"
             variant="surface"
             padding="md"
-            className="flex flex-col gap-4 scroll-mt-[72px]"
+            className="flex flex-col gap-5 scroll-mt-[76px]"
           >
             <SectionHeader
               id="memory-budgets-heading"
@@ -584,9 +583,12 @@ export function SettingsPage(): React.JSX.Element {
               description="Hard limits enforced deterministically on every task regardless of model output."
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <label htmlFor="sec-dur" className="block text-[11.5px] font-medium mb-1">
+                <label
+                  htmlFor="sec-dur"
+                  className="block type-meta text-[var(--ink-secondary)] mb-1.5"
+                >
                   Max duration (sec)
                 </label>
                 <input
@@ -601,11 +603,14 @@ export function SettingsPage(): React.JSX.Element {
                       max_duration_sec: Number(e.target.value) || 300,
                     })
                   }
-                  className="glass-input w-full px-2.5 py-1.5 text-[13px]"
+                  className="glass-input w-full px-3 py-2"
                 />
               </div>
               <div>
-                <label htmlFor="sec-calls" className="block text-[11.5px] font-medium mb-1">
+                <label
+                  htmlFor="sec-calls"
+                  className="block type-meta text-[var(--ink-secondary)] mb-1.5"
+                >
                   Max tool calls
                 </label>
                 <input
@@ -620,11 +625,14 @@ export function SettingsPage(): React.JSX.Element {
                       max_tool_calls: Number(e.target.value) || 25,
                     })
                   }
-                  className="glass-input w-full px-2.5 py-1.5 text-[13px]"
+                  className="glass-input w-full px-3 py-2"
                 />
               </div>
               <div>
-                <label htmlFor="sec-tokens" className="block text-[11.5px] font-medium mb-1">
+                <label
+                  htmlFor="sec-tokens"
+                  className="block type-meta text-[var(--ink-secondary)] mb-1.5"
+                >
                   Max tokens / task
                 </label>
                 <input
@@ -639,11 +647,14 @@ export function SettingsPage(): React.JSX.Element {
                       max_tokens: Number(e.target.value) || 64000,
                     })
                   }
-                  className="glass-input w-full px-2.5 py-1.5 text-[13px]"
+                  className="glass-input w-full px-3 py-2"
                 />
               </div>
               <div>
-                <label htmlFor="sec-ret" className="block text-[11.5px] font-medium mb-1">
+                <label
+                  htmlFor="sec-ret"
+                  className="block type-meta text-[var(--ink-secondary)] mb-1.5"
+                >
                   Memory retention (days)
                 </label>
                 <input
@@ -658,12 +669,12 @@ export function SettingsPage(): React.JSX.Element {
                       memory_retention_days: Number(e.target.value) || 90,
                     })
                   }
-                  className="glass-input w-full px-2.5 py-1.5 text-[13px]"
+                  className="glass-input w-full px-3 py-2"
                 />
               </div>
             </div>
 
-            <label htmlFor="sec-mem-en" className="inline-flex items-center gap-2 text-[13px]">
+            <label htmlFor="sec-mem-en" className="inline-flex items-center gap-2 type-secondary">
               <input
                 id="sec-mem-en"
                 type="checkbox"
@@ -683,7 +694,7 @@ export function SettingsPage(): React.JSX.Element {
             aria-labelledby="security-heading"
             variant="surface"
             padding="md"
-            className="flex flex-col gap-3.5 scroll-mt-[72px]"
+            className="flex flex-col gap-4 scroll-mt-[76px]"
           >
             <SectionHeader
               id="security-heading"
@@ -691,7 +702,7 @@ export function SettingsPage(): React.JSX.Element {
               description="Structured argv execution with command allowlists, sanitized environment variables, and permanent destructive blocklists."
             />
 
-            <label htmlFor="sec-term-en" className="inline-flex items-center gap-2 text-[13px]">
+            <label htmlFor="sec-term-en" className="inline-flex items-center gap-2 type-secondary">
               <input
                 id="sec-term-en"
                 type="checkbox"
@@ -704,11 +715,11 @@ export function SettingsPage(): React.JSX.Element {
               HIGH approval per command)
             </label>
 
-            <div className="flex flex-wrap items-end gap-2">
+            <div className="flex flex-wrap items-end gap-2.5">
               <div className="flex-1 min-w-[240px]">
                 <label
                   htmlFor="sec-allow"
-                  className="block text-[11.5px] font-medium text-[var(--ink-secondary)] mb-1"
+                  className="block type-meta text-[var(--ink-secondary)] mb-1.5"
                 >
                   Terminal command allowlist (comma separated)
                 </label>
@@ -717,7 +728,7 @@ export function SettingsPage(): React.JSX.Element {
                   type="text"
                   value={allowlistText}
                   onChange={(e) => setAllowlistText(e.target.value)}
-                  className="glass-input w-full px-3 py-1.5 text-[13px] font-mono"
+                  className="glass-input w-full px-3 py-2 font-mono"
                 />
               </div>
               <Button
@@ -745,7 +756,7 @@ export function SettingsPage(): React.JSX.Element {
             aria-labelledby="cu-heading"
             variant="surface"
             padding="md"
-            className="flex flex-col gap-3.5 scroll-mt-[72px]"
+            className="flex flex-col gap-4 scroll-mt-[76px]"
           >
             <SectionHeader
               id="cu-heading"
@@ -775,17 +786,23 @@ export function SettingsPage(): React.JSX.Element {
             />
 
             {cuCaps && (
-              <dl className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[12.5px] rounded-[10px] bg-[var(--surface-recessed)]/80 border border-[var(--border-hairline)] p-3 m-0">
+              <dl className="grid grid-cols-1 sm:grid-cols-3 gap-4 rounded-[12px] bg-[var(--surface-recessed)] border border-[var(--border-hairline)] p-4 m-0">
                 <div>
-                  <dt className="text-[var(--ink-secondary)]">Platform adapter</dt>
-                  <dd className="font-mono mt-0.5 m-0">
-                    {cuCaps.platform} ({cuCaps.arch}) ·{" "}
-                    {cuCaps.supported ? "Supported" : "Unavailable"}
+                  <dt className="type-meta font-normal text-[var(--ink-secondary)]">
+                    Platform adapter
+                  </dt>
+                  <dd className="type-secondary font-medium text-[var(--ink-primary)] mt-1 m-0">
+                    <span className="font-mono">
+                      {cuCaps.platform} ({cuCaps.arch})
+                    </span>{" "}
+                    · {cuCaps.supported ? "Supported" : "Unavailable"}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-[var(--ink-secondary)]">macOS Accessibility</dt>
-                  <dd className="font-mono mt-0.5 m-0">
+                  <dt className="type-meta font-normal text-[var(--ink-secondary)]">
+                    macOS Accessibility
+                  </dt>
+                  <dd className="type-secondary font-medium text-[var(--ink-primary)] mt-1 m-0">
                     {cuCaps.accessibility_granted === null
                       ? "Unknown"
                       : cuCaps.accessibility_granted
@@ -794,8 +811,10 @@ export function SettingsPage(): React.JSX.Element {
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-[var(--ink-secondary)]">macOS Screen Recording</dt>
-                  <dd className="font-mono mt-0.5 m-0">
+                  <dt className="type-meta font-normal text-[var(--ink-secondary)]">
+                    macOS Screen Recording
+                  </dt>
+                  <dd className="type-secondary font-medium text-[var(--ink-primary)] mt-1 m-0">
                     {cuCaps.screen_recording_granted === null
                       ? "Unknown"
                       : cuCaps.screen_recording_granted
@@ -806,7 +825,7 @@ export function SettingsPage(): React.JSX.Element {
               </dl>
             )}
 
-            <label htmlFor="cu-en" className="inline-flex items-center gap-2 text-[13px]">
+            <label htmlFor="cu-en" className="inline-flex items-center gap-2 type-secondary">
               <input
                 id="cu-en"
                 type="checkbox"
@@ -820,7 +839,7 @@ export function SettingsPage(): React.JSX.Element {
               Authorize desktop inspection and approved app launching
             </label>
 
-            <label htmlFor="cu-sc" className="inline-flex items-center gap-2 text-[13px]">
+            <label htmlFor="cu-sc" className="inline-flex items-center gap-2 type-secondary">
               <input
                 id="cu-sc"
                 type="checkbox"
@@ -836,11 +855,11 @@ export function SettingsPage(): React.JSX.Element {
               apps)
             </label>
 
-            <div className="flex flex-wrap items-end gap-2">
+            <div className="flex flex-wrap items-end gap-2.5">
               <div className="flex-1 min-w-[240px]">
                 <label
                   htmlFor="cu-apps"
-                  className="block text-[11.5px] font-medium text-[var(--ink-secondary)] mb-1"
+                  className="block type-meta text-[var(--ink-secondary)] mb-1.5"
                 >
                   Approved applications (comma separated)
                 </label>
@@ -849,7 +868,7 @@ export function SettingsPage(): React.JSX.Element {
                   type="text"
                   value={approvedAppsText}
                   onChange={(e) => setApprovedAppsText(e.target.value)}
-                  className="glass-input w-full px-3 py-1.5 text-[13px]"
+                  className="glass-input w-full px-3 py-2"
                 />
               </div>
               <Button
@@ -877,7 +896,7 @@ export function SettingsPage(): React.JSX.Element {
             aria-labelledby="mcp-heading"
             variant="surface"
             padding="md"
-            className="flex flex-col gap-4 scroll-mt-[72px]"
+            className="flex flex-col gap-5 scroll-mt-[76px]"
           >
             <SectionHeader
               id="mcp-heading"
@@ -887,10 +906,13 @@ export function SettingsPage(): React.JSX.Element {
 
             <form
               onSubmit={(e) => void handleAddMcp(e)}
-              className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end"
+              className="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-end"
             >
               <div className="md:col-span-3">
-                <label htmlFor="mcp-name" className="block text-[11.5px] font-medium mb-1">
+                <label
+                  htmlFor="mcp-name"
+                  className="block type-meta text-[var(--ink-secondary)] mb-1.5"
+                >
                   Server name
                 </label>
                 <input
@@ -900,11 +922,14 @@ export function SettingsPage(): React.JSX.Element {
                   value={mcpName}
                   onChange={(e) => setMcpName(e.target.value)}
                   placeholder="local-docs-mcp"
-                  className="glass-input w-full px-3 py-1.5 text-[13px]"
+                  className="glass-input w-full px-3 py-2"
                 />
               </div>
               <div className="md:col-span-2">
-                <label htmlFor="mcp-trans" className="block text-[11.5px] font-medium mb-1">
+                <label
+                  htmlFor="mcp-trans"
+                  className="block type-meta text-[var(--ink-secondary)] mb-1.5"
+                >
                   Transport
                 </label>
                 <select
@@ -913,7 +938,7 @@ export function SettingsPage(): React.JSX.Element {
                   onChange={(e) =>
                     setMcpTransport(e.target.value as "stdio" | "sse" | "streamable_http")
                   }
-                  className="glass-input w-full px-2.5 py-1.5 text-[13px]"
+                  className="glass-input w-full px-3 py-2"
                 >
                   <option value="stdio">stdio</option>
                   <option value="sse">sse</option>
@@ -923,7 +948,10 @@ export function SettingsPage(): React.JSX.Element {
               <div className="md:col-span-5">
                 {mcpTransport === "stdio" ? (
                   <>
-                    <label htmlFor="mcp-cmd" className="block text-[11.5px] font-medium mb-1">
+                    <label
+                      htmlFor="mcp-cmd"
+                      className="block type-meta text-[var(--ink-secondary)] mb-1.5"
+                    >
                       Command & args
                     </label>
                     <input
@@ -933,12 +961,15 @@ export function SettingsPage(): React.JSX.Element {
                       value={mcpCommand}
                       onChange={(e) => setMcpCommand(e.target.value)}
                       placeholder="python3 /path/to/mcp_server.py"
-                      className="glass-input w-full px-3 py-1.5 text-[13px] font-mono"
+                      className="glass-input w-full px-3 py-2 font-mono"
                     />
                   </>
                 ) : (
                   <>
-                    <label htmlFor="mcp-url" className="block text-[11.5px] font-medium mb-1">
+                    <label
+                      htmlFor="mcp-url"
+                      className="block type-meta text-[var(--ink-secondary)] mb-1.5"
+                    >
                       Endpoint URL
                     </label>
                     <input
@@ -948,7 +979,7 @@ export function SettingsPage(): React.JSX.Element {
                       value={mcpUrl}
                       onChange={(e) => setMcpUrl(e.target.value)}
                       placeholder="http://127.0.0.1:8088/mcp"
-                      className="glass-input w-full px-3 py-1.5 text-[13px] font-mono"
+                      className="glass-input w-full px-3 py-2 font-mono"
                     />
                   </>
                 )}
@@ -962,23 +993,23 @@ export function SettingsPage(): React.JSX.Element {
             </form>
 
             {mcpServers.length === 0 ? (
-              <p className="text-[13px] text-[var(--ink-secondary)] m-0">
+              <p className="type-secondary text-[var(--ink-secondary)] m-0">
                 No external MCP servers configured.
               </p>
             ) : (
-              <div className="flex flex-col gap-3">
+              <div className="rounded-[12px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)]/65 divide-y divide-[var(--border-hairline)] overflow-hidden">
                 {mcpServers.map((srv) => {
                   const tools = discoveredTools[srv.id] ?? [];
                   return (
-                    <div
-                      key={srv.id}
-                      className="rounded-[10px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)]/80 p-3.5 flex flex-col gap-2"
-                    >
+                    <div key={srv.id} className="p-4 flex flex-col gap-2.5">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div>
-                          <span className="font-semibold text-[14px]">{srv.name}</span>
-                          <span className="ml-2 font-mono text-[12px] text-[var(--ink-secondary)]">
-                            {srv.transport} · status: {srv.status}
+                          <span className="type-body font-semibold text-[var(--ink-primary)]">
+                            {srv.name}
+                          </span>
+                          <span className="ml-2 type-meta font-normal text-[var(--ink-secondary)]">
+                            <span className="font-mono">{srv.transport}</span> · status:{" "}
+                            {srv.status}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -1002,17 +1033,19 @@ export function SettingsPage(): React.JSX.Element {
                         </div>
                       </div>
                       {srv.last_error && (
-                        <p className="text-[12px] text-[var(--danger-ink)] m-0">{srv.last_error}</p>
+                        <p className="type-meta font-normal text-[var(--danger-ink)] m-0">
+                          {srv.last_error}
+                        </p>
                       )}
                       {tools.length > 0 && (
-                        <div className="pt-2 border-t border-[var(--border-hairline)] flex flex-col gap-1.5">
-                          <p className="text-[12px] font-medium m-0">
+                        <div className="pt-2.5 border-t border-[var(--border-hairline)] flex flex-col gap-2">
+                          <p className="type-meta text-[var(--ink-primary)] m-0">
                             Discovered tools (check to authorize):
                           </p>
                           {tools.map((t) => (
                             <label
                               key={t.name}
-                              className="inline-flex items-center gap-2 text-[12px]"
+                              className="inline-flex items-center gap-2 type-meta font-normal"
                             >
                               <input
                                 type="checkbox"
@@ -1039,16 +1072,16 @@ export function SettingsPage(): React.JSX.Element {
             aria-labelledby="diag-heading"
             variant="surface"
             padding="md"
-            className="flex flex-col gap-3 scroll-mt-[72px]"
+            className="flex flex-col gap-4 scroll-mt-[76px]"
           >
             <SectionHeader id="diag-heading" title="Diagnostics & About AgentOS" />
-            <p className="text-[13px] text-[var(--ink-secondary)] m-0">
+            <p className="type-secondary text-[var(--ink-secondary)] m-0">
               AgentOS v{bootstrap?.app.version ?? "0.1.0"} by{" "}
               {bootstrap?.app.author ?? "Dandi Setiawan"} (
               {bootstrap?.app.organization ?? "NGOPREK DIGITAL"}). Open-source under Apache License
               2.0.
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2.5">
               <Button variant="secondary" size="sm" onClick={() => void handleExportDiagnostics()}>
                 <Download className="w-3.5 h-3.5" aria-hidden={true} />
                 Export redacted diagnostics

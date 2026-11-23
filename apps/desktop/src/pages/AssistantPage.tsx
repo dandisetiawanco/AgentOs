@@ -53,6 +53,7 @@ export function AssistantPage(): React.JSX.Element {
   const [pageError, setPageError] = useState<string | null>(null);
   const [approvalDialogOpen, setApprovalDialogOpen] = useState<boolean>(false);
   const [liveEvents, setLiveEvents] = useState<string[]>([]);
+  const [emergencyActive, setEmergencyActive] = useState<boolean>(false);
 
   useEffect(() => {
     if (settings) {
@@ -72,7 +73,13 @@ export function AssistantPage(): React.JSX.Element {
     setLoadingInit(true);
     setPageError(null);
     try {
-      const list = await client.listConversations();
+      const [list, caps] = await Promise.all([
+        client.listConversations(),
+        client.getComputerUseCapabilities().catch(() => null),
+      ]);
+      if (caps) {
+        setEmergencyActive(caps.emergency_stop_active);
+      }
       setConversations(list);
       if (list.length > 0 && list[0]) {
         const detailed = await client.getConversation(list[0].id);
@@ -118,6 +125,22 @@ export function AssistantPage(): React.JSX.Element {
 
     return () => controller.abort();
   }, [client, activeTaskId, activeTaskStatus]);
+
+  const handleToggleEmergencyStop = async () => {
+    if (!client) return;
+    try {
+      const res = await client.triggerEmergencyStop(!emergencyActive);
+      setEmergencyActive(res.emergency_stop_active);
+      notify(
+        res.emergency_stop_active
+          ? `Emergency stop activated (${res.cancelled_tasks} active task signal(s) halted).`
+          : "Emergency stop cleared. Operations may resume.",
+        res.emergency_stop_active ? "error" : "success",
+      );
+    } catch (err) {
+      notify(err instanceof Error ? err.message : String(err), "error");
+    }
+  };
 
   const handleSelectConversation = async (convId: string) => {
     if (!client) return;
@@ -286,7 +309,7 @@ export function AssistantPage(): React.JSX.Element {
   );
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <SectionHeader
         as="h1"
         title="Assistant"
@@ -296,6 +319,14 @@ export function AssistantPage(): React.JSX.Element {
             <Button variant="secondary" size="sm" onClick={() => void handleNewConversation()}>
               <Plus className="w-3.5 h-3.5" aria-hidden={true} />
               New session
+            </Button>
+            <Button
+              variant={emergencyActive ? "primary" : "danger"}
+              size="sm"
+              onClick={() => void handleToggleEmergencyStop()}
+            >
+              <ShieldAlert className="w-3.5 h-3.5" aria-hidden={true} />
+              {emergencyActive ? "Clear emergency stop" : "Emergency stop"}
             </Button>
             {isTaskRunning && (
               <Button variant="danger" size="sm" onClick={() => void handleCancelTask()}>
@@ -307,15 +338,24 @@ export function AssistantPage(): React.JSX.Element {
         }
       />
 
+      {emergencyActive && (
+        <div
+          role="alert"
+          className="rounded-[12px] border border-[var(--danger-border)] bg-[var(--danger-tint)] text-[var(--danger-ink)] px-5 py-3.5 type-secondary font-medium"
+        >
+          Emergency stop is active. All non-read-only tool executions are blocked until cleared.
+        </div>
+      )}
+
       {pageError && <ErrorState message={pageError} />}
 
-      {/* Compact glass runtime context bar */}
+      {/* Translucent Inline Session Controls */}
       <GlassPanel variant="surface" padding="sm">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label
               htmlFor="asst-provider"
-              className="block text-[11.5px] font-medium text-[var(--ink-secondary)] mb-1"
+              className="block type-meta text-[var(--ink-secondary)] mb-1.5"
             >
               AI Provider
             </label>
@@ -323,7 +363,7 @@ export function AssistantPage(): React.JSX.Element {
               id="asst-provider"
               value={selectedProvider}
               onChange={(e) => handleProviderChange(e.target.value)}
-              className="glass-input w-full px-2.5 py-1.5 text-[13px]"
+              className="glass-input w-full px-3 py-2"
             >
               {providers.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -336,7 +376,7 @@ export function AssistantPage(): React.JSX.Element {
           <div>
             <label
               htmlFor="asst-model"
-              className="block text-[11.5px] font-medium text-[var(--ink-secondary)] mb-1"
+              className="block type-meta text-[var(--ink-secondary)] mb-1.5"
             >
               Model
             </label>
@@ -345,23 +385,23 @@ export function AssistantPage(): React.JSX.Element {
               type="text"
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
-              className="glass-input w-full px-2.5 py-1.5 text-[13px] font-mono"
+              className="glass-input w-full px-3 py-2 font-mono"
             />
           </div>
 
           <div>
             <label
               htmlFor="asst-workspace"
-              className="block text-[11.5px] font-medium text-[var(--ink-secondary)] mb-1"
+              className="block type-meta text-[var(--ink-secondary)] mb-1.5"
             >
               Authorized Workspace
             </label>
-            <div className="flex gap-1.5">
+            <div className="flex gap-2">
               <select
                 id="asst-workspace"
                 value={selectedWorkspaceId}
                 onChange={(e) => setSelectedWorkspaceId(e.target.value)}
-                className="glass-input flex-1 min-w-0 px-2.5 py-1.5 text-[13px]"
+                className="glass-input flex-1 min-w-0 px-3 py-2"
               >
                 <option value="">No workspace (read-only diagnostics/web)</option>
                 {workspaces.map((ws) => (
@@ -381,31 +421,30 @@ export function AssistantPage(): React.JSX.Element {
       </GlassPanel>
 
       {activeProviderObj?.capabilities.is_mock && (
-        <div className="rounded-[10px] border border-[var(--warning-border)] bg-[var(--warning-tint)] text-[var(--warning-ink)] px-4 py-2.5 text-[12.5px]">
+        <div className="rounded-[12px] border border-[var(--warning-border)] bg-[var(--warning-tint)] text-[var(--warning-ink)] px-4 py-3 type-secondary">
           Offline Deterministic Test Mode is active. Plans use local deterministic rules without
           calling external APIs. Configure a live provider in Settings whenever ready.
         </div>
       )}
 
-      {/* Centerpiece split workspace: Chat + Execution Inspector */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-        {/* Conversation stream & floating glass composer */}
+      {/* Split AI Workspace: Conversation Stream + Floating Glass Execution Inspector */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         <section
           aria-label="Conversation and command input"
-          className="xl:col-span-7 flex flex-col gap-4"
+          className="xl:col-span-7 flex flex-col gap-5"
         >
           {conversations.length > 1 && (
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+            <div className="flex items-center gap-2 overflow-x-auto pb-0.5">
               {conversations.slice(0, 8).map((conv) => (
                 <button
                   key={conv.id}
                   type="button"
                   onClick={() => void handleSelectConversation(conv.id)}
                   className={[
-                    "px-3 py-1 rounded-full text-[12px] border shrink-0 transition-colors duration-150",
+                    "px-3.5 py-1.5 rounded-full type-meta border shrink-0 transition-colors duration-150",
                     activeConv?.id === conv.id
-                      ? "bg-[var(--accent-tint)] border-[var(--accent-border)] font-medium text-[var(--accent-ink)]"
-                      : "bg-[var(--glass-panel)] border-[var(--border-hairline)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]",
+                      ? "bg-[var(--accent-tint)] border-[var(--accent-border)] text-[var(--accent-ink)]"
+                      : "bg-[var(--glass-surface)] border-[var(--border-hairline)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]",
                   ].join(" ")}
                 >
                   {conv.title}
@@ -417,30 +456,31 @@ export function AssistantPage(): React.JSX.Element {
           <GlassPanel
             variant="surface"
             padding="none"
-            className="min-h-[310px] max-h-[460px] overflow-y-auto p-5 flex flex-col gap-4"
+            className="min-h-[260px] max-h-[360px] overflow-y-auto p-5 flex flex-col gap-4"
           >
             {!activeConv?.messages || activeConv.messages.length === 0 ? (
-              <div className="my-auto py-4 flex flex-col gap-4">
-                <div className="flex items-center gap-2.5">
-                  <span className="w-8 h-8 rounded-[10px] bg-[var(--accent-tint)] border border-[var(--accent-border)] flex items-center justify-center text-[var(--accent-ink)] shrink-0">
+              <div className="my-auto py-4 flex flex-col gap-5">
+                <div className="flex items-start gap-3">
+                  <span className="w-9 h-9 rounded-[11px] bg-[var(--accent-tint)] border border-[var(--accent-border)] flex items-center justify-center text-[var(--accent-ink)] shrink-0">
                     <Sparkles className="w-4 h-4" aria-hidden={true} />
                   </span>
-                  <div>
-                    <p className="text-[14.5px] font-semibold text-[var(--ink-primary)] m-0">
+                  <div className="min-w-0">
+                    <p className="type-section-title text-[var(--ink-primary)] m-0">
                       Ready for an instruction
                     </p>
-                    <p className="text-[12.5px] text-[var(--ink-secondary)] mt-0.5 mb-0">
-                      Read-only tools run and verify automatically. Mutations pause for approval.
+                    <p className="type-secondary text-[var(--ink-secondary)] mt-1 mb-0">
+                      Read-only tools run and verify automatically. Mutations pause for explicit
+                      approval.
                     </p>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {STARTER_PROMPTS.map((sample) => (
                     <button
                       key={sample}
                       type="button"
                       onClick={() => setInstruction(sample)}
-                      className="text-left text-[12.5px] px-3.5 py-2.5 rounded-[10px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)]/80 hover:border-[var(--accent-border)] hover:bg-[var(--accent-tint)]/35 text-[var(--ink-primary)] transition-colors duration-150"
+                      className="text-left type-secondary px-4 py-3 rounded-[12px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)]/85 hover:border-[var(--accent-border)] hover:bg-[var(--accent-tint)]/35 text-[var(--ink-primary)] transition-colors duration-150"
                     >
                       {sample}
                     </button>
@@ -457,18 +497,19 @@ export function AssistantPage(): React.JSX.Element {
                   >
                     <div
                       className={[
-                        "max-w-[90%] rounded-[14px] px-4 py-3 text-[13.5px] leading-relaxed border",
+                        "max-w-[90%] rounded-[16px] px-4 py-3.5 type-body border",
                         isUser
-                          ? "bg-[var(--accent-tint)]/70 border-[var(--accent-border)] text-[var(--ink-primary)] rounded-br-[4px]"
-                          : "bg-[var(--surface-elevated)] border-[var(--border-hairline)] text-[var(--ink-primary)] rounded-bl-[4px] shadow-[var(--shadow-sm)]",
+                          ? "bg-[var(--accent-tint)] border-[var(--accent-border)] text-[var(--ink-primary)] rounded-br-[4px]"
+                          : "bg-[var(--surface-elevated)] border-[var(--border-hairline)] text-[var(--ink-primary)] rounded-bl-[4px] shadow-[var(--shadow-surface)]",
                       ].join(" ")}
                     >
-                      <div className="flex items-center justify-between gap-4 text-[11px] text-[var(--ink-secondary)] mb-1.5">
+                      <div className="flex items-center justify-between gap-4 type-meta text-[var(--ink-secondary)] mb-1.5">
                         <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--ink-primary)]">
                           {!isUser && (
                             <span
                               aria-hidden="true"
-                              className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]"
+                              className="w-2 h-2 rounded-full"
+                              style={{ backgroundColor: "var(--accent)" }}
                             />
                           )}
                           {isUser ? "You" : "AgentOS"}
@@ -480,7 +521,7 @@ export function AssistantPage(): React.JSX.Element {
                               client &&
                               void client.getTask(msg.task_id!).then((t) => setActiveTask(t))
                             }
-                            className="font-mono text-[11px] underline text-[var(--accent-ink)]"
+                            className="font-mono type-meta underline text-[var(--accent-ink)]"
                           >
                             {msg.task_id}
                           </button>
@@ -490,11 +531,11 @@ export function AssistantPage(): React.JSX.Element {
                         {msg.content}
                       </p>
                       {msg.attachments && msg.attachments.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-1.5">
+                        <div className="mt-2.5 flex flex-wrap gap-1.5">
                           {msg.attachments.map((att, idx) => (
                             <span
                               key={`${att.name}-${idx}`}
-                              className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-recessed)] border border-[var(--border-hairline)]"
+                              className="type-meta font-mono px-2.5 py-0.5 rounded-full bg-[var(--surface-recessed)] border border-[var(--border-hairline)]"
                             >
                               {att.name}
                             </span>
@@ -521,10 +562,10 @@ export function AssistantPage(): React.JSX.Element {
           />
         </section>
 
-        {/* Right: Structured Execution Plan, Approval Gate & Verification Inspector */}
+        {/* Right: Floating Liquid Glass Execution Plan & Verification Inspector */}
         <section
           aria-label="Execution plan and verification inspector"
-          className="xl:col-span-5 flex flex-col gap-4"
+          className="xl:col-span-5 flex flex-col gap-5"
         >
           {!activeTask ? (
             <EmptyState
@@ -532,20 +573,18 @@ export function AssistantPage(): React.JSX.Element {
               description="Submit an instruction on the left to inspect its structured plan, risk classifications, permission previews, and verified tool outputs here."
             />
           ) : (
-            <GlassPanel variant="frosted" padding="md" className="flex flex-col gap-4">
-              <div className="flex flex-wrap items-start justify-between gap-2 pb-3.5 border-b border-[var(--border-hairline)]">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-[11.5px] text-[var(--ink-secondary)]">
-                      {activeTask.id}
-                    </span>
-                    <TaskStatusBadge status={activeTask.status} />
-                  </div>
-                  <h2 className="text-[15px] font-semibold mt-1.5 mb-0 text-[var(--ink-primary)]">
-                    {activeTask.instruction}
-                  </h2>
+            <GlassPanel variant="frosted" padding="md" className="flex flex-col gap-5">
+              <div className="flex flex-col gap-3 pb-4 border-b border-[var(--border-hairline)]">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-mono type-meta font-normal text-[var(--ink-secondary)]">
+                    {activeTask.id}
+                  </span>
+                  <TaskStatusBadge status={activeTask.status} />
                 </div>
-                <div className="flex flex-wrap gap-1.5">
+                <h2 className="type-section-title m-0 text-[var(--ink-primary)] break-words [overflow-wrap:anywhere]">
+                  {activeTask.instruction}
+                </h2>
+                <div className="flex flex-wrap gap-2">
                   {canRollback && (
                     <Button variant="secondary" size="sm" onClick={() => void handleRollback()}>
                       <RotateCcw className="w-3.5 h-3.5" aria-hidden={true} />
@@ -559,14 +598,14 @@ export function AssistantPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* High-contrast opaque approval callout (never obscured by glass) */}
+              {/* High-contrast opaque approval callout */}
               {activeTask.status === "awaiting_approval" && (
-                <div className="rounded-[10px] border border-[var(--warning-border)] bg-[var(--warning-tint)] p-4 text-[var(--warning-ink)] flex flex-col gap-2.5">
-                  <div className="flex items-center gap-2 font-semibold text-[13.5px]">
+                <div className="rounded-[12px] border border-[var(--warning-border)] bg-[var(--warning-tint)] p-4 text-[var(--warning-ink)] flex flex-col gap-3">
+                  <div className="flex items-center gap-2 type-body font-semibold">
                     <ShieldAlert className="w-4 h-4 shrink-0" aria-hidden={true} />
                     <span>Approval required before sensitive execution</span>
                   </div>
-                  <p className="text-[12.5px] m-0">
+                  <p className="type-secondary m-0">
                     Review the planned steps and exact arguments below. Nothing has been modified
                     yet.
                   </p>
@@ -585,29 +624,37 @@ export function AssistantPage(): React.JSX.Element {
                 </div>
               )}
 
-              {/* Compact budget strip */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[12px] rounded-[10px] bg-[var(--surface-recessed)]/85 border border-[var(--border-hairline)] p-3">
+              {/* Execution Metrics Strip */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-[12px] bg-[var(--surface-recessed)] border border-[var(--border-hairline)] px-4 py-3">
                 <div>
-                  <span className="text-[11px] text-[var(--ink-secondary)] block">Tool calls</span>
-                  <span className="font-mono font-semibold text-[var(--ink-primary)]">
+                  <span className="type-meta font-normal text-[var(--ink-secondary)] block">
+                    Tool calls
+                  </span>
+                  <span className="type-secondary font-semibold tabular-nums text-[var(--ink-primary)]">
                     {activeTask.usage.tool_calls}/{activeTask.budget.max_tool_calls}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[11px] text-[var(--ink-secondary)] block">Tokens</span>
-                  <span className="font-mono font-semibold text-[var(--ink-primary)]">
+                  <span className="type-meta font-normal text-[var(--ink-secondary)] block">
+                    Tokens
+                  </span>
+                  <span className="type-secondary font-semibold tabular-nums text-[var(--ink-primary)]">
                     {activeTask.usage.total_tokens}/{activeTask.budget.max_tokens}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[11px] text-[var(--ink-secondary)] block">Duration</span>
-                  <span className="font-mono font-semibold text-[var(--ink-primary)]">
+                  <span className="type-meta font-normal text-[var(--ink-secondary)] block">
+                    Duration
+                  </span>
+                  <span className="type-secondary font-semibold tabular-nums text-[var(--ink-primary)]">
                     {activeTask.usage.elapsed_sec}s
                   </span>
                 </div>
                 <div>
-                  <span className="text-[11px] text-[var(--ink-secondary)] block">Est. cost</span>
-                  <span className="font-mono font-semibold text-[var(--ink-primary)]">
+                  <span className="type-meta font-normal text-[var(--ink-secondary)] block">
+                    Est. cost
+                  </span>
+                  <span className="type-secondary font-semibold tabular-nums text-[var(--ink-primary)]">
                     {activeTask.usage.estimated_cost_usd !== null
                       ? `$${activeTask.usage.estimated_cost_usd.toFixed(5)}`
                       : "n/a"}
@@ -618,11 +665,11 @@ export function AssistantPage(): React.JSX.Element {
               <TaskTimeline steps={activeTask.steps} showResults={true} />
 
               {liveEvents.length > 0 && (
-                <details className="text-[12px]">
+                <details className="type-meta">
                   <summary className="text-[var(--ink-secondary)] select-none">
                     Live SSE stream ({liveEvents.length} events)
                   </summary>
-                  <pre className="mt-2 p-2.5 rounded-[8px] bg-[var(--surface-recessed)] border border-[var(--border-hairline)] overflow-x-auto text-[11px] m-0">
+                  <pre className="mt-2 p-3 rounded-[10px] bg-[var(--surface-recessed)] border border-[var(--border-hairline)] overflow-x-auto type-meta font-mono font-normal m-0">
                     {liveEvents.join("\n")}
                   </pre>
                 </details>
@@ -632,7 +679,7 @@ export function AssistantPage(): React.JSX.Element {
         </section>
       </div>
 
-      {/* Native <dialog> permission confirmation modal */}
+      {/* Native <dialog> Permission Confirmation Modal */}
       <ModalDialog
         open={approvalDialogOpen && activeTask?.status === "awaiting_approval"}
         title="Approve sensitive execution plan"
@@ -642,28 +689,30 @@ export function AssistantPage(): React.JSX.Element {
       >
         {activeTask && (
           <div className="flex flex-col gap-4">
-            <ul className="m-0 p-0 list-none flex flex-col gap-2.5">
+            <ul className="m-0 p-0 list-none flex flex-col gap-3">
               {activeTask.steps
                 .filter((s) => s.requires_approval)
                 .map((s) => (
                   <li
                     key={s.id}
-                    className="rounded-[10px] border border-[var(--border-hairline)] bg-[var(--surface-recessed)]/70 p-3.5 text-[13px]"
+                    className="rounded-[12px] border border-[var(--border-hairline)] bg-[var(--surface-recessed)] p-4 type-secondary"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold text-[var(--ink-primary)]">{s.title}</span>
+                      <span className="type-body font-semibold text-[var(--ink-primary)]">
+                        {s.title}
+                      </span>
                       <RiskBadge level={s.risk_level} />
                     </div>
-                    <p className="font-mono text-[12px] text-[var(--ink-secondary)] mt-1 mb-0">
+                    <p className="font-mono type-meta font-normal text-[var(--ink-secondary)] mt-1 mb-0">
                       {s.tool_id}
                     </p>
-                    <pre className="mt-2 p-2.5 rounded-[8px] bg-[var(--surface-elevated)] border border-[var(--border-hairline)] text-[11.5px] overflow-x-auto m-0">
+                    <pre className="mt-2.5 p-3 rounded-[10px] bg-[var(--surface-elevated)] border border-[var(--border-hairline)] type-meta font-mono font-normal overflow-x-auto m-0">
                       {JSON.stringify(s.arguments, null, 2)}
                     </pre>
                   </li>
                 ))}
             </ul>
-            <div className="flex justify-end gap-2 pt-3 border-t border-[var(--border-hairline)]">
+            <div className="flex justify-end gap-2.5 pt-4 border-t border-[var(--border-hairline)]">
               <Button
                 variant="secondary"
                 autoFocus

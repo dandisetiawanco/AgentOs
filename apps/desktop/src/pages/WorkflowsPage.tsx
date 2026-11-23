@@ -190,21 +190,19 @@ export function WorkflowsPage(): React.JSX.Element {
       )}
 
       {!loading && workflows.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {workflows.map((wf) => (
             <GlassPanel
               key={wf.id}
               as="article"
               variant="surface"
               padding="md"
-              className="flex flex-col justify-between gap-4"
+              className="flex flex-col justify-between gap-5"
             >
-              <div className="flex flex-col gap-2">
-                <div className="flex items-start justify-between gap-2">
-                  <h2 className="text-[15px] font-semibold text-[var(--ink-primary)] m-0">
-                    {wf.name}
-                  </h2>
-                  <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex flex-col gap-2.5">
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className="type-section-title text-[var(--ink-primary)] m-0">{wf.name}</h2>
+                  <div className="flex items-center gap-2 shrink-0">
                     <StatusIndicator
                       tone={wf.schedule_enabled ? "ready" : "idle"}
                       label={
@@ -212,23 +210,23 @@ export function WorkflowsPage(): React.JSX.Element {
                       }
                     />
                     {wf.is_builtin && (
-                      <span className="text-[11px] px-2 py-0.5 rounded-full border border-[var(--border-hairline)] bg-[var(--surface-recessed)] text-[var(--ink-secondary)]">
+                      <span className="type-meta px-2.5 py-0.5 rounded-full border border-[var(--border-hairline)] bg-[var(--surface-recessed)] text-[var(--ink-secondary)]">
                         Template
                       </span>
                     )}
                   </div>
                 </div>
-                <p className="text-[13px] text-[var(--ink-secondary)] m-0">{wf.description}</p>
-                <p className="text-[12px] font-mono text-[var(--ink-secondary)] bg-[var(--surface-recessed)]/80 border border-[var(--border-hairline)] rounded-[8px] px-3 py-2 m-0">
+                <p className="type-secondary text-[var(--ink-secondary)] m-0">{wf.description}</p>
+                <p className="type-meta font-mono font-normal text-[var(--ink-secondary)] bg-[var(--surface-recessed)] border border-[var(--border-hairline)] rounded-[10px] px-3.5 py-2.5 m-0 break-words [overflow-wrap:anywhere]">
                   {wf.instruction_template}
                 </p>
               </div>
 
-              <div className="flex flex-col gap-3 pt-3 border-t border-[var(--border-hairline)]">
+              <div className="flex flex-col gap-3.5 pt-4 border-t border-[var(--border-hairline)]">
                 <div>
                   <label
                     htmlFor={`wf-ws-${wf.id}`}
-                    className="block text-[11.5px] font-medium text-[var(--ink-secondary)] mb-1"
+                    className="block type-meta text-[var(--ink-secondary)] mb-1.5"
                   >
                     Target workspace
                   </label>
@@ -236,7 +234,7 @@ export function WorkflowsPage(): React.JSX.Element {
                     id={`wf-ws-${wf.id}`}
                     value={wf.workspace_id ?? ""}
                     onChange={(e) => void handleAssignWorkspace(wf.id, e.target.value)}
-                    className="glass-input w-full px-2.5 py-1.5 text-[12.5px]"
+                    className="glass-input w-full px-3 py-2"
                   >
                     <option value="">No workspace bound</option>
                     {workspaces.map((ws) => (
@@ -258,7 +256,7 @@ export function WorkflowsPage(): React.JSX.Element {
                       ? `Every ${wf.schedule_interval_minutes}m (Active)`
                       : "Schedule off"}
                   </Button>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
                     {!wf.is_builtin && (
                       <>
                         <Button
@@ -300,40 +298,40 @@ export function WorkflowsPage(): React.JSX.Element {
       <section aria-labelledby="wf-runs-heading" className="flex flex-col gap-3">
         <SectionHeader id="wf-runs-heading" title="Recent Workflow Runs" />
         {runs.length === 0 ? (
-          <GlassPanel variant="subtle" padding="md">
-            <p className="text-[13px] text-[var(--ink-secondary)] m-0">
+          <GlassPanel variant="surface" padding="md">
+            <p className="type-secondary text-[var(--ink-secondary)] m-0">
               No workflow runs recorded yet. Select Run now on any workflow above.
             </p>
           </GlassPanel>
         ) : (
           <GlassPanel variant="surface" padding="none" className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-[13px]">
+            <table className="w-full text-left border-collapse type-secondary">
               <caption className="visually-hidden">Workflow execution history</caption>
               <thead>
                 <tr className="border-b border-[var(--border-hairline)] bg-[var(--surface-recessed)]/70">
-                  <th scope="col" className="px-4 py-2.5 text-[12px] font-semibold">
+                  <th scope="col" className="px-5 py-3 type-meta font-semibold">
                     Run ID
                   </th>
-                  <th scope="col" className="px-4 py-2.5 text-[12px] font-semibold">
+                  <th scope="col" className="px-5 py-3 type-meta font-semibold">
                     Trigger
                   </th>
-                  <th scope="col" className="px-4 py-2.5 text-[12px] font-semibold">
+                  <th scope="col" className="px-5 py-3 type-meta font-semibold">
                     Status
                   </th>
-                  <th scope="col" className="px-4 py-2.5 text-[12px] font-semibold">
+                  <th scope="col" className="px-5 py-3 type-meta font-semibold">
                     Summary
                   </th>
-                  <th scope="col" className="px-4 py-2.5 text-[12px] font-semibold">
+                  <th scope="col" className="px-5 py-3 type-meta font-semibold">
                     Task
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-[var(--border-hairline)]">
                 {runs.map((r) => (
-                  <tr key={r.id} className="border-b border-[var(--border-hairline)] last:border-0">
-                    <td className="px-4 py-2.5 font-mono text-[12px]">{r.id}</td>
-                    <td className="px-4 py-2.5">{r.trigger}</td>
-                    <td className="px-4 py-2.5">
+                  <tr key={r.id}>
+                    <td className="px-5 py-3 font-mono type-meta font-normal">{r.id}</td>
+                    <td className="px-5 py-3">{r.trigger}</td>
+                    <td className="px-5 py-3">
                       <StatusIndicator
                         tone={
                           r.status === "completed"
@@ -343,13 +341,12 @@ export function WorkflowsPage(): React.JSX.Element {
                               : "running"
                         }
                         label={r.status}
-                        mono
                       />
                     </td>
-                    <td className="px-4 py-2.5 max-w-[360px] truncate text-[var(--ink-secondary)]">
+                    <td className="px-5 py-3 max-w-[380px] text-[var(--ink-secondary)] break-words [overflow-wrap:anywhere]">
                       {r.summary ?? r.error_message ?? ""}
                     </td>
-                    <td className="px-4 py-2.5">
+                    <td className="px-5 py-3">
                       {r.task_id && (
                         <Button variant="ghost" size="sm" onClick={() => setRoute("tasks")}>
                           Inspect
@@ -370,9 +367,9 @@ export function WorkflowsPage(): React.JSX.Element {
         description="Define a reusable instruction template. Scheduled workflows run only while AgentOS is open."
         onClose={() => setEditorOpen(false)}
       >
-        <form onSubmit={(e) => void handleSaveWorkflow(e)} className="flex flex-col gap-3.5">
+        <form onSubmit={(e) => void handleSaveWorkflow(e)} className="flex flex-col gap-4">
           <div>
-            <label htmlFor="wf-name" className="block text-[12px] font-medium mb-1">
+            <label htmlFor="wf-name" className="block type-meta text-[var(--ink-secondary)] mb-1.5">
               Name
             </label>
             <input
@@ -382,11 +379,11 @@ export function WorkflowsPage(): React.JSX.Element {
               value={draftName}
               onChange={(e) => setDraftName(e.target.value)}
               placeholder="Daily Workspace Health Check"
-              className="glass-input w-full px-3 py-1.5 text-[13px]"
+              className="glass-input w-full px-3 py-2"
             />
           </div>
           <div>
-            <label htmlFor="wf-desc" className="block text-[12px] font-medium mb-1">
+            <label htmlFor="wf-desc" className="block type-meta text-[var(--ink-secondary)] mb-1.5">
               Description
             </label>
             <input
@@ -395,11 +392,11 @@ export function WorkflowsPage(): React.JSX.Element {
               value={draftDesc}
               onChange={(e) => setDraftDesc(e.target.value)}
               placeholder="Checks large files and system health."
-              className="glass-input w-full px-3 py-1.5 text-[13px]"
+              className="glass-input w-full px-3 py-2"
             />
           </div>
           <div>
-            <label htmlFor="wf-inst" className="block text-[12px] font-medium mb-1">
+            <label htmlFor="wf-inst" className="block type-meta text-[var(--ink-secondary)] mb-1.5">
               Instruction template
             </label>
             <textarea
@@ -409,18 +406,21 @@ export function WorkflowsPage(): React.JSX.Element {
               value={draftInstruction}
               onChange={(e) => setDraftInstruction(e.target.value)}
               placeholder="Inspect system health and find large files in the authorized workspace."
-              className="glass-input w-full px-3 py-1.5 text-[13px]"
+              className="glass-input w-full px-3 py-2"
             />
           </div>
           <div>
-            <label htmlFor="wf-ws-create" className="block text-[12px] font-medium mb-1">
+            <label
+              htmlFor="wf-ws-create"
+              className="block type-meta text-[var(--ink-secondary)] mb-1.5"
+            >
               Authorized workspace
             </label>
             <select
               id="wf-ws-create"
               value={draftWs}
               onChange={(e) => setDraftWs(e.target.value)}
-              className="glass-input w-full px-3 py-1.5 text-[13px]"
+              className="glass-input w-full px-3 py-2"
             >
               <option value="">None</option>
               {workspaces.map((ws) => (
@@ -430,8 +430,8 @@ export function WorkflowsPage(): React.JSX.Element {
               ))}
             </select>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <label htmlFor="wf-sched" className="inline-flex items-center gap-2 text-[13px]">
+          <div className="flex flex-wrap items-center gap-4">
+            <label htmlFor="wf-sched" className="inline-flex items-center gap-2 type-secondary">
               <input
                 id="wf-sched"
                 type="checkbox"
@@ -441,8 +441,8 @@ export function WorkflowsPage(): React.JSX.Element {
               Enable in-app schedule
             </label>
             {draftSchedule && (
-              <div className="flex items-center gap-1.5">
-                <label htmlFor="wf-int" className="text-[12px]">
+              <div className="flex items-center gap-2">
+                <label htmlFor="wf-int" className="type-meta text-[var(--ink-secondary)]">
                   Every (minutes):
                 </label>
                 <input
@@ -452,12 +452,12 @@ export function WorkflowsPage(): React.JSX.Element {
                   max={10080}
                   value={draftInterval}
                   onChange={(e) => setDraftInterval(Number(e.target.value) || 60)}
-                  className="glass-input w-20 px-2 py-1 text-[13px]"
+                  className="glass-input w-20 px-2.5 py-1.5"
                 />
               </div>
             )}
           </div>
-          <div className="flex justify-end gap-2 pt-3 border-t border-[var(--border-hairline)]">
+          <div className="flex justify-end gap-2.5 pt-4 border-t border-[var(--border-hairline)]">
             <Button variant="secondary" onClick={() => setEditorOpen(false)}>
               Cancel
             </Button>

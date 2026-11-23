@@ -21,12 +21,12 @@ function AuditNodeIcon({
   outcome: string;
 }): React.JSX.Element {
   if (outcome === "denied" || outcome === "failed" || outcome === "blocked") {
-    return <ShieldAlert className="w-3.5 h-3.5 text-[var(--danger-ink)]" aria-hidden={true} />;
+    return <ShieldAlert className="w-4 h-4 text-[var(--danger-ink)]" aria-hidden={true} />;
   }
   if (category === "permission" || category === "security" || category === "workspace") {
-    return <ShieldCheck className="w-3.5 h-3.5 text-[var(--accent)]" aria-hidden={true} />;
+    return <ShieldCheck className="w-4 h-4 text-[var(--accent)]" aria-hidden={true} />;
   }
-  return <Wrench className="w-3.5 h-3.5 text-[var(--ink-secondary)]" aria-hidden={true} />;
+  return <Wrench className="w-4 h-4 text-[var(--ink-secondary)]" aria-hidden={true} />;
 }
 
 export function ActivityPage(): React.JSX.Element {
@@ -77,7 +77,7 @@ export function ActivityPage(): React.JSX.Element {
   };
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <SectionHeader
         as="h1"
         title="Activity & Audit Log"
@@ -97,19 +97,16 @@ export function ActivityPage(): React.JSX.Element {
       />
 
       <GlassPanel variant="surface" padding="sm">
-        <div className="flex flex-wrap gap-3 items-end">
+        <div className="flex flex-wrap gap-4 items-end">
           <div>
-            <label
-              htmlFor="aud-cat"
-              className="block text-[11.5px] font-medium text-[var(--ink-secondary)] mb-1"
-            >
+            <label htmlFor="aud-cat" className="block type-meta text-[var(--ink-secondary)] mb-1.5">
               Category
             </label>
             <select
               id="aud-cat"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="glass-input px-3 py-1.5 text-[13px]"
+              className="glass-input px-3 py-2"
             >
               <option value="">All categories</option>
               {[
@@ -132,7 +129,7 @@ export function ActivityPage(): React.JSX.Element {
           <div>
             <label
               htmlFor="aud-risk"
-              className="block text-[11.5px] font-medium text-[var(--ink-secondary)] mb-1"
+              className="block type-meta text-[var(--ink-secondary)] mb-1.5"
             >
               Risk level
             </label>
@@ -140,7 +137,7 @@ export function ActivityPage(): React.JSX.Element {
               id="aud-risk"
               value={risk}
               onChange={(e) => setRisk(e.target.value)}
-              className="glass-input px-3 py-1.5 text-[13px]"
+              className="glass-input px-3 py-2"
             >
               <option value="">All levels</option>
               {["READ_ONLY", "LOW", "MEDIUM", "HIGH", "BLOCKED"].map((r) => (
@@ -164,79 +161,69 @@ export function ActivityPage(): React.JSX.Element {
       )}
 
       {!loading && events.length > 0 && (
-        <ol className="m-0 p-0 list-none flex flex-col gap-3">
-          {events.map((ev, idx) => {
-            const isLast = idx === events.length - 1;
-            const isAlert =
-              ev.outcome === "denied" || ev.outcome === "failed" || ev.risk_level === "BLOCKED";
-            return (
-              <li key={ev.id} className="flex gap-3">
-                <div className="flex flex-col items-center pt-1.5 shrink-0">
-                  <span className="w-7 h-7 rounded-full border border-[var(--border-hairline)] bg-[var(--surface-elevated)] flex items-center justify-center">
-                    <AuditNodeIcon category={ev.category} outcome={ev.outcome} />
-                  </span>
-                  {!isLast && (
-                    <span
-                      aria-hidden="true"
-                      className="w-px flex-1 bg-[var(--border-hairline)] mt-1.5"
-                    />
-                  )}
-                </div>
-
-                <GlassPanel
-                  as="article"
-                  variant="surface"
-                  padding="sm"
+        <GlassPanel variant="surface" padding="none" className="overflow-hidden">
+          <ol className="m-0 p-0 list-none divide-y divide-[var(--border-hairline)]">
+            {events.map((ev) => {
+              const isAlert =
+                ev.outcome === "denied" || ev.outcome === "failed" || ev.risk_level === "BLOCKED";
+              return (
+                <li
+                  key={ev.id}
                   className={[
-                    "flex-1 min-w-0 text-[13px]",
-                    isAlert ? "border-[var(--danger-border)] bg-[var(--danger-tint)]/30" : "",
+                    "px-5 py-4 flex items-start gap-3.5",
+                    isAlert ? "bg-[var(--danger-tint)]/35" : "",
                   ].join(" ")}
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-                      <span className="font-mono text-[12px] font-semibold text-[var(--ink-primary)] break-all">
-                        {ev.action}
-                      </span>
-                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-[var(--surface-recessed)] border border-[var(--border-hairline)] text-[var(--ink-secondary)]">
-                        {ev.category}
-                      </span>
-                      <RiskBadge level={ev.risk_level} />
-                      <StatusIndicator
-                        tone={
-                          isAlert
-                            ? "error"
-                            : ev.outcome === "ok" ||
-                                ev.outcome === "allowed" ||
-                                ev.outcome === "completed"
-                              ? "ready"
-                              : "idle"
-                        }
-                        label={ev.outcome}
-                        mono
-                      />
+                  <span className="w-8 h-8 rounded-full border border-[var(--border-hairline)] bg-[var(--surface-elevated)] flex items-center justify-center shrink-0 mt-0.5">
+                    <AuditNodeIcon category={ev.category} outcome={ev.outcome} />
+                  </span>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2 min-w-0">
+                        <span className="font-mono type-meta font-semibold text-[var(--ink-primary)] break-all">
+                          {ev.action}
+                        </span>
+                        <span className="type-meta font-normal px-2.5 py-0.5 rounded-full bg-[var(--surface-recessed)] border border-[var(--border-hairline)] text-[var(--ink-secondary)]">
+                          {ev.category}
+                        </span>
+                        <RiskBadge level={ev.risk_level} />
+                        <StatusIndicator
+                          tone={
+                            isAlert
+                              ? "error"
+                              : ev.outcome === "ok" ||
+                                  ev.outcome === "allowed" ||
+                                  ev.outcome === "completed"
+                                ? "ready"
+                                : "idle"
+                          }
+                          label={ev.outcome}
+                        />
+                      </div>
+                      <time className="type-meta font-normal tabular-nums text-[var(--ink-secondary)] shrink-0">
+                        {ev.timestamp ?? ""}
+                      </time>
                     </div>
-                    <time className="font-mono text-[11px] text-[var(--ink-secondary)] shrink-0">
-                      {ev.timestamp ?? ""}
-                    </time>
+                    <p className="type-secondary text-[var(--ink-primary)] mt-1.5 mb-0 break-words [overflow-wrap:anywhere]">
+                      {ev.summary}
+                    </p>
+                    {Object.keys(ev.details).length > 0 && (
+                      <details className="mt-2.5 type-meta">
+                        <summary className="text-[var(--ink-secondary)] select-none">
+                          Redacted details
+                        </summary>
+                        <pre className="mt-2 p-3 rounded-[10px] bg-[var(--surface-recessed)] border border-[var(--border-hairline)] overflow-x-auto type-meta font-mono font-normal m-0">
+                          {JSON.stringify(ev.details, null, 2)}
+                        </pre>
+                      </details>
+                    )}
                   </div>
-                  <p className="mt-2 mb-0 text-[var(--ink-primary)] break-words [overflow-wrap:anywhere]">
-                    {ev.summary}
-                  </p>
-                  {Object.keys(ev.details).length > 0 && (
-                    <details className="mt-2 text-[12px]">
-                      <summary className="text-[var(--ink-secondary)] select-none">
-                        Redacted details
-                      </summary>
-                      <pre className="mt-1.5 p-2.5 rounded-[8px] bg-[var(--surface-recessed)] border border-[var(--border-hairline)] overflow-x-auto text-[11px] m-0">
-                        {JSON.stringify(ev.details, null, 2)}
-                      </pre>
-                    </details>
-                  )}
-                </GlassPanel>
-              </li>
-            );
-          })}
-        </ol>
+                </li>
+              );
+            })}
+          </ol>
+        </GlassPanel>
       )}
     </div>
   );

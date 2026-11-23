@@ -74,11 +74,11 @@ export function GlassSidebar({
   version,
 }: GlassSidebarProps): React.JSX.Element {
   const renderNavList = (isCollapsed: boolean) => (
-    <div className="flex flex-col gap-5 py-3">
+    <div className="flex flex-col gap-5 py-4">
       {NAV_GROUPS.map((group) => (
         <div key={group.label} className="flex flex-col gap-1">
           {!isCollapsed && (
-            <div className="px-3 pb-0.5 text-[10.5px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-secondary)]">
+            <div className="px-3 pb-1 type-meta uppercase tracking-[0.06em] text-[var(--ink-secondary)]">
               {group.label}
             </div>
           )}
@@ -95,11 +95,11 @@ export function GlassSidebar({
                     aria-label={isCollapsed ? item.label : undefined}
                     title={isCollapsed ? item.label : undefined}
                     className={[
-                      "relative w-full flex items-center gap-2.5 rounded-[9px] min-h-[36px] text-[13.5px] transition-[background-color,color,border-color] duration-150 text-left",
+                      "relative w-full flex items-center gap-2.5 rounded-[10px] min-h-[38px] type-body transition-[background-color,color,border-color] duration-150 text-left",
                       isCollapsed ? "justify-center px-2" : "px-3",
                       active
-                        ? "bg-[var(--accent-tint)] text-[var(--accent-ink)] font-semibold border border-[var(--accent-border)]"
-                        : "text-[var(--ink-secondary)] hover:bg-[var(--surface-elevated)]/75 hover:text-[var(--ink-primary)] border border-transparent",
+                        ? "bg-[var(--accent-tint)] text-[var(--accent-ink)] font-semibold border border-[var(--accent-border)] shadow-[inset_0_1px_0_var(--glass-highlight)]"
+                        : "text-[var(--ink-secondary)] hover:bg-[var(--glass-surface)] hover:text-[var(--ink-primary)] border border-transparent",
                     ].join(" ")}
                   >
                     <Icon className="w-4 h-4 shrink-0" aria-hidden={true} />
@@ -116,21 +116,21 @@ export function GlassSidebar({
 
   return (
     <>
-      {/* Desktop glass sidebar */}
+      {/* Desktop frosted sidebar (224px expanded / 68px collapsed) */}
       <aside
         className={[
           "hidden md:flex flex-col shrink-0 border-r glass-sidebar transition-[width] duration-200 ease-out sticky top-0 h-screen",
-          collapsed ? "w-[66px]" : "w-[216px]",
+          collapsed ? "w-[68px]" : "w-[224px]",
         ].join(" ")}
       >
-        <div className="h-[52px] px-3 flex items-center justify-between border-b border-[var(--border-hairline)]">
+        <div className="h-[56px] px-3.5 flex items-center justify-between border-b border-[var(--border-hairline)]">
           <AgentOSLogo size={22} showWordmark={!collapsed} />
           <button
             type="button"
             onClick={onToggleCollapse}
             aria-expanded={!collapsed}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="p-1.5 rounded-[8px] text-[var(--ink-secondary)] hover:bg-[var(--surface-elevated)]/80 hover:text-[var(--ink-primary)] transition-colors duration-150"
+            className="p-1.5 rounded-[8px] text-[var(--ink-secondary)] hover:bg-[var(--glass-surface)] hover:text-[var(--ink-primary)] transition-colors duration-150"
           >
             {collapsed ? (
               <PanelLeftOpen className="w-4 h-4" aria-hidden={true} />
@@ -140,11 +140,11 @@ export function GlassSidebar({
           </button>
         </div>
 
-        <nav aria-label="Primary" className="flex-1 overflow-y-auto px-2">
+        <nav aria-label="Primary" className="flex-1 overflow-y-auto px-2.5">
           {renderNavList(collapsed)}
         </nav>
 
-        <footer className="px-3 py-3 border-t border-[var(--border-hairline)] text-[11.5px] text-[var(--ink-secondary)]">
+        <footer className="px-3.5 py-3 border-t border-[var(--border-hairline)] type-meta text-[var(--ink-secondary)]">
           {collapsed ? (
             <span
               className="flex justify-center"
@@ -153,10 +153,10 @@ export function GlassSidebar({
             >
               <span
                 aria-hidden="true"
-                className={[
-                  "inline-block w-2 h-2 rounded-full",
-                  backendError ? "bg-[var(--danger-ink)]" : "bg-[var(--success-ink)]",
-                ].join(" ")}
+                className="inline-block w-2 h-2 rounded-full"
+                style={{
+                  backgroundColor: backendError ? "var(--danger-ink)" : "var(--success-ink)",
+                }}
               />
             </span>
           ) : (
@@ -164,56 +164,56 @@ export function GlassSidebar({
               <span className="flex items-center gap-2 min-w-0">
                 <span
                   aria-hidden="true"
-                  className={[
-                    "inline-block w-2 h-2 rounded-full shrink-0",
-                    backendError ? "bg-[var(--danger-ink)]" : "bg-[var(--success-ink)]",
-                  ].join(" ")}
+                  className="inline-block w-2 h-2 rounded-full shrink-0"
+                  style={{
+                    backgroundColor: backendError ? "var(--danger-ink)" : "var(--success-ink)",
+                  }}
                 />
                 <span className="truncate">
-                  {backendError ? "Backend offline" : "Local backend ready"}
+                  {backendError ? "Backend offline" : "Backend ready"}
                 </span>
               </span>
-              <span className="font-mono text-[11px] shrink-0">v{version}</span>
+              <span className="shrink-0">v{version}</span>
             </div>
           )}
         </footer>
       </aside>
 
-      {/* Narrow-window glass slide-over drawer */}
+      {/* Narrow-window frosted drawer */}
       {drawerOpen && (
         <div className="fixed inset-0 z-40 md:hidden flex">
           <div
-            className="fixed inset-0 bg-[#0d111a]/45"
+            className="fixed inset-0 bg-[#0a0f1a]/45"
             aria-hidden="true"
             onClick={onCloseDrawer}
           />
-          <aside className="relative z-50 w-[248px] max-w-[82vw] glass-sidebar border-r flex flex-col h-full shadow-[var(--shadow-lg)]">
-            <div className="h-[52px] px-3.5 flex items-center justify-between border-b border-[var(--border-hairline)]">
+          <aside className="relative z-50 w-[256px] max-w-[82vw] glass-sidebar border-r flex flex-col h-full shadow-[var(--shadow-modal)]">
+            <div className="h-[56px] px-4 flex items-center justify-between border-b border-[var(--border-hairline)]">
               <AgentOSLogo size={22} showWordmark={true} />
               <button
                 type="button"
                 onClick={onCloseDrawer}
                 aria-label="Close navigation menu"
-                className="p-2 rounded-[8px] text-[var(--ink-primary)] hover:bg-[var(--surface-elevated)]/80"
+                className="p-2 rounded-[8px] text-[var(--ink-primary)] hover:bg-[var(--glass-surface)]"
               >
                 <X className="w-4 h-4" aria-hidden={true} />
               </button>
             </div>
-            <nav aria-label="Mobile primary" className="flex-1 overflow-y-auto px-2">
+            <nav aria-label="Mobile primary" className="flex-1 overflow-y-auto px-2.5">
               {renderNavList(false)}
             </nav>
-            <footer className="px-3.5 py-3 border-t border-[var(--border-hairline)] text-[11.5px] text-[var(--ink-secondary)] flex items-center justify-between">
+            <footer className="px-4 py-3 border-t border-[var(--border-hairline)] type-meta text-[var(--ink-secondary)] flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <span
                   aria-hidden="true"
-                  className={[
-                    "inline-block w-2 h-2 rounded-full",
-                    backendError ? "bg-[var(--danger-ink)]" : "bg-[var(--success-ink)]",
-                  ].join(" ")}
+                  className="inline-block w-2 h-2 rounded-full"
+                  style={{
+                    backgroundColor: backendError ? "var(--danger-ink)" : "var(--success-ink)",
+                  }}
                 />
-                <span>{backendError ? "Backend offline" : "Local backend ready"}</span>
+                <span>{backendError ? "Backend offline" : "Backend ready"}</span>
               </span>
-              <span className="font-mono text-[11px]">v{version}</span>
+              <span>v{version}</span>
             </footer>
           </aside>
         </div>

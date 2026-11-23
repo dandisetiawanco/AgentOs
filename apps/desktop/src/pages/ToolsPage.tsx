@@ -74,7 +74,7 @@ export function ToolsPage(): React.JSX.Element {
   };
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <SectionHeader
         as="h1"
         title="Tool Registry"
@@ -82,7 +82,7 @@ export function ToolsPage(): React.JSX.Element {
       />
 
       {/* Search & Category pills */}
-      <GlassPanel variant="surface" padding="sm" className="flex flex-col gap-3">
+      <GlassPanel variant="surface" padding="sm" className="flex flex-col gap-3.5">
         <div className="relative">
           <label htmlFor="tool-search" className="visually-hidden">
             Search tools
@@ -97,19 +97,19 @@ export function ToolsPage(): React.JSX.Element {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by tool ID, name, or capability..."
-            className="glass-input w-full pl-9 pr-3 py-2 text-[13px]"
+            className="glass-input w-full pl-9 pr-3 py-2"
           />
         </div>
 
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter tools by category">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Filter tools by category">
           <button
             type="button"
             aria-pressed={category === ""}
             onClick={() => setCategory("")}
             className={[
-              "px-3 py-1 rounded-full text-[12px] border transition-colors duration-150",
+              "px-3.5 py-1.5 rounded-full type-meta border transition-colors duration-150",
               category === ""
-                ? "bg-[var(--accent-fill)] text-white border-transparent font-medium"
+                ? "bg-[var(--accent-fill)] text-white border-transparent shadow-sm"
                 : "bg-[var(--surface-elevated)]/80 text-[var(--ink-secondary)] border-[var(--border-hairline)] hover:text-[var(--ink-primary)]",
             ].join(" ")}
           >
@@ -122,9 +122,9 @@ export function ToolsPage(): React.JSX.Element {
               aria-pressed={category === cat}
               onClick={() => setCategory(cat)}
               className={[
-                "px-3 py-1 rounded-full text-[12px] border transition-colors duration-150",
+                "px-3.5 py-1.5 rounded-full type-meta border transition-colors duration-150",
                 category === cat
-                  ? "bg-[var(--accent-fill)] text-white border-transparent font-medium"
+                  ? "bg-[var(--accent-fill)] text-white border-transparent shadow-sm"
                   : "bg-[var(--surface-elevated)]/80 text-[var(--ink-secondary)] border-[var(--border-hairline)] hover:text-[var(--ink-primary)]",
               ].join(" ")}
             >
@@ -136,9 +136,9 @@ export function ToolsPage(): React.JSX.Element {
             aria-pressed={category === "mcp"}
             onClick={() => setCategory("mcp")}
             className={[
-              "px-3 py-1 rounded-full text-[12px] border transition-colors duration-150",
+              "px-3.5 py-1.5 rounded-full type-meta border transition-colors duration-150",
               category === "mcp"
-                ? "bg-[var(--accent-fill)] text-white border-transparent font-medium"
+                ? "bg-[var(--accent-fill)] text-white border-transparent shadow-sm"
                 : "bg-[var(--surface-elevated)]/80 text-[var(--ink-secondary)] border-[var(--border-hairline)] hover:text-[var(--ink-primary)]",
             ].join(" ")}
           >
@@ -151,7 +151,7 @@ export function ToolsPage(): React.JSX.Element {
       {error && <ErrorState message={error} />}
 
       {!loading && category === "mcp" && (
-        <section aria-label="MCP integrations" className="flex flex-col gap-3">
+        <section aria-label="MCP integrations" className="flex flex-col gap-4">
           {mcpServers.length === 0 ? (
             <EmptyState
               title="No external MCP servers connected"
@@ -160,17 +160,17 @@ export function ToolsPage(): React.JSX.Element {
               onAction={() => setRoute("settings")}
             />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {mcpServers.map((srv) => (
                 <GlassPanel
                   key={srv.id}
                   variant="surface"
-                  padding="sm"
-                  className="flex flex-col gap-2"
+                  padding="md"
+                  className="flex flex-col gap-3"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="inline-flex items-center gap-2 font-semibold text-[14px]">
-                      <Plug className="w-3.5 h-3.5 text-[var(--accent)]" aria-hidden={true} />
+                    <span className="inline-flex items-center gap-2 type-section-title text-[var(--ink-primary)]">
+                      <Plug className="w-4 h-4 text-[var(--accent)]" aria-hidden={true} />
                       {srv.name}
                     </span>
                     <StatusIndicator
@@ -178,8 +178,9 @@ export function ToolsPage(): React.JSX.Element {
                       label={srv.status}
                     />
                   </div>
-                  <p className="text-[12px] font-mono text-[var(--ink-secondary)] m-0">
-                    transport: {srv.transport} · {srv.allowed_tools.length} authorized tool(s)
+                  <p className="type-meta font-normal text-[var(--ink-secondary)] m-0">
+                    Transport: <span className="font-mono">{srv.transport}</span> ·{" "}
+                    {srv.allowed_tools.length} authorized tool(s)
                   </p>
                   <div className="pt-1">
                     <Button variant="ghost" size="sm" onClick={() => setRoute("settings")}>
@@ -206,7 +207,7 @@ export function ToolsPage(): React.JSX.Element {
       )}
 
       {!loading && category !== "mcp" && filtered.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {filtered.map((tool) => {
             const avail = getAvailability(tool);
             return (
@@ -214,49 +215,49 @@ export function ToolsPage(): React.JSX.Element {
                 key={tool.id}
                 as="article"
                 variant="surface"
-                padding="sm"
-                className="flex flex-col gap-2.5"
+                padding="md"
+                className="flex flex-col gap-3"
               >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <h2 className="text-[14px] font-semibold text-[var(--ink-primary)] m-0">
+                    <h2 className="type-section-title text-[var(--ink-primary)] m-0">
                       {tool.name}
                     </h2>
-                    <p className="font-mono text-[11.5px] text-[var(--ink-secondary)] mt-0.5 mb-0">
+                    <p className="font-mono type-meta font-normal text-[var(--ink-secondary)] mt-0.5 mb-0">
                       {tool.id}
                     </p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
                     <StatusIndicator tone={avail.tone} label={avail.label} />
                     <RiskBadge level={tool.risk_level} />
                   </div>
                 </div>
 
-                <p className="text-[12.5px] text-[var(--ink-secondary)] m-0">{tool.description}</p>
+                <p className="type-secondary text-[var(--ink-secondary)] m-0">{tool.description}</p>
 
-                <dl className="grid grid-cols-2 gap-2 text-[11.5px] pt-2 border-t border-[var(--border-hairline)] m-0">
+                <dl className="grid grid-cols-2 gap-3 type-meta pt-3 border-t border-[var(--border-hairline)] m-0">
                   <div>
-                    <dt className="text-[var(--ink-secondary)]">Permissions</dt>
-                    <dd className="font-mono text-[var(--ink-primary)] mt-0.5 m-0">
+                    <dt className="font-normal text-[var(--ink-secondary)]">Permissions</dt>
+                    <dd className="font-mono font-normal text-[var(--ink-primary)] mt-0.5 m-0 break-words [overflow-wrap:anywhere]">
                       {tool.required_permissions.join(", ") || "none"}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-[var(--ink-secondary)]">Timeout / Rollback</dt>
-                    <dd className="font-mono text-[var(--ink-primary)] mt-0.5 m-0">
-                      {tool.timeout_sec}s / {tool.supports_rollback ? "Supported" : "N/A"}
+                    <dt className="font-normal text-[var(--ink-secondary)]">Timeout / Rollback</dt>
+                    <dd className="font-normal tabular-nums text-[var(--ink-primary)] mt-0.5 m-0">
+                      {tool.timeout_sec}s · {tool.supports_rollback ? "Supported" : "N/A"}
                     </dd>
                   </div>
                 </dl>
 
-                <details className="text-[11.5px]">
+                <details className="type-meta">
                   <summary className="text-[var(--ink-secondary)] select-none">
                     Verification & input schema
                   </summary>
-                  <p className="text-[12px] text-[var(--ink-primary)] mt-1.5 mb-1.5">
+                  <p className="type-secondary text-[var(--ink-primary)] mt-2 mb-2">
                     {tool.verification_procedure}
                   </p>
-                  <pre className="p-2.5 rounded-[8px] bg-[var(--surface-recessed)] border border-[var(--border-hairline)] overflow-x-auto text-[11px] m-0">
+                  <pre className="p-3 rounded-[10px] bg-[var(--surface-recessed)] border border-[var(--border-hairline)] overflow-x-auto type-meta font-mono font-normal m-0">
                     {JSON.stringify(tool.input_schema, null, 2)}
                   </pre>
                 </details>

@@ -14,12 +14,12 @@ export function AgentOSLogo({
   return (
     <span className="inline-flex items-center gap-2.5 select-none">
       <span
-        className="inline-flex items-center justify-center rounded-[8px] bg-[var(--accent-tint)] border border-[var(--accent-border)] text-[var(--ink-primary)] shrink-0"
-        style={{ width: size + 6, height: size + 6 }}
+        className="inline-flex items-center justify-center rounded-[10px] bg-[var(--accent-tint)] border border-[var(--accent-border)] text-[var(--ink-primary)] shadow-[inset_0_1px_0_var(--glass-highlight)] shrink-0"
+        style={{ width: size + 8, height: size + 8 }}
       >
         <svg
-          width={size - 4}
-          height={size - 4}
+          width={size - 2}
+          height={size - 2}
           viewBox="0 0 28 28"
           fill="none"
           aria-hidden={showWordmark ? "true" : undefined}
@@ -38,11 +38,11 @@ export function AgentOSLogo({
       </span>
       {showWordmark && (
         <span className="flex flex-col leading-none">
-          <span className="text-[14.5px] font-semibold tracking-[-0.02em] text-[var(--ink-primary)]">
+          <span className="type-body font-semibold tracking-[-0.015em] text-[var(--ink-primary)]">
             AgentOS
           </span>
           {!compact && (
-            <span className="text-[10.5px] tracking-[0.04em] text-[var(--ink-secondary)] mt-0.5">
+            <span className="type-meta font-normal text-[var(--ink-secondary)]">
               NGOPREK DIGITAL
             </span>
           )}

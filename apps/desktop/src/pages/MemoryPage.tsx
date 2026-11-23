@@ -144,7 +144,7 @@ export function MemoryPage(): React.JSX.Element {
   };
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <SectionHeader
         as="h1"
         title="Local Memory"
@@ -174,7 +174,7 @@ export function MemoryPage(): React.JSX.Element {
       />
 
       {settings?.memory_enabled === false && (
-        <div className="rounded-[10px] border border-[var(--warning-border)] bg-[var(--warning-tint)] text-[var(--warning-ink)] px-4 py-3 text-[13px] flex flex-wrap items-center justify-between gap-2">
+        <div className="rounded-[12px] border border-[var(--warning-border)] bg-[var(--warning-tint)] text-[var(--warning-ink)] px-5 py-3.5 type-secondary flex flex-wrap items-center justify-between gap-3">
           <span>
             Local memory is currently disabled in Settings. No new memories are saved or retrieved.
           </span>
@@ -184,7 +184,7 @@ export function MemoryPage(): React.JSX.Element {
         </div>
       )}
 
-      <GlassPanel variant="surface" padding="sm" className="flex flex-col gap-3">
+      <GlassPanel variant="surface" padding="sm">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[220px]">
             <label htmlFor="mem-search" className="visually-hidden">
@@ -200,7 +200,7 @@ export function MemoryPage(): React.JSX.Element {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search titles, content, or tags..."
-              className="glass-input w-full pl-9 pr-3 py-2 text-[13px]"
+              className="glass-input w-full pl-9 pr-3 py-2"
             />
           </div>
           <div className="shrink-0">
@@ -211,7 +211,7 @@ export function MemoryPage(): React.JSX.Element {
               id="mem-cat"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="glass-input px-3 py-2 text-[13px]"
+              className="glass-input px-3 py-2"
             >
               <option value="">All categories</option>
               {CATEGORIES.map((c) => (
@@ -236,29 +236,29 @@ export function MemoryPage(): React.JSX.Element {
         />
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {entries.map((item) => (
           <GlassPanel
             key={item.id}
             as="article"
             variant="surface"
             padding="md"
-            className="flex flex-col justify-between gap-3"
+            className="flex flex-col justify-between gap-4"
           >
             <div>
               <div className="flex flex-wrap items-start justify-between gap-2">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-recessed)] border border-[var(--border-hairline)] text-[var(--ink-secondary)]">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="type-meta font-mono font-normal px-2.5 py-0.5 rounded-full bg-[var(--surface-recessed)] border border-[var(--border-hairline)] text-[var(--ink-secondary)]">
                     {item.category}
                   </span>
                   {item.pinned && (
-                    <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-[var(--accent-tint)] text-[var(--accent-ink)] border border-[var(--accent-border)] font-medium">
+                    <span className="inline-flex items-center gap-1 type-meta px-2.5 py-0.5 rounded-full bg-[var(--accent-tint)] text-[var(--accent-ink)] border border-[var(--accent-border)]">
                       <Pin className="w-3 h-3" aria-hidden={true} />
                       Pinned
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -278,18 +278,21 @@ export function MemoryPage(): React.JSX.Element {
                   </Button>
                 </div>
               </div>
-              <h2 className="text-[14.5px] font-semibold text-[var(--ink-primary)] mt-2 mb-1">
+              <h2 className="type-section-title text-[var(--ink-primary)] mt-3 mb-1.5">
                 {item.title}
               </h2>
-              <p className="text-[13px] text-[var(--ink-secondary)] whitespace-pre-wrap m-0">
+              <p className="type-secondary text-[var(--ink-secondary)] whitespace-pre-wrap break-words [overflow-wrap:anywhere] m-0">
                 {item.content}
               </p>
             </div>
 
             {item.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 pt-2 border-t border-[var(--border-hairline)]">
+              <div className="flex flex-wrap gap-2 pt-3 border-t border-[var(--border-hairline)]">
                 {item.tags.map((tag) => (
-                  <span key={tag} className="text-[11.5px] font-mono text-[var(--ink-secondary)]">
+                  <span
+                    key={tag}
+                    className="type-meta font-mono font-normal text-[var(--ink-secondary)]"
+                  >
                     #{tag}
                   </span>
                 ))}
@@ -304,17 +307,17 @@ export function MemoryPage(): React.JSX.Element {
         title={editing ? "Edit memory record" : "Add local memory record"}
         onClose={() => setEditorOpen(false)}
       >
-        <form onSubmit={(e) => void handleSave(e)} className="flex flex-col gap-3.5">
+        <form onSubmit={(e) => void handleSave(e)} className="flex flex-col gap-4">
           {!editing && (
             <div>
-              <label htmlFor="m-cat" className="block text-[12px] font-medium mb-1">
+              <label htmlFor="m-cat" className="block type-meta text-[var(--ink-secondary)] mb-1.5">
                 Category
               </label>
               <select
                 id="m-cat"
                 value={catDraft}
                 onChange={(e) => setCatDraft(e.target.value as MemoryCategory)}
-                className="glass-input w-full px-3 py-1.5 text-[13px]"
+                className="glass-input w-full px-3 py-2"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -325,7 +328,7 @@ export function MemoryPage(): React.JSX.Element {
             </div>
           )}
           <div>
-            <label htmlFor="m-title" className="block text-[12px] font-medium mb-1">
+            <label htmlFor="m-title" className="block type-meta text-[var(--ink-secondary)] mb-1.5">
               Title
             </label>
             <input
@@ -335,11 +338,14 @@ export function MemoryPage(): React.JSX.Element {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Preferred report format"
-              className="glass-input w-full px-3 py-1.5 text-[13px]"
+              className="glass-input w-full px-3 py-2"
             />
           </div>
           <div>
-            <label htmlFor="m-content" className="block text-[12px] font-medium mb-1">
+            <label
+              htmlFor="m-content"
+              className="block type-meta text-[var(--ink-secondary)] mb-1.5"
+            >
               Content
             </label>
             <textarea
@@ -349,11 +355,11 @@ export function MemoryPage(): React.JSX.Element {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Use concise Markdown bullet summaries with file paths."
-              className="glass-input w-full px-3 py-1.5 text-[13px]"
+              className="glass-input w-full px-3 py-2"
             />
           </div>
           <div>
-            <label htmlFor="m-tags" className="block text-[12px] font-medium mb-1">
+            <label htmlFor="m-tags" className="block type-meta text-[var(--ink-secondary)] mb-1.5">
               Tags (comma separated)
             </label>
             <input
@@ -362,10 +368,10 @@ export function MemoryPage(): React.JSX.Element {
               value={tagsDraft}
               onChange={(e) => setTagsDraft(e.target.value)}
               placeholder="reports, markdown"
-              className="glass-input w-full px-3 py-1.5 text-[13px]"
+              className="glass-input w-full px-3 py-2"
             />
           </div>
-          <label htmlFor="m-pin" className="inline-flex items-center gap-2 text-[13px]">
+          <label htmlFor="m-pin" className="inline-flex items-center gap-2 type-secondary">
             <input
               id="m-pin"
               type="checkbox"
@@ -374,7 +380,7 @@ export function MemoryPage(): React.JSX.Element {
             />
             Pin record (exempt from retention expiry)
           </label>
-          <div className="flex justify-end gap-2 pt-3 border-t border-[var(--border-hairline)]">
+          <div className="flex justify-end gap-2.5 pt-4 border-t border-[var(--border-hairline)]">
             <Button variant="secondary" onClick={() => setEditorOpen(false)}>
               Cancel
             </Button>
